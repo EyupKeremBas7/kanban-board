@@ -58,7 +58,7 @@ def create_card(
     board = cards_repo.get_board_by_id(session=session, board_id=board_list.board_id)
     workspace = cards_repo.get_workspace_by_id(session=session, workspace_id=board.workspace_id)
 
-    if workspace.owner_id != current_user.id:
+    if not current_user.is_superuser and workspace.owner_id != current_user.id:
         role = cards_repo.get_user_role_in_workspace(
             session=session, user_id=current_user.id, workspace_id=workspace.id
         )

@@ -213,9 +213,6 @@ def upgrade():
         sa.PrimaryKeyConstraint('id')
     )
 
-    # ========================================
-    # NOTIFICATION TABLE
-    # ========================================
     op.create_table(
         'notification',
         sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
@@ -239,9 +236,7 @@ def upgrade():
     op.create_index('ix_notification_user_id', 'notification', ['user_id'])
     op.create_index('ix_notification_is_read', 'notification', ['is_read'])
 
-    # ========================================
-    # WORKSPACE INVITATION TABLE
-    # ========================================
+    
     op.create_table(
         'workspace_invitation',
         sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
