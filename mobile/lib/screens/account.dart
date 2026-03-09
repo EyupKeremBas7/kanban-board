@@ -255,9 +255,78 @@ class AccountScreen extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 12),
+
+            // Hesabı Sil butonu — soft delete, onay dialogu ile
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SizedBox(
+                width: double.infinity,
+                child: TextButton.icon(
+                  onPressed: () => _showDeleteConfirmation(context),
+                  icon: const Icon(Icons.delete_forever_outlined),
+                  label: const Text('Hesabı Sil'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.error,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
+              ),
+            ),
             const SizedBox(height: 32),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Hesabı Sil'),
+        content: const Text(
+          'Hesabınız kalıcı olarak silinecektir. '
+          'Bu işlem geri alınamaz. Devam etmek istiyor musunuz?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('İptal'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              final authVM = context.read<AuthViewModel>();
+              final success = await authVM.deleteAccount();
+
+              if (!context.mounted) return;
+
+              if (success) {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SplashScreen(),
+                  ),
+                  (route) => false,
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                        authVM.errorMessage ?? 'Hesap silme başarısız'),
+                    backgroundColor:
+                        Theme.of(context).colorScheme.error,
+                  ),
+                );
+              }
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Hesabı Sil'),
+          ),
+        ],
       ),
     );
   }

@@ -240,6 +240,38 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
+  /// Hesap silme (soft delete) — DELETE /users/me
+  /// Backend hesabı siler, ardından token temizlenir.
+  Future<bool> deleteAccount() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _apiService.delete('/users/me');
+
+      if (response.statusCode == 200) {
+        // Hesap silindi → token geçersiz, temizle
+        await _authService.clearToken();
+        _currentUser = null;
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        _errorMessage = data['detail'] as String? ?? 'Hesap silme başarısız';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = 'Bağlantı hatası: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// Çıkış yap
   Future<void> logout() async {
     await _authService.clearToken();
