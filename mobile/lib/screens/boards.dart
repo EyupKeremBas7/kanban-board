@@ -156,15 +156,149 @@ class _BoardsScreenState extends State<BoardsScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // TODO: Board oluşturma — Feature #9'da eklenecek
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Pano oluşturma yakında eklenecek')),
-          );
-        },
+        onPressed: () => _showCreateBoardDialog(context),
         icon: const Icon(Icons.add),
         label: const Text('Pano Oluştur'),
       ),
+    );
+  }
+
+  void _showCreateBoardDialog(BuildContext context) {
+    final nameController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    String? selectedWorkspaceId;
+
+    final boardsVM = context.read<BoardsViewModel>();
+    
+    // Dialog açılırken workspaces yoksa çek
+    if (boardsVM.workspaces.isEmpty) {
+      boardsVM.fetchWorkspaces();
+    }
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Yeni Pano Oluştur'),
+              content: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Pano Adı',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Pano adı gerekli';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    // Workspace seçimi
+                    Consumer<BoardsViewModel>(
+                      builder: (context, vm, child) {
+                        if (vm.workspaces.isEmpty) {
+                          return const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        // Eğer seçili yoksa ilkini seç
+                        selectedWorkspaceId ??= vm.workspaces.first.id;
+
+                        return DropdownButtonFormField<String>(
+                          initialValue: selectedWorkspaceId,
+                          decoration: const InputDecoration(
+                            labelText: 'Çalışma Alanı',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: vm.workspaces.map((ws) {
+                            return DropdownMenuItem(
+                              value: ws.id,
+                              child: Text(
+                                ws.name,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedWorkspaceId = value;
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Çalışma alanı seçilmeli';
+                            }
+                            return null;
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('İptal'),
+                ),
+                Consumer<BoardsViewModel>(
+                  builder: (context, vm, child) {
+                    return FilledButton(
+                      onPressed: vm.isLoading
+                          ? null
+                          : () async {
+                              if (!formKey.currentState!.validate()) return;
+                              if (selectedWorkspaceId == null) return;
+
+                              final success = await vm.createBoard(
+                                name: nameController.text.trim(),
+                                workspaceId: selectedWorkspaceId!,
+                              );
+
+                              if (!context.mounted) return;
+
+                              if (success) {
+                                Navigator.pop(dialogContext);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Pano oluşturuldu')),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(vm.errorMessage ??
+                                        'Oluşturma başarısız'),
+                                    backgroundColor:
+                                        Theme.of(context).colorScheme.error,
+                                  ),
+                                );
+                              }
+                            },
+                      child: vm.isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('Oluştur'),
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

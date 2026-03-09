@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:mobile/domain/models/board.dart';
+import 'package:mobile/domain/models/workspace.dart';
 import 'package:mobile/services/api_service.dart';
 
 /// Boards ViewModel — Pano listesi yönetimi.
@@ -13,11 +14,13 @@ class BoardsViewModel extends ChangeNotifier {
 
   // State
   List<Board> _boards = [];
+  List<Workspace> _workspaces = [];
   bool _isLoading = false;
   String? _errorMessage;
 
   // Getters
   List<Board> get boards => _boards;
+  List<Workspace> get workspaces => _workspaces;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
@@ -46,5 +49,65 @@ class BoardsViewModel extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  /// Workspace listesini API'den çek — GET /workspaces
+  /// (Board oluştururken workspace seçimi için gerekli)
+  Future<void> fetchWorkspaces() async {
+    try {
+      final response = await _apiService.get('/workspaces');
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final wsList = data['data'] as List<dynamic>;
+        _workspaces = wsList
+            .map((json) => Workspace.fromJson(json as Map<String, dynamic>))
+            .toList();
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('Workspace listesi alınamadı: $e');
+    }
+  }
+
+  /// Yeni Board oluştur — POST /boards
+  Future<bool> createBoard({
+    required String name,
+    required String workspaceId,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _apiService.post(
+        '/boards/',
+        body: {
+          'name': name,
+          'workspace_id': workspaceId,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Yeni board oluşturuldu, listeye ekle
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final newBoard = Board.fromJson(data);
+        _boards.insert(0, newBoard); // Başa ekle
+        
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        _errorMessage = data['detail'] as String? ?? 'Pano oluşturulamadı';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = 'Bağlantı hatası: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
 }
