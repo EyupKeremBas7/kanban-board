@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/viewmodels/auth_viewmodel.dart';
+import 'package:mobile/screens/profile_edit.dart';
 import 'package:mobile/screens/splash.dart';
 
 /// Hesap (Profil & Ayarlar) ekranı — referans: hesap.jpeg
@@ -19,6 +20,14 @@ class AccountScreen extends StatelessWidget {
             icon: Icons.person_outline,
             title: 'Profil Bilgileri',
             subtitle: 'Ad, e-posta, profil fotoğrafı',
+            onTap: (ctx) {
+              Navigator.push(
+                ctx,
+                MaterialPageRoute(
+                  builder: (context) => const ProfileEditScreen(),
+                ),
+              );
+            },
           ),
           _SettingsItem(
             icon: Icons.lock_outline,
@@ -193,7 +202,9 @@ class AccountScreen extends StatelessWidget {
                               : null,
                           trailing: const Icon(Icons.chevron_right, size: 20),
                           onTap: () {
-                            // TODO: Ayar detay sayfalarına yönlendirme
+                            if (item.onTap != null) {
+                              item.onTap!(context);
+                            }
                           },
                         );
                       },
@@ -254,9 +265,11 @@ class _SettingsItem {
   final IconData icon;
   final String title;
   final String? subtitle;
+  final void Function(BuildContext)? onTap;
   const _SettingsItem({
     required this.icon,
     required this.title,
     this.subtitle,
+    this.onTap,
   });
 }

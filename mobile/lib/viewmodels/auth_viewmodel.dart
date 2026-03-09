@@ -128,6 +128,50 @@ class AuthViewModel extends ChangeNotifier {
     return false;
   }
 
+  /// Profil güncelleme — PATCH /users/me
+  Future<bool> updateProfile({String? fullName, String? email}) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final body = <String, dynamic>{};
+      if (fullName != null && fullName.isNotEmpty) {
+        body['full_name'] = fullName;
+      }
+      if (email != null && email.isNotEmpty) {
+        body['email'] = email;
+      }
+
+      if (body.isEmpty) {
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+
+      final response = await _apiService.patch('/users/me', body: body);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        _currentUser = User.fromJson(data);
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        _errorMessage = data['detail'] as String? ?? 'Güncelleme başarısız';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = 'Bağlantı hatası: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// Çıkış yap
   Future<void> logout() async {
     await _authService.clearToken();
