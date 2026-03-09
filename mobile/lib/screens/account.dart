@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:mobile/viewmodels/auth_viewmodel.dart';
+import 'package:mobile/screens/splash.dart';
 
 /// Hesap (Profil & Ayarlar) ekranı — referans: hesap.jpeg
-/// Kullanıcı profili, çalışma alanları, ayarlar.
+/// AuthViewModel üzerinden gerçek kullanıcı verisi gösterir.
 /// ListView.separated kullanımı (settings pattern — Kural 8).
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Provider üzerinden AccountViewModel'den veri çekilecek
     final settingsSections = [
       _SettingsSection(
         title: 'Profil',
@@ -29,13 +31,8 @@ class AccountScreen extends StatelessWidget {
         items: [
           _SettingsItem(
             icon: Icons.workspaces_outline,
-            title: 'DigiNova Staj VISION-B',
-            subtitle: 'Yönetici',
-          ),
-          _SettingsItem(
-            icon: Icons.workspaces_outline,
-            title: 'NovaVision',
-            subtitle: 'Üye',
+            title: 'Çalışma alanları',
+            subtitle: 'Workspace entegrasyonunda güncellenecek',
           ),
         ],
       ),
@@ -85,50 +82,73 @@ class AccountScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Profil kartı
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 32,
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    child: Text(
-                      'EK',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Eyüp Kerem Baş',
+            // Profil kartı — AuthViewModel'den gerçek veri
+            Consumer<AuthViewModel>(
+              builder: (context, authVM, child) {
+                final user = authVM.currentUser;
+                final displayName = user?.fullName ?? 'Kullanıcı';
+                final email = user?.email ?? '';
+                // İsmin baş harflerini al (nullable-safe)
+                final initials = displayName
+                    .split(' ')
+                    .where((s) => s.isNotEmpty)
+                    .take(2)
+                    .map((s) => s[0].toUpperCase())
+                    .join();
+
+                return Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 32,
+                        backgroundColor:
+                            Theme.of(context).colorScheme.primary,
+                        child: Text(
+                          initials.isNotEmpty ? initials : '?',
                           style: Theme.of(context)
                               .textTheme
-                              .titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                          overflow: TextOverflow.ellipsis,
+                              .titleLarge
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimary,
+                              ),
                         ),
-                        Text(
-                          'eyupkerem@example.com',
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              displayName,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              email,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onSurface
                                         .withValues(alpha: 0.6),
                                   ),
-                          overflow: TextOverflow.ellipsis,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             ),
             const Divider(height: 1),
 
@@ -183,16 +203,25 @@ class AccountScreen extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // Çıkış butonu
+            // Çıkış butonu — AuthViewModel.logout() çağırır
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  onPressed: () {
-                    // TODO: ViewModel üzerinden çıkış
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Çıkış yapılıyor...')),
+                  onPressed: () async {
+                    final authVM = context.read<AuthViewModel>();
+                    await authVM.logout();
+
+                    if (!context.mounted) return;
+
+                    // Splash'a geri dön, tüm stack temizle
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SplashScreen(),
+                      ),
+                      (route) => false,
                     );
                   },
                   icon: const Icon(Icons.logout),
@@ -214,7 +243,7 @@ class AccountScreen extends StatelessWidget {
   }
 }
 
-// Mock veri sınıfları — ViewModel entegrasyonunda kaldırılacak
+// Yardımcı veri sınıfları (settings pattern)
 class _SettingsSection {
   final String title;
   final List<_SettingsItem> items;
