@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/viewmodels/auth_viewmodel.dart';
 import 'package:mobile/screens/signup.dart';
+import 'package:mobile/screens/forgot_password.dart';
 import 'package:mobile/widgets/bottom_nav_shell.dart';
 
 /// Oturum açma ekranı — referans: giris-login.jpeg
@@ -141,6 +142,21 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
+                // Şifremi unuttum
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ForgotPasswordScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text('Şifremi Unuttum'),
+                  ),
+                ),
                 // Kayıt ol yönlendirmesi
                 TextButton(
                   onPressed: () {

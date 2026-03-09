@@ -172,6 +172,37 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
+  /// Şifre sıfırlama e-postası gönder — POST /password-recovery/{email}
+  Future<bool> recoverPassword(String email) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _apiService.post(
+        '/password-recovery/$email',
+        withAuth: false,
+      );
+
+      if (response.statusCode == 200) {
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        _errorMessage = data['detail'] as String? ?? 'İşlem başarısız';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = 'Bağlantı hatası: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// Şifre değiştirme — PATCH /users/me/password
   Future<bool> changePassword({
     required String currentPassword,
