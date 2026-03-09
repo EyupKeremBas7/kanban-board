@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/viewmodels/auth_viewmodel.dart';
 import 'package:mobile/screens/profile_edit.dart';
+import 'package:mobile/screens/change_password.dart';
 import 'package:mobile/screens/splash.dart';
 
 /// Hesap (Profil & Ayarlar) ekranı — referans: hesap.jpeg
@@ -32,6 +33,14 @@ class AccountScreen extends StatelessWidget {
           _SettingsItem(
             icon: Icons.lock_outline,
             title: 'Şifre Değiştir',
+            onTap: (ctx) {
+              Navigator.push(
+                ctx,
+                MaterialPageRoute(
+                  builder: (context) => const ChangePasswordScreen(),
+                ),
+              );
+            },
           ),
         ],
       ),
