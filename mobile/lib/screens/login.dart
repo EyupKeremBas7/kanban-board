@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:mobile/viewmodels/auth_viewmodel.dart';
 import 'package:mobile/screens/signup.dart';
 import 'package:mobile/widgets/bottom_nav_shell.dart';
 
 /// Oturum açma ekranı — referans: giris-login.jpeg
-/// E-posta ve şifre ile giriş formu.
+/// AuthViewModel üzerinden gerçek API çağrısı yapar.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -15,7 +17,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
   bool _obscurePassword = true;
 
   @override
@@ -28,20 +29,29 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
-
-    // TODO: ViewModel üzerinden API çağrısı yapılacak
-    await Future.delayed(const Duration(seconds: 1));
+    final authViewModel = context.read<AuthViewModel>();
+    final success = await authViewModel.login(
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
 
     if (!mounted) return;
-    setState(() => _isLoading = false);
 
-    // Başarılı giriş → Ana ekrana yönlendir
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const BottomNavShell()),
-      (route) => false,
-    );
+    if (success) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const BottomNavShell()),
+        (route) => false,
+      );
+    } else {
+      // Hata mesajını SnackBar ile göster (Kural 15)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(authViewModel.errorMessage ?? 'Giriş başarısız'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
   }
 
   @override
@@ -112,19 +122,23 @@ class _LoginScreenState extends State<LoginScreen> {
                   onFieldSubmitted: (_) => _handleLogin(),
                 ),
                 const SizedBox(height: 24),
-                // Giriş butonu
-                FilledButton(
-                  onPressed: _isLoading ? null : _handleLogin,
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Giriş Yap'),
+                // Giriş butonu — ViewModel loading state'ini dinle
+                Consumer<AuthViewModel>(
+                  builder: (context, authVM, child) {
+                    return FilledButton(
+                      onPressed: authVM.isLoading ? null : _handleLogin,
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: authVM.isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('Giriş Yap'),
+                    );
+                  },
                 ),
                 const SizedBox(height: 16),
                 // Kayıt ol yönlendirmesi

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:mobile/viewmodels/auth_viewmodel.dart';
 import 'package:mobile/screens/login.dart';
 import 'package:mobile/widgets/bottom_nav_shell.dart';
 
 /// Kayıt olma ekranı — referans: giris-signup.jpeg
-/// E-posta, şifre ve ad soyad ile yeni hesap oluşturma.
+/// AuthViewModel üzerinden gerçek API çağrısı yapar.
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
@@ -16,7 +18,6 @@ class _SignupScreenState extends State<SignupScreen> {
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
   bool _obscurePassword = true;
 
   @override
@@ -30,20 +31,32 @@ class _SignupScreenState extends State<SignupScreen> {
   Future<void> _handleSignup() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
-
-    // TODO: ViewModel üzerinden API çağrısı yapılacak
-    await Future.delayed(const Duration(seconds: 1));
+    final authViewModel = context.read<AuthViewModel>();
+    final success = await authViewModel.signup(
+      _emailController.text.trim(),
+      _passwordController.text,
+      fullName: _fullNameController.text.trim().isNotEmpty
+          ? _fullNameController.text.trim()
+          : null,
+    );
 
     if (!mounted) return;
-    setState(() => _isLoading = false);
 
-    // Başarılı kayıt → Ana ekrana yönlendir
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const BottomNavShell()),
-      (route) => false,
-    );
+    if (success) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const BottomNavShell()),
+        (route) => false,
+      );
+    } else {
+      // Hata mesajını SnackBar ile göster (Kural 15)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(authViewModel.errorMessage ?? 'Kayıt başarısız'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
   }
 
   @override
@@ -131,19 +144,23 @@ class _SignupScreenState extends State<SignupScreen> {
                   onFieldSubmitted: (_) => _handleSignup(),
                 ),
                 const SizedBox(height: 24),
-                // Kayıt ol butonu
-                FilledButton(
-                  onPressed: _isLoading ? null : _handleSignup,
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Kayıt Ol'),
+                // Kayıt ol butonu — ViewModel loading state'ini dinle
+                Consumer<AuthViewModel>(
+                  builder: (context, authVM, child) {
+                    return FilledButton(
+                      onPressed: authVM.isLoading ? null : _handleSignup,
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: authVM.isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('Kayıt Ol'),
+                    );
+                  },
                 ),
                 const SizedBox(height: 16),
                 // Giriş yap yönlendirmesi

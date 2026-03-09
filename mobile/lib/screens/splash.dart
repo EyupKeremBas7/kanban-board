@@ -1,11 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:mobile/viewmodels/auth_viewmodel.dart';
 import 'package:mobile/screens/login.dart';
 import 'package:mobile/screens/signup.dart';
+import 'package:mobile/widgets/bottom_nav_shell.dart';
 
 /// Karşılama ekranı — referans: giris.jpeg
-/// "Üye Ol" ve "Oturum Aç" butonları ile karşılama.
-class SplashScreen extends StatelessWidget {
+/// Otomatik giriş kontrolü yapar. Giriş yapılmışsa direkt ana ekrana yönlendirir.
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _checkAutoLogin();
+  }
+
+  Future<void> _checkAutoLogin() async {
+    final authViewModel = context.read<AuthViewModel>();
+    final isLoggedIn = await authViewModel.tryAutoLogin();
+
+    if (!mounted) return;
+
+    if (isLoggedIn) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const BottomNavShell()),
+        (route) => false,
+      );
+    }
+    // Giriş yapılmamışsa splash ekranında kal
+  }
 
   @override
   Widget build(BuildContext context) {

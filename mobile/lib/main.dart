@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:mobile/services/api_service.dart';
+import 'package:mobile/services/auth_service.dart';
+import 'package:mobile/viewmodels/auth_viewmodel.dart';
 import 'package:mobile/screens/splash.dart';
 
 /// Kanban Board — Mobil Uygulama
@@ -12,25 +16,40 @@ class KanbanBoardApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Kanban Board',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.light,
+    // Service'leri oluştur
+    final authService = AuthService();
+    final apiService = ApiService(authService);
+
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => AuthViewModel(
+            apiService: apiService,
+            authService: authService,
+          ),
         ),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.dark,
+        // Diğer ViewModel'ler ileride eklenecek
+      ],
+      child: MaterialApp(
+        title: 'Kanban Board',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.blue,
+            brightness: Brightness.light,
+          ),
+          useMaterial3: true,
         ),
-        useMaterial3: true,
+        darkTheme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.blue,
+            brightness: Brightness.dark,
+          ),
+          useMaterial3: true,
+        ),
+        themeMode: ThemeMode.system,
+        home: const SplashScreen(),
       ),
-      themeMode: ThemeMode.system,
-      home: const SplashScreen(),
     );
   }
 }
