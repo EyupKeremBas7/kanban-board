@@ -18,9 +18,25 @@ class CardsViewModel extends ChangeNotifier {
 
   /// Belirli bir liste altındaki kartları döndürür
   List<BoardCard> getCardsForList(String listId) {
-    var filtered = _cards.where((c) => c.listId == listId).toList();
+    final filtered = _cards.where((c) => c.listId == listId).toList();
     filtered.sort((a, b) => a.position.compareTo(b.position));
     return filtered;
+  }
+
+  double _calculateNextPositionForList({
+    required String listId,
+    String? excludeCardId,
+  }) {
+    final listCards = getCardsForList(listId)
+        .where((card) => card.id != excludeCardId)
+        .toList();
+
+    if (listCards.isEmpty) {
+      return 65535.0;
+    }
+
+    final lastCard = listCards.last;
+    return lastCard.position + 1024.0;
   }
 
   /// REST api'den bütün kartları çeker ve önbelleğe (state'e) atar.
@@ -62,12 +78,7 @@ class CardsViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final listCards = getCardsForList(listId);
-      double nextPosition = 65535.0;
-      if (listCards.isNotEmpty) {
-        final lastCard = listCards.last;
-        nextPosition = lastCard.position + 1024.0;
-      }
+      final nextPosition = _calculateNextPositionForList(listId: listId);
 
       final body = {
         'list_id': listId,
@@ -99,6 +110,35 @@ class CardsViewModel extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  /// Kart taşıma — başka listeye geçirir (PUT /cards/{id})
+  Future<bool> moveCardToList({
+    required String cardId,
+    required String targetListId,
+  }) async {
+    final cardIndex = _cards.indexWhere((card) => card.id == cardId);
+    if (cardIndex == -1) {
+      _errorMessage = 'Kart bulunamadı.';
+      notifyListeners();
+      return false;
+    }
+
+    final currentCard = _cards[cardIndex];
+    if (currentCard.listId == targetListId) {
+      return true;
+    }
+
+    final nextPosition = _calculateNextPositionForList(
+      listId: targetListId,
+      excludeCardId: cardId,
+    );
+
+    return updateCard(
+      cardId: cardId,
+      listId: targetListId,
+      position: nextPosition,
+    );
   }
 
   /// Kart Güncelleme — PUT /cards/{id}

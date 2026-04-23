@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:mobile/domain/models/board_card.dart';
 import 'package:mobile/viewmodels/boards_viewmodel.dart';
 import 'package:mobile/viewmodels/lists_viewmodel.dart';
 import 'package:mobile/viewmodels/cards_viewmodel.dart';
@@ -22,6 +23,8 @@ class BoardDetailScreen extends StatefulWidget {
 }
 
 class _BoardDetailScreenState extends State<BoardDetailScreen> {
+  String? _activeDropListId;
+
   @override
   void initState() {
     super.initState();
@@ -208,26 +211,68 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                       ),
                       // Kartlar listesi
                       Expanded(
-                        child: ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          itemCount: listCards.length,
-                          itemBuilder: (context, cardIndex) {
-                            final card = listCards[cardIndex];
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 8),
-                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                              child: InkWell(
-                                onTap: () => _showEditCardDialog(context, card),
-                                onLongPress: () => _showDeleteCardDialog(context, card),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12),
-                                  child: Text(
-                                    card.title,
-                                    style: Theme.of(context).textTheme.bodyMedium,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 3,
-                                  ),
+                        child: DragTarget<BoardCard>(
+                          onWillAcceptWithDetails: (details) {
+                            final incomingCard = details.data;
+                            if (incomingCard.listId == list.id) return false;
+                            setState(() => _activeDropListId = list.id);
+                            return true;
+                          },
+                          onLeave: (_) {
+                            if (_activeDropListId == list.id) {
+                              setState(() => _activeDropListId = null);
+                            }
+                          },
+                          onAcceptWithDetails: (details) {
+                            _handleCardDrop(
+                              context,
+                              cardsVM,
+                              details.data,
+                              list.id,
+                            );
+                          },
+                          builder: (context, candidateData, rejectedData) {
+                            final isActiveTarget =
+                                _activeDropListId == list.id || candidateData.isNotEmpty;
+
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 120),
+                              margin: const EdgeInsets.symmetric(horizontal: 8),
+                              decoration: BoxDecoration(
+                                color: isActiveTarget
+                                    ? Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainerHighest
+                                    .withValues(alpha: 0.5)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: isActiveTarget
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Colors.transparent,
                                 ),
+                              ),
+                              child: ListView.builder(
+                                padding: const EdgeInsets.all(8),
+                                itemCount: listCards.length,
+                                itemBuilder: (context, cardIndex) {
+                                  final card = listCards[cardIndex];
+                                  return LongPressDraggable<BoardCard>(
+                                    data: card,
+                                    feedback: Material(
+                                      color: Colors.transparent,
+                                      child: SizedBox(
+                                        width: 240,
+                                        child: _buildCardTile(context, card),
+                                      ),
+                                    ),
+                                    childWhenDragging: Opacity(
+                                      opacity: 0.35,
+                                      child: _buildCardTile(context, card),
+                                    ),
+                                    child: _buildCardTile(context, card),
+                                  );
+                                },
                               ),
                             );
                           },
@@ -251,6 +296,51 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
         },
       ),
     );
+  }
+
+  Widget _buildCardTile(BuildContext context, BoardCard card) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: InkWell(
+        onTap: () => _showEditCardDialog(context, card),
+        onLongPress: () => _showDeleteCardDialog(context, card),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Text(
+            card.title,
+            style: Theme.of(context).textTheme.bodyMedium,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 3,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleCardDrop(
+    BuildContext context,
+    CardsViewModel cardsVM,
+    BoardCard card,
+    String targetListId,
+  ) async {
+    setState(() => _activeDropListId = null);
+
+    final success = await cardsVM.moveCardToList(
+      cardId: card.id,
+      targetListId: targetListId,
+    );
+
+    if (!context.mounted) return;
+
+    if (!success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(cardsVM.errorMessage ?? 'Kart taşınamadı'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
   }
 
   // ==================== Board Dialogları ====================
