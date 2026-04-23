@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:mobile/viewmodels/boards_viewmodel.dart';
 import 'package:mobile/screens/card_detail.dart';
 
 /// Pano detay (Kanban görünümü) — referans: panoların-içi.jpeg
 /// Yatay kaydırma ile sütunlar (listeler), her sütunda dikey kart listesi.
 /// Constructor ile boardId alır (Navigator ID taşıma kuralı).
-class BoardDetailScreen extends StatelessWidget {
+class BoardDetailScreen extends StatefulWidget {
   final String boardId;
-  final String boardName;
+  final String boardName; // Sadece fallback olarak
 
   const BoardDetailScreen({
     super.key,
@@ -14,6 +16,11 @@ class BoardDetailScreen extends StatelessWidget {
     required this.boardName,
   });
 
+  @override
+  State<BoardDetailScreen> createState() => _BoardDetailScreenState();
+}
+
+class _BoardDetailScreenState extends State<BoardDetailScreen> {
   @override
   Widget build(BuildContext context) {
     // TODO: Provider üzerinden BoardDetailViewModel'den veri çekilecek
@@ -43,9 +50,17 @@ class BoardDetailScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          boardName,
-          overflow: TextOverflow.ellipsis,
+        title: Consumer<BoardsViewModel>(
+          builder: (context, boardsVM, child) {
+            final board = boardsVM.boards.cast<dynamic>().firstWhere(
+                  (b) => b.id == widget.boardId,
+                  orElse: () => null,
+                );
+            return Text(
+              board?.name ?? widget.boardName,
+              overflow: TextOverflow.ellipsis,
+            );
+          },
         ),
         actions: [
           IconButton(
@@ -60,11 +75,36 @@ class BoardDetailScreen extends StatelessWidget {
               // TODO: Board bildirimleri
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {
-              // TODO: Board ayarları
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'edit') {
+                _showEditBoardDialog(context);
+              } else if (value == 'delete') {
+                _showDeleteBoardDialog(context);
+              }
             },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'edit',
+                child: Row(
+                  children: [
+                    Icon(Icons.edit, size: 20),
+                    SizedBox(width: 8),
+                    Text('Panoyu Düzenle'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete, color: Colors.red, size: 20),
+                    SizedBox(width: 8),
+                    Text('Panoyu Sil', style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -228,6 +268,144 @@ class BoardDetailScreen extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+
+  void _showEditBoardDialog(BuildContext context) {
+    final boardsVM = context.read<BoardsViewModel>();
+    final board = boardsVM.boards.cast<dynamic>().firstWhere(
+          (b) => b.id == widget.boardId,
+          orElse: () => null,
+        );
+
+    if (board == null) return;
+
+    final controller = TextEditingController(text: board.name);
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Panoyu Düzenle'),
+          content: Form(
+            key: formKey,
+            child: TextFormField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Pano Adı',
+                border: OutlineInputBorder(),
+              ),
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) return 'İsim gerekli';
+                return null;
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('İptal'),
+            ),
+            Consumer<BoardsViewModel>(
+              builder: (context, vm, child) {
+                return FilledButton(
+                  onPressed: vm.isLoading
+                      ? null
+                      : () async {
+                          if (!formKey.currentState!.validate()) return;
+                          
+                          final success = await vm.updateBoard(
+                            boardId: widget.boardId,
+                            name: controller.text.trim(),
+                          );
+
+                          if (!context.mounted) return;
+
+                          if (success) {
+                            Navigator.pop(dialogContext);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Pano güncellendi')),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(vm.errorMessage ?? 'Hata'),
+                                backgroundColor: Theme.of(context).colorScheme.error,
+                              ),
+                            );
+                          }
+                        },
+                  child: vm.isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Kaydet'),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDeleteBoardDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Panoyu Sil'),
+          content: const Text(
+              'Bu panoyu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('İptal'),
+            ),
+            Consumer<BoardsViewModel>(
+              builder: (context, vm, child) {
+                return FilledButton(
+                  onPressed: vm.isLoading
+                      ? null
+                      : () async {
+                          final success = await vm.deleteBoard(widget.boardId);
+
+                          if (!context.mounted) return;
+
+                          if (success) {
+                            Navigator.pop(dialogContext); // dialog
+                            Navigator.pop(context); // ekrandan çık
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Pano silindi')),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(vm.errorMessage ?? 'Hata'),
+                                backgroundColor: Theme.of(context).colorScheme.error,
+                              ),
+                            );
+                          }
+                        },
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  ),
+                  child: vm.isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Sil'),
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

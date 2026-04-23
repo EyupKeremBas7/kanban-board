@@ -110,4 +110,85 @@ class BoardsViewModel extends ChangeNotifier {
       return false;
     }
   }
+
+  /// Pano Güncelleme — PUT /boards/{id}
+  Future<bool> updateBoard({
+    required String boardId,
+    String? name,
+    String? visibility,
+    String? backgroundImage,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final Map<String, dynamic> body = {};
+      if (name != null) body['name'] = name;
+      if (visibility != null) body['visibility'] = visibility;
+      if (backgroundImage != null) body['background_image'] = backgroundImage;
+
+      final response = await _apiService.put(
+        '/boards/$boardId',
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        // Obje döndü, yerelde de güncelleyelim
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final updatedBoard = Board.fromJson(data);
+
+        final index = _boards.indexWhere((b) => b.id == boardId);
+        if (index != -1) {
+          _boards[index] = updatedBoard;
+        }
+        
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        _errorMessage = data['detail'] as String? ?? 'Güncelleme başarısız';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = 'Bağlantı hatası: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Pano Silme — DELETE /boards/{id}
+  Future<bool> deleteBoard(String boardId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _apiService.delete('/boards/$boardId');
+
+      if (response.statusCode == 200) {
+        // Listeden çıkar
+        _boards.removeWhere((b) => b.id == boardId);
+        
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        _errorMessage = data['detail'] as String? ?? 'Silme başarısız';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = 'Bağlantı hatası: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
 }
