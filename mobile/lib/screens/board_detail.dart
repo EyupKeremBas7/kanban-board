@@ -1,7 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/viewmodels/boards_viewmodel.dart';
 import 'package:mobile/viewmodels/lists_viewmodel.dart';
-import 'package:mobile/screens/card_detail.dart';
+import 'package:mobile/viewmodels/cards_viewmodel.dart';
 
 /// Pano detay (Kanban görünümü) — referans: panoların-içi.jpeg
 /// Yatay kaydırma ile sütunlar (listeler), her sütunda dikey kart listesi.
@@ -24,17 +25,16 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
   @override
   void initState() {
     super.initState();
-    // Ekran açılırken o boardın listelerini çek
     Future.microtask(() {
       if (mounted) {
         context.read<ListsViewModel>().fetchLists(widget.boardId);
+        context.read<CardsViewModel>().fetchCards();
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: Consumer<BoardsViewModel>(
@@ -95,8 +95,8 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
           ),
         ],
       ),
-      body: Consumer<ListsViewModel>(
-        builder: (context, listsVM, child) {
+      body: Consumer2<ListsViewModel, CardsViewModel>(
+        builder: (context, listsVM, cardsVM, child) {
           if (listsVM.isLoading && listsVM.lists.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -121,7 +121,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
           return ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.all(8),
-            itemCount: listsVM.lists.length + 1, // +1 "Liste ekle" butonu için
+            itemCount: listsVM.lists.length + 1,
             itemBuilder: (context, listIndex) {
               // Son eleman = "Liste Ekle" butonu
               if (listIndex == listsVM.lists.length) {
@@ -147,10 +147,8 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
               }
 
               final list = listsVM.lists[listIndex];
-              // TODO: Feature #14 — Kartları API'den çekme
-              // Şimdilik liste boşmuş gibi göster
-              final int fakeCardCount = 0; 
-              
+              final listCards = cardsVM.getCardsForList(list.id);
+
               return Container(
                 width: 280,
                 margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -173,9 +171,37 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            IconButton(
+                            PopupMenuButton<String>(
                               icon: const Icon(Icons.more_vert, size: 20),
-                              onPressed: () {},
+                              onSelected: (value) {
+                                if (value == 'edit') {
+                                  _showEditListDialog(context, list);
+                                } else if (value == 'delete') {
+                                  _showDeleteListDialog(context, list);
+                                }
+                              },
+                              itemBuilder: (context) => [
+                                const PopupMenuItem(
+                                  value: 'edit',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.edit, size: 20),
+                                      SizedBox(width: 8),
+                                      Text('Listeyi Düzenle'),
+                                    ],
+                                  ),
+                                ),
+                                const PopupMenuItem(
+                                  value: 'delete',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.delete, color: Colors.red, size: 20),
+                                      SizedBox(width: 8),
+                                      Text('Listeyi Sil', style: TextStyle(color: Colors.red)),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -184,34 +210,50 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                       Expanded(
                         child: ListView.builder(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
-                          itemCount: fakeCardCount,
+                          itemCount: listCards.length,
                           itemBuilder: (context, cardIndex) {
-                            return const SizedBox.shrink(); // Şimdilik kart yok
+                            final card = listCards[cardIndex];
+                            return Card(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                              child: InkWell(
+                                onTap: () => _showEditCardDialog(context, card),
+                                onLongPress: () => _showDeleteCardDialog(context, card),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Text(
+                                    card.title,
+                                    style: Theme.of(context).textTheme.bodyMedium,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 3,
+                                  ),
+                                ),
+                              ),
+                            );
                           },
                         ),
                       ),
-                  // Kart ekle butonu
-                  Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: TextButton.icon(
-                      onPressed: () {
-                        // TODO: Kart ekleme
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Kart ekleme yakında')),
-                        );
-                      },
-                      icon: const Icon(Icons.add, size: 18),
-                      label: const Text('Kart ekle'),
-                    ),
+                      // Kart ekle butonu
+                      Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: TextButton.icon(
+                          onPressed: () => _showAddCardDialog(context, list.id),
+                          icon: const Icon(Icons.add, size: 18),
+                          label: const Text('Kart ekle'),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         },
       ),
     );
   }
+
+  // ==================== Board Dialogları ====================
 
   void _showEditBoardDialog(BuildContext context) {
     final boardsVM = context.read<BoardsViewModel>();
@@ -256,14 +298,11 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                       ? null
                       : () async {
                           if (!formKey.currentState!.validate()) return;
-                          
                           final success = await vm.updateBoard(
                             boardId: widget.boardId,
                             name: controller.text.trim(),
                           );
-
                           if (!context.mounted) return;
-
                           if (success) {
                             Navigator.pop(dialogContext);
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -279,11 +318,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                           }
                         },
                   child: vm.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Text('Kaydet'),
                 );
               },
@@ -300,8 +335,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Panoyu Sil'),
-          content: const Text(
-              'Bu panoyu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.'),
+          content: const Text('Bu panoyu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
@@ -314,12 +348,10 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                       ? null
                       : () async {
                           final success = await vm.deleteBoard(widget.boardId);
-
                           if (!context.mounted) return;
-
                           if (success) {
-                            Navigator.pop(dialogContext); // dialog
-                            Navigator.pop(context); // ekrandan çık
+                            Navigator.pop(dialogContext);
+                            Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('Pano silindi')),
                             );
@@ -332,15 +364,9 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                             );
                           }
                         },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                  ),
+                  style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
                   child: vm.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Text('Sil'),
                 );
               },
@@ -350,22 +376,364 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
       },
     );
   }
-}
 
-// Mock veri sınıfları — ViewModel entegrasyonunda kaldırılacak
-class _MockListColumn {
-  final String name;
-  final List<_MockCardItem> cards;
-  const _MockListColumn({required this.name, required this.cards});
-}
+  // ==================== List Dialogları ====================
 
-class _MockCardItem {
-  final String title;
-  final int commentCount;
-  final String checklistProgress;
-  const _MockCardItem({
-    required this.title,
-    this.commentCount = 0,
-    this.checklistProgress = '0/0',
-  });
+  void _showAddListDialog(BuildContext context) {
+    final controller = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Yeni Liste Ekle'),
+          content: Form(
+            key: formKey,
+            child: TextFormField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Liste Adı',
+                border: OutlineInputBorder(),
+              ),
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) return 'İsim gerekli';
+                return null;
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('İptal'),
+            ),
+            Consumer<ListsViewModel>(
+              builder: (context, vm, child) {
+                return FilledButton(
+                  onPressed: vm.isLoading
+                      ? null
+                      : () async {
+                          if (!formKey.currentState!.validate()) return;
+                          final success = await vm.createList(
+                            boardId: widget.boardId,
+                            name: controller.text.trim(),
+                          );
+                          if (!context.mounted) return;
+                          if (success) {
+                            Navigator.pop(dialogContext);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(vm.errorMessage ?? 'Hata'),
+                                backgroundColor: Theme.of(context).colorScheme.error,
+                              ),
+                            );
+                          }
+                        },
+                  child: vm.isLoading
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Text('Ekle'),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showEditListDialog(BuildContext context, dynamic list) {
+    final controller = TextEditingController(text: list.name);
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Listeyi Düzenle'),
+          content: Form(
+            key: formKey,
+            child: TextFormField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Liste Adı',
+                border: OutlineInputBorder(),
+              ),
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) return 'İsim gerekli';
+                return null;
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('İptal'),
+            ),
+            Consumer<ListsViewModel>(
+              builder: (context, vm, child) {
+                return FilledButton(
+                  onPressed: vm.isLoading
+                      ? null
+                      : () async {
+                          if (!formKey.currentState!.validate()) return;
+                          final success = await vm.updateList(
+                            listId: list.id,
+                            name: controller.text.trim(),
+                          );
+                          if (!context.mounted) return;
+                          if (success) {
+                            Navigator.pop(dialogContext);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(vm.errorMessage ?? 'Hata'),
+                                backgroundColor: Theme.of(context).colorScheme.error,
+                              ),
+                            );
+                          }
+                        },
+                  child: vm.isLoading
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Text('Kaydet'),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDeleteListDialog(BuildContext context, dynamic list) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Listeyi Sil'),
+          content: Text('${list.name} isimli listeyi silmek istediğinize emin misiniz?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('İptal'),
+            ),
+            Consumer<ListsViewModel>(
+              builder: (context, vm, child) {
+                return FilledButton(
+                  onPressed: vm.isLoading
+                      ? null
+                      : () async {
+                          final success = await vm.deleteList(list.id);
+                          if (!context.mounted) return;
+                          if (success) {
+                            Navigator.pop(dialogContext);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(vm.errorMessage ?? 'Hata'),
+                                backgroundColor: Theme.of(context).colorScheme.error,
+                              ),
+                            );
+                          }
+                        },
+                  style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+                  child: vm.isLoading
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Text('Sil'),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // ==================== Card Dialogları ====================
+
+  void _showAddCardDialog(BuildContext context, String listId) {
+    final titleController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Yeni Kart Ekle'),
+          content: Form(
+            key: formKey,
+            child: TextFormField(
+              controller: titleController,
+              decoration: const InputDecoration(
+                labelText: 'Kart Başlığı',
+                border: OutlineInputBorder(),
+              ),
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) return 'Başlık gerekli';
+                return null;
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('İptal'),
+            ),
+            Consumer<CardsViewModel>(
+              builder: (context, vm, child) {
+                return FilledButton(
+                  onPressed: vm.isLoading
+                      ? null
+                      : () async {
+                          if (!formKey.currentState!.validate()) return;
+                          final success = await vm.createCard(
+                            listId: listId,
+                            title: titleController.text.trim(),
+                          );
+                          if (!context.mounted) return;
+                          if (success) {
+                            Navigator.pop(dialogContext);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(vm.errorMessage ?? 'Hata'),
+                                backgroundColor: Theme.of(context).colorScheme.error,
+                              ),
+                            );
+                          }
+                        },
+                  child: vm.isLoading
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Text('Ekle'),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showEditCardDialog(BuildContext context, dynamic card) {
+    final titleController = TextEditingController(text: card.title);
+    final descController = TextEditingController(text: card.description ?? '');
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Kartı Düzenle'),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'Kart Başlığı',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (val) {
+                    if (val == null || val.trim().isEmpty) return 'Başlık gerekli';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: descController,
+                  decoration: const InputDecoration(
+                    labelText: 'Açıklama',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('İptal'),
+            ),
+            Consumer<CardsViewModel>(
+              builder: (context, vm, child) {
+                return FilledButton(
+                  onPressed: vm.isLoading
+                      ? null
+                      : () async {
+                          if (!formKey.currentState!.validate()) return;
+                          final success = await vm.updateCard(
+                            cardId: card.id,
+                            title: titleController.text.trim(),
+                            description: descController.text.trim(),
+                          );
+                          if (!context.mounted) return;
+                          if (success) {
+                            Navigator.pop(dialogContext);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(vm.errorMessage ?? 'Hata'),
+                                backgroundColor: Theme.of(context).colorScheme.error,
+                              ),
+                            );
+                          }
+                        },
+                  child: vm.isLoading
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Text('Kaydet'),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDeleteCardDialog(BuildContext context, dynamic card) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Kartı Sil'),
+          content: Text('"${card.title}" kartını silmek istediğinize emin misiniz?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('İptal'),
+            ),
+            Consumer<CardsViewModel>(
+              builder: (context, vm, child) {
+                return FilledButton(
+                  onPressed: vm.isLoading
+                      ? null
+                      : () async {
+                          final success = await vm.deleteCard(card.id);
+                          if (!context.mounted) return;
+                          if (success) {
+                            Navigator.pop(dialogContext);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(vm.errorMessage ?? 'Hata'),
+                                backgroundColor: Theme.of(context).colorScheme.error,
+                              ),
+                            );
+                          }
+                        },
+                  style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+                  child: vm.isLoading
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Text('Sil'),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

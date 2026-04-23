@@ -5,6 +5,7 @@ import 'package:mobile/services/auth_service.dart';
 import 'package:mobile/viewmodels/auth_viewmodel.dart';
 import 'package:mobile/viewmodels/boards_viewmodel.dart';
 import 'package:mobile/viewmodels/lists_viewmodel.dart';
+import 'package:mobile/viewmodels/cards_viewmodel.dart';
 import 'package:mobile/screens/splash.dart';
 
 /// Kanban Board — Mobil Uygulama
@@ -35,6 +36,9 @@ class KanbanBoardApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => ListsViewModel(apiService: apiService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => CardsViewModel(apiService: apiService),
         ),
         // Diğer ViewModel'ler ileride eklenecek
       ],
