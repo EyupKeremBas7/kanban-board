@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/viewmodels/boards_viewmodel.dart';
+import 'package:mobile/viewmodels/lists_viewmodel.dart';
 import 'package:mobile/screens/card_detail.dart';
 
 /// Pano detay (Kanban görünümü) — referans: panoların-içi.jpeg
@@ -22,31 +22,18 @@ class BoardDetailScreen extends StatefulWidget {
 
 class _BoardDetailScreenState extends State<BoardDetailScreen> {
   @override
+  void initState() {
+    super.initState();
+    // Ekran açılırken o boardın listelerini çek
+    Future.microtask(() {
+      if (mounted) {
+        context.read<ListsViewModel>().fetchLists(widget.boardId);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // TODO: Provider üzerinden BoardDetailViewModel'den veri çekilecek
-    // Şimdilik mock veri
-    final mockLists = [
-      _MockListColumn(
-        name: 'In Progress',
-        cards: [
-          _MockCardItem(title: 'NV - Pose Estimation', commentCount: 17, checklistProgress: '0/9'),
-          _MockCardItem(title: 'NV - Shoplifting Model', commentCount: 0, checklistProgress: '0/9'),
-          _MockCardItem(title: 'NV - Heat Map', commentCount: 3, checklistProgress: '0/9'),
-        ],
-      ),
-      _MockListColumn(
-        name: 'Active',
-        cards: [
-          _MockCardItem(title: 'NV - API Integration', commentCount: 5, checklistProgress: '2/6'),
-        ],
-      ),
-      _MockListColumn(
-        name: 'Done',
-        cards: [
-          _MockCardItem(title: 'NV - Setup', commentCount: 1, checklistProgress: '9/9'),
-        ],
-      ),
-    ];
 
     return Scaffold(
       appBar: AppBar(
@@ -108,146 +95,101 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
           ),
         ],
       ),
-      body: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.all(8),
-        itemCount: mockLists.length + 1, // +1 "Liste ekle" butonu için
-        itemBuilder: (context, listIndex) {
-          // Son eleman = "Liste Ekle" butonu
-          if (listIndex == mockLists.length) {
-            return Container(
-              width: 280,
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              child: Card(
-                child: InkWell(
-                  onTap: () {
-                    // TODO: Yeni liste ekleme
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Liste ekleme yakında')),
-                    );
-                  },
-                  child: const Center(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.add),
-                        SizedBox(width: 8),
-                        Text('Liste Ekle'),
-                      ],
-                    ),
+      body: Consumer<ListsViewModel>(
+        builder: (context, listsVM, child) {
+          if (listsVM.isLoading && listsVM.lists.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (listsVM.errorMessage != null && listsVM.lists.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(listsVM.errorMessage!),
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: () => listsVM.fetchLists(widget.boardId),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Tekrar Dene'),
                   ),
-                ),
+                ],
               ),
             );
           }
 
-          final list = mockLists[listIndex];
-          return Container(
-            width: 280,
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            child: Card(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Liste başlığı
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            list.name,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                            overflow: TextOverflow.ellipsis,
-                          ),
+          return ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.all(8),
+            itemCount: listsVM.lists.length + 1, // +1 "Liste ekle" butonu için
+            itemBuilder: (context, listIndex) {
+              // Son eleman = "Liste Ekle" butonu
+              if (listIndex == listsVM.lists.length) {
+                return Container(
+                  width: 280,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Card(
+                    child: InkWell(
+                      onTap: () => _showAddListDialog(context),
+                      child: const Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.add),
+                            SizedBox(width: 8),
+                            Text('Liste Ekle'),
+                          ],
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.more_vert, size: 20),
-                          onPressed: () {},
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                  // Kartlar listesi
-                  Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      itemCount: list.cards.length,
-                      itemBuilder: (context, cardIndex) {
-                        final card = list.cards[cardIndex];
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                          child: InkWell(
-                            onTap: () {
-                              // Navigator ile cardId taşıma (Kural 6)
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => CardDetailScreen(
-                                    cardId: 'mock-card-$listIndex-$cardIndex',
-                                    cardTitle: card.title,
-                                  ),
-                                ),
-                              );
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    card.title,
-                                    style: Theme.of(context).textTheme.bodyMedium,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  // Kart meta bilgileri
-                                  Row(
-                                    children: [
-                                      if (card.commentCount > 0) ...[
-                                        Icon(Icons.comment_outlined,
-                                            size: 14,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onSurface
-                                                .withValues(alpha: 0.6)),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          '${card.commentCount}',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall,
-                                        ),
-                                        const SizedBox(width: 12),
-                                      ],
-                                      Icon(Icons.check_box_outlined,
-                                          size: 14,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurface
-                                              .withValues(alpha: 0.6)),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        card.checklistProgress,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall,
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                );
+              }
+
+              final list = listsVM.lists[listIndex];
+              // TODO: Feature #14 — Kartları API'den çekme
+              // Şimdilik liste boşmuş gibi göster
+              final int fakeCardCount = 0; 
+              
+              return Container(
+                width: 280,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                child: Card(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Liste başlığı
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                list.name,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                            IconButton(
+                              icon: const Icon(Icons.more_vert, size: 20),
+                              onPressed: () {},
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Kartlar listesi
+                      Expanded(
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          itemCount: fakeCardCount,
+                          itemBuilder: (context, cardIndex) {
+                            return const SizedBox.shrink(); // Şimdilik kart yok
+                          },
+                        ),
+                      ),
                   // Kart ekle butonu
                   Padding(
                     padding: const EdgeInsets.all(8),
