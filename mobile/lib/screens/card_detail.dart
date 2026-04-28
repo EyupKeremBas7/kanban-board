@@ -3,9 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:mobile/viewmodels/cards_viewmodel.dart';
 import 'package:mobile/viewmodels/checklists_viewmodel.dart';
 import 'package:mobile/viewmodels/comments_viewmodel.dart';
+import 'package:mobile/viewmodels/activity_viewmodel.dart';
 import 'package:mobile/domain/models/board_card.dart';
 import 'package:mobile/domain/models/checklist_item.dart';
 import 'package:mobile/domain/models/card_comment.dart';
+import 'package:mobile/domain/models/activity_log.dart';
 
 /// Kart detay ekranı — tam MVVM entegrasyonu
 /// Kural 18: Sadece cardId ve cardTitle taşınır, veri ViewModel'den okunur.
@@ -35,6 +37,7 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
       if (!mounted) return;
       context.read<ChecklistsViewModel>().fetchItems(widget.cardId);
       context.read<CommentsViewModel>().fetchComments(widget.cardId);
+      context.read<ActivityViewModel>().fetchCardActivity(widget.cardId);
     });
   }
 
@@ -45,6 +48,7 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
     // clear ViewModel state (ekran kapandığında temizle)
     context.read<ChecklistsViewModel>().clear();
     context.read<CommentsViewModel>().clear();
+    context.read<ActivityViewModel>().clear();
     super.dispose();
   }
 
@@ -61,7 +65,6 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_outlined),
-            tooltip: 'Kartı Düzenle',
             onPressed: () => _showEditCardDialog(context, card),
           ),
         ],
@@ -119,6 +122,16 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
             ),
             const SizedBox(height: 12),
             _CommentsSection(cardId: widget.cardId),
+            const Divider(height: 32),
+
+            // ── Aktivite ─────────────────────────────────────────────────
+            _buildSectionHeader(
+              context,
+              icon: Icons.history,
+              title: 'Aktivite',
+            ),
+            const SizedBox(height: 8),
+            _CardActivitySection(cardId: widget.cardId),
           ],
         ),
       ),
@@ -575,6 +588,132 @@ class _CommentsSection extends StatelessWidget {
   }
 }
 
+class _CardActivitySection extends StatelessWidget {
+  final String cardId;
+
+  const _CardActivitySection({required this.cardId});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ActivityViewModel>(
+      builder: (context, vm, _) {
+        if (vm.isLoading && vm.logs.isEmpty) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (vm.errorMessage != null && vm.logs.isEmpty) {
+          return Text(
+            vm.errorMessage!,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          );
+        }
+
+        if (vm.logs.isEmpty) {
+          return Text(
+            'Henüz aktivite yok.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
+          );
+        }
+
+        return ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: vm.logs.length,
+          separatorBuilder: (context, index) => const Divider(height: 16),
+          itemBuilder: (context, index) {
+            final log = vm.logs[index];
+            return _ActivityLogTile(log: log);
+          },
+        );
+      },
+    );
+  }
+}
+
+class _ActivityLogTile extends StatelessWidget {
+  final ActivityLog log;
+
+  const _ActivityLogTile({required this.log});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CircleAvatar(
+          radius: 16,
+          child: Icon(_iconForAction(log.action), size: 16),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${log.userName ?? log.userEmail ?? 'Kullanıcı'} · ${log.action}',
+                style: Theme.of(
+                  context,
+                ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                log.entityName ?? log.entityType,
+                style: Theme.of(context).textTheme.bodySmall,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if ((log.oldValue ?? '').isNotEmpty ||
+                  (log.newValue ?? '').isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Text(
+                  [
+                    if ((log.oldValue ?? '').isNotEmpty)
+                      'Önce: ${log.oldValue}',
+                    if ((log.newValue ?? '').isNotEmpty)
+                      'Sonra: ${log.newValue}',
+                  ].join(' • '),
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          '${log.createdAt.day.toString().padLeft(2, '0')}.${log.createdAt.month.toString().padLeft(2, '0')}',
+          style: Theme.of(context).textTheme.labelSmall,
+        ),
+      ],
+    );
+  }
+
+  IconData _iconForAction(String action) {
+    final normalized = action.toLowerCase();
+    if (normalized.contains('create') || normalized.contains('add')) {
+      return Icons.add;
+    }
+    if (normalized.contains('update') || normalized.contains('edit')) {
+      return Icons.edit;
+    }
+    if (normalized.contains('delete') || normalized.contains('remove')) {
+      return Icons.delete;
+    }
+    if (normalized.contains('move')) {
+      return Icons.drive_file_move;
+    }
+    return Icons.history;
+  }
+}
+
 /// Tek bir yorum kartı
 class _CommentTile extends StatelessWidget {
   final CardComment comment;
@@ -639,7 +778,6 @@ class _CommentTile extends StatelessWidget {
                     ),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
-                    tooltip: 'Yorumu Sil',
                     onPressed: () async {
                       final success = await vm.deleteComment(comment.id);
                       if (!context.mounted) return;

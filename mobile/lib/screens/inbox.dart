@@ -50,7 +50,6 @@ class _InboxScreenState extends State<InboxScreen> {
                 }
                 return IconButton(
                   icon: const Icon(Icons.done_all),
-                  tooltip: 'Tümünü okundu işaretle',
                   onPressed: vm.isLoading
                       ? null
                       : () async {
@@ -407,7 +406,6 @@ class _SentInvitationCard extends StatelessWidget {
         subtitle: Text('Çalışma Alanı: ${invitation.workspaceName}'),
         trailing: IconButton(
           icon: const Icon(Icons.close, color: Colors.red),
-          tooltip: 'Daveti İptal Et',
           onPressed: vm.isLoading
               ? null
               : () async {

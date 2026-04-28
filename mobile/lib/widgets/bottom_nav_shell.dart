@@ -6,7 +6,7 @@ import 'package:mobile/screens/activity.dart';
 import 'package:mobile/screens/account.dart';
 
 /// 5-sekmeli BottomNavigationBar wrapper.
-/// Sekmeler: Panolar, Gelen Kutusu, Planlayıcı, Etkinlik, Hesap
+/// Sekmeler: Panolar, Gelen Kutusu, Ana Sayfa, Etkinlik, Hesap
 /// IndexedStack ile sekme state korunumu sağlanır (Kural 21).
 class BottomNavShell extends StatefulWidget {
   const BottomNavShell({super.key});
@@ -48,9 +48,9 @@ class _BottomNavShellState extends State<BottomNavShell> {
             label: 'Gelen Kutusu',
           ),
           NavigationDestination(
-            icon: Icon(Icons.calendar_month_outlined),
-            selectedIcon: Icon(Icons.calendar_month),
-            label: 'Planlayıcı',
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Ana Sayfa',
           ),
           NavigationDestination(
             icon: Icon(Icons.notifications_outlined),

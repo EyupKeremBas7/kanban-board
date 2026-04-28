@@ -36,7 +36,6 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            tooltip: 'Yenile',
             onPressed: () =>
                 context.read<WorkspacesViewModel>().fetchWorkspaces(),
           ),

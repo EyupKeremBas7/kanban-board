@@ -4,6 +4,7 @@ import 'package:mobile/domain/models/board_card.dart';
 import 'package:mobile/viewmodels/boards_viewmodel.dart';
 import 'package:mobile/viewmodels/lists_viewmodel.dart';
 import 'package:mobile/viewmodels/cards_viewmodel.dart';
+import 'package:mobile/screens/activity.dart';
 
 /// Pano detay (Kanban görünümü) — referans: panoların-içi.jpeg
 /// Yatay kaydırma ile sütunlar (listeler), her sütunda dikey kart listesi.
@@ -38,272 +39,315 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Consumer<BoardsViewModel>(
-          builder: (context, boardsVM, child) {
-            final board = boardsVM.boards.cast<dynamic>().firstWhere(
-              (b) => b.id == widget.boardId,
-              orElse: () => null,
-            );
-            return Text(
+    return Consumer<BoardsViewModel>(
+      builder: (context, boardsVM, child) {
+        final board = boardsVM.boards.cast<dynamic>().firstWhere(
+          (b) => b.id == widget.boardId,
+          orElse: () => null,
+        );
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
               board?.name ?? widget.boardName,
               overflow: TextOverflow.ellipsis,
-            );
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.format_paint_outlined),
-            tooltip: 'Arka Plan',
-            onPressed: () => _showBackgroundPicker(context),
-          ),
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () {
-              // TODO: Filtre
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              // TODO: Board bildirimleri
-            },
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'edit') {
-                _showEditBoardDialog(context);
-              } else if (value == 'delete') {
-                _showDeleteBoardDialog(context);
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'edit',
-                child: Row(
-                  children: [
-                    Icon(Icons.edit, size: 20),
-                    SizedBox(width: 8),
-                    Text('Panoyu Düzenle'),
-                  ],
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.timeline_outlined),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ActivityScreen(
+                      boardId: widget.boardId,
+                      boardName: widget.boardName,
+                      initialScope: ActivityScope.board,
+                    ),
+                  ),
                 ),
               ),
-              const PopupMenuItem(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    Icon(Icons.delete, color: Colors.red, size: 20),
-                    SizedBox(width: 8),
-                    Text('Panoyu Sil', style: TextStyle(color: Colors.red)),
-                  ],
-                ),
+              IconButton(
+                icon: const Icon(Icons.format_paint_outlined),
+                onPressed: () => _showBackgroundPicker(context),
               ),
-            ],
-          ),
-        ],
-      ),
-      body: Consumer2<ListsViewModel, CardsViewModel>(
-        builder: (context, listsVM, cardsVM, child) {
-          if (listsVM.isLoading && listsVM.lists.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (listsVM.errorMessage != null && listsVM.lists.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(listsVM.errorMessage!),
-                  const SizedBox(height: 16),
-                  FilledButton.icon(
-                    onPressed: () => listsVM.fetchLists(widget.boardId),
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Tekrar Dene'),
+              IconButton(
+                icon: const Icon(Icons.filter_list),
+                onPressed: () {
+                  // TODO: Filtre
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined),
+                onPressed: () {
+                  // TODO: Board bildirimleri
+                },
+              ),
+              PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'edit') {
+                    _showEditBoardDialog(context);
+                  } else if (value == 'delete') {
+                    _showDeleteBoardDialog(context);
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'edit',
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit, size: 20),
+                        SizedBox(width: 8),
+                        Text('Panoyu Düzenle'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete, color: Colors.red, size: 20),
+                        SizedBox(width: 8),
+                        Text('Panoyu Sil', style: TextStyle(color: Colors.red)),
+                      ],
+                    ),
                   ),
                 ],
               ),
-            );
-          }
+            ],
+          ),
+          body: Container(
+            decoration: _buildBoardBackgroundDecoration(
+              context,
+              board?.backgroundImage as String?,
+            ),
+            child: Consumer2<ListsViewModel, CardsViewModel>(
+              builder: (context, listsVM, cardsVM, child) {
+                if (listsVM.isLoading && listsVM.lists.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-          return ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.all(8),
-            itemCount: listsVM.lists.length + 1,
-            itemBuilder: (context, listIndex) {
-              // Son eleman = "Liste Ekle" butonu
-              if (listIndex == listsVM.lists.length) {
-                return Container(
-                  width: 280,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Card(
-                    child: InkWell(
-                      onTap: () => _showAddListDialog(context),
-                      child: const Center(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.add),
-                            SizedBox(width: 8),
-                            Text('Liste Ekle'),
-                          ],
+                if (listsVM.errorMessage != null && listsVM.lists.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(listsVM.errorMessage!),
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
+                          onPressed: () => listsVM.fetchLists(widget.boardId),
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Tekrar Dene'),
                         ),
-                      ),
+                      ],
                     ),
-                  ),
-                );
-              }
+                  );
+                }
 
-              final list = listsVM.lists[listIndex];
-              final listCards = cardsVM.getCardsForList(list.id);
-
-              return Container(
-                width: 280,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                child: Card(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Liste başlığı
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                list.name,
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                                overflow: TextOverflow.ellipsis,
+                return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.all(8),
+                  itemCount: listsVM.lists.length + 1,
+                  itemBuilder: (context, listIndex) {
+                    if (listIndex == listsVM.lists.length) {
+                      return Container(
+                        width: 280,
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Card(
+                          child: InkWell(
+                            onTap: () => _showAddListDialog(context),
+                            child: const Center(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.add),
+                                  SizedBox(width: 8),
+                                  Text('Liste Ekle'),
+                                ],
                               ),
                             ),
-                            PopupMenuButton<String>(
-                              icon: const Icon(Icons.more_vert, size: 20),
-                              onSelected: (value) {
-                                if (value == 'edit') {
-                                  _showEditListDialog(context, list);
-                                } else if (value == 'delete') {
-                                  _showDeleteListDialog(context, list);
-                                }
-                              },
-                              itemBuilder: (context) => [
-                                const PopupMenuItem(
-                                  value: 'edit',
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.edit, size: 20),
-                                      SizedBox(width: 8),
-                                      Text('Listeyi Düzenle'),
-                                    ],
-                                  ),
-                                ),
-                                const PopupMenuItem(
-                                  value: 'delete',
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.delete,
-                                        color: Colors.red,
-                                        size: 20,
-                                      ),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        'Listeyi Sil',
-                                        style: TextStyle(color: Colors.red),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                      // Kartlar listesi
-                      Expanded(
-                        child: DragTarget<BoardCard>(
-                          onWillAcceptWithDetails: (details) {
-                            setState(() => _activeDropListId = list.id);
-                            return true;
-                          },
-                          onLeave: (_) {
-                            if (_activeDropListId == list.id) {
-                              setState(() => _activeDropListId = null);
-                            }
-                          },
-                          onAcceptWithDetails: (details) {
-                            _handleCardDrop(
-                              context,
-                              cardsVM,
-                              details.data,
-                              list.id,
-                            );
-                          },
-                          builder: (context, candidateData, rejectedData) {
-                            final isActiveTarget =
-                                _activeDropListId == list.id ||
-                                candidateData.isNotEmpty;
+                      );
+                    }
 
-                            return AnimatedContainer(
-                              duration: const Duration(milliseconds: 120),
-                              margin: const EdgeInsets.symmetric(horizontal: 8),
-                              decoration: BoxDecoration(
+                    final list = listsVM.lists[listIndex];
+                    final listCards = cardsVM.getCardsForList(list.id);
+
+                    return DragTarget<BoardCard>(
+                      onWillAcceptWithDetails: (details) {
+                        setState(() => _activeDropListId = list.id);
+                        return true;
+                      },
+                      onLeave: (_) {
+                        if (_activeDropListId == list.id) {
+                          setState(() => _activeDropListId = null);
+                        }
+                      },
+                      onAcceptWithDetails: (details) {
+                        _handleCardDrop(
+                          context,
+                          cardsVM,
+                          details.data,
+                          list.id,
+                        );
+                      },
+                      builder: (context, candidateData, rejectedData) {
+                        final isActiveTarget =
+                            _activeDropListId == list.id ||
+                            candidateData.isNotEmpty;
+
+                        return Container(
+                          width: 280,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 120),
+                            decoration: BoxDecoration(
+                              color: isActiveTarget
+                                  ? Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainerHighest
+                                        .withValues(alpha: 0.5)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
                                 color: isActiveTarget
-                                    ? Theme.of(context)
-                                          .colorScheme
-                                          .surfaceContainerHighest
-                                          .withValues(alpha: 0.5)
+                                    ? Theme.of(context).colorScheme.primary
                                     : Colors.transparent,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: isActiveTarget
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Colors.transparent,
-                                ),
                               ),
-                              child: ListView.builder(
-                                padding: const EdgeInsets.all(8),
-                                itemCount: listCards.length,
-                                itemBuilder: (context, cardIndex) {
-                                  final card = listCards[cardIndex];
-                                  return LongPressDraggable<BoardCard>(
-                                    data: card,
-                                    feedback: Material(
-                                      color: Colors.transparent,
-                                      child: SizedBox(
-                                        width: 240,
-                                        child: _buildCardTile(context, card),
-                                      ),
+                            ),
+                            child: Card(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      12,
+                                      8,
+                                      8,
                                     ),
-                                    childWhenDragging: Opacity(
-                                      opacity: 0.35,
-                                      child: _buildCardTile(context, card),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            list.name,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleMedium
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        PopupMenuButton<String>(
+                                          icon: const Icon(
+                                            Icons.more_vert,
+                                            size: 20,
+                                          ),
+                                          onSelected: (value) {
+                                            if (value == 'edit') {
+                                              _showEditListDialog(
+                                                context,
+                                                list,
+                                              );
+                                            } else if (value == 'delete') {
+                                              _showDeleteListDialog(
+                                                context,
+                                                list,
+                                              );
+                                            }
+                                          },
+                                          itemBuilder: (context) => [
+                                            const PopupMenuItem(
+                                              value: 'edit',
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.edit, size: 20),
+                                                  SizedBox(width: 8),
+                                                  Text('Listeyi Düzenle'),
+                                                ],
+                                              ),
+                                            ),
+                                            const PopupMenuItem(
+                                              value: 'delete',
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.delete,
+                                                    color: Colors.red,
+                                                    size: 20,
+                                                  ),
+                                                  SizedBox(width: 8),
+                                                  Text(
+                                                    'Listeyi Sil',
+                                                    style: TextStyle(
+                                                      color: Colors.red,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
-                                    child: _buildCardTile(context, card),
-                                  );
-                                },
+                                  ),
+                                  Expanded(
+                                    child: ListView.builder(
+                                      physics: const BouncingScrollPhysics(),
+                                      padding: const EdgeInsets.all(8),
+                                      itemCount: listCards.length,
+                                      itemBuilder: (context, cardIndex) {
+                                        final card = listCards[cardIndex];
+                                        return LongPressDraggable<BoardCard>(
+                                          data: card,
+                                          feedback: Material(
+                                            color: Colors.transparent,
+                                            child: SizedBox(
+                                              width: 240,
+                                              child: _buildCardTile(
+                                                context,
+                                                card,
+                                              ),
+                                            ),
+                                          ),
+                                          childWhenDragging: Opacity(
+                                            opacity: 0.35,
+                                            child: _buildCardTile(
+                                              context,
+                                              card,
+                                            ),
+                                          ),
+                                          child: _buildCardTile(context, card),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: TextButton.icon(
+                                      onPressed: () =>
+                                          _showAddCardDialog(context, list.id),
+                                      icon: const Icon(Icons.add, size: 18),
+                                      label: const Text('Kart ekle'),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            );
-                          },
-                        ),
-                      ),
-                      // Kart ekle butonu
-                      Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: TextButton.icon(
-                          onPressed: () => _showAddCardDialog(context, list.id),
-                          icon: const Icon(Icons.add, size: 18),
-                          label: const Text('Kart ekle'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -313,7 +357,6 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: InkWell(
         onTap: () => _showEditCardDialog(context, card),
-        onLongPress: () => _showDeleteCardDialog(context, card),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Text(
@@ -325,6 +368,74 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
         ),
       ),
     );
+  }
+
+  BoxDecoration _buildBoardBackgroundDecoration(
+    BuildContext context,
+    String? backgroundImage,
+  ) {
+    final scheme = Theme.of(context).colorScheme;
+
+    switch (backgroundImage) {
+      case 'purple':
+        return BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.purple.shade200, Colors.deepPurple.shade400],
+          ),
+        );
+      case 'blue':
+        return BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.blue.shade200, Colors.indigo.shade400],
+          ),
+        );
+      case 'green':
+        return BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.green.shade200, Colors.teal.shade400],
+          ),
+        );
+      case 'orange':
+        return BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.orange.shade200, Colors.deepOrange.shade400],
+          ),
+        );
+      case 'pink':
+        return BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.pink.shade200, Colors.redAccent.shade400],
+          ),
+        );
+      case 'teal':
+        return BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.teal.shade200, Colors.cyan.shade500],
+          ),
+        );
+      case 'amber':
+        return BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.amber.shade200, Colors.orange.shade500],
+          ),
+        );
+      default:
+        return BoxDecoration(color: scheme.surfaceContainerLowest);
+    }
   }
 
   Future<void> _handleCardDrop(
@@ -689,7 +800,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
   // ==================== Card Dialogları ====================
 
   void _showAddCardDialog(BuildContext context, String listId) {
-    final titleController = TextEditingController();
+    final controller = TextEditingController();
     final formKey = GlobalKey<FormState>();
 
     showDialog(
@@ -700,7 +811,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
           content: Form(
             key: formKey,
             child: TextFormField(
-              controller: titleController,
+              controller: controller,
               decoration: const InputDecoration(
                 labelText: 'Kart Başlığı',
                 border: OutlineInputBorder(),
@@ -725,7 +836,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                           if (!formKey.currentState!.validate()) return;
                           final success = await vm.createCard(
                             listId: listId,
-                            title: titleController.text.trim(),
+                            title: controller.text.trim(),
                           );
                           if (!context.mounted) return;
                           if (success) {
@@ -844,59 +955,6 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
     );
   }
 
-  void _showDeleteCardDialog(BuildContext context, dynamic card) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Kartı Sil'),
-          content: Text(
-            '"${card.title}" kartını silmek istediğinize emin misiniz?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('İptal'),
-            ),
-            Consumer<CardsViewModel>(
-              builder: (context, vm, child) {
-                return FilledButton(
-                  onPressed: vm.isLoading
-                      ? null
-                      : () async {
-                          final success = await vm.deleteCard(card.id);
-                          if (!context.mounted) return;
-                          if (success) {
-                            Navigator.pop(dialogContext);
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(vm.errorMessage ?? 'Hata'),
-                                backgroundColor: Theme.of(
-                                  context,
-                                ).colorScheme.error,
-                              ),
-                            );
-                          }
-                        },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                  ),
-                  child: vm.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Sil'),
-                );
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
   // ==================== Background Seçici ====================
 
   void _showBackgroundPicker(BuildContext context) {
@@ -977,7 +1035,6 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
   ) {
     return GestureDetector(
       onTap: () async {
-        Navigator.pop(context);
         final boardsVM = context.read<BoardsViewModel>();
         final bgValue = value == 'none' ? null : value;
         final success = await boardsVM.updateBoard(
@@ -985,6 +1042,10 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
           backgroundImage: bgValue,
         );
         if (!context.mounted) return;
+        if (success) {
+          Navigator.pop(context);
+          return;
+        }
         if (!success) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

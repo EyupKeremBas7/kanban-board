@@ -8,6 +8,7 @@ import 'package:mobile/viewmodels/lists_viewmodel.dart';
 import 'package:mobile/viewmodels/cards_viewmodel.dart';
 import 'package:mobile/viewmodels/comments_viewmodel.dart';
 import 'package:mobile/viewmodels/checklists_viewmodel.dart';
+import 'package:mobile/viewmodels/activity_viewmodel.dart';
 import 'package:mobile/viewmodels/workspaces_viewmodel.dart';
 import 'package:mobile/viewmodels/notifications_viewmodel.dart';
 import 'package:mobile/viewmodels/invitations_viewmodel.dart';
@@ -48,6 +49,9 @@ class KanbanBoardApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => ChecklistsViewModel(apiService: apiService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ActivityViewModel(apiService: apiService),
         ),
         ChangeNotifierProvider(
           create: (_) => WorkspacesViewModel(apiService: apiService),
