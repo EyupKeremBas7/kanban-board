@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:mobile/viewmodels/auth_viewmodel.dart';
 import 'package:mobile/screens/profile_edit.dart';
 import 'package:mobile/screens/change_password.dart';
+import 'package:mobile/screens/workspaces.dart';
 import 'package:mobile/screens/splash.dart';
 
 /// Hesap (Profil & Ayarlar) ekranı — referans: hesap.jpeg
@@ -49,8 +50,16 @@ class AccountScreen extends StatelessWidget {
         items: [
           _SettingsItem(
             icon: Icons.workspaces_outline,
-            title: 'Çalışma alanları',
-            subtitle: 'Workspace entegrasyonunda güncellenecek',
+            title: 'Çalışma Alanlarını Yönet',
+            subtitle: 'Oluştur, düzenle, sil',
+            onTap: (ctx) {
+              Navigator.push(
+                ctx,
+                MaterialPageRoute(
+                  builder: (context) => const WorkspacesScreen(),
+                ),
+              );
+            },
           ),
         ],
       ),
