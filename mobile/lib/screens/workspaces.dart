@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:mobile/viewmodels/workspaces_viewmodel.dart';
 import 'package:mobile/viewmodels/invitations_viewmodel.dart';
 import 'package:mobile/domain/models/workspace.dart';
+import 'package:mobile/screens/workspace_members.dart';
 
 /// Workspace yönetim ekranı
 /// WorkspacesViewModel üzerinden tam CRUD (listele, oluştur, düzenle, sil).
@@ -268,9 +269,27 @@ class _WorkspaceTile extends StatelessWidget {
                 _showDeleteConfirm(context, workspace, vm);
               case _WorkspaceAction.invite:
                 _showInviteDialog(context, workspace);
+              case _WorkspaceAction.manageMembers:
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        WorkspaceMembersScreen(workspace: workspace),
+                  ),
+                );
             }
           },
           itemBuilder: (_) => const [
+            PopupMenuItem(
+              value: _WorkspaceAction.manageMembers,
+              child: Row(
+                children: [
+                  Icon(Icons.group_outlined, size: 18),
+                  SizedBox(width: 8),
+                  Text('Üyeleri Yönet'),
+                ],
+              ),
+            ),
             PopupMenuItem(
               value: _WorkspaceAction.invite,
               child: Row(
@@ -561,4 +580,4 @@ class _WorkspaceTile extends StatelessWidget {
 }
 
 /// Kural 20: Magic string/int yerine enum kullan
-enum _WorkspaceAction { edit, delete, invite }
+enum _WorkspaceAction { edit, delete, invite, manageMembers }
