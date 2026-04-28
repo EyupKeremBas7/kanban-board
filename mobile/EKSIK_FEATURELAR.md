@@ -30,8 +30,8 @@ Aşağıdaki kaynaklar incelendi:
 | 10 | `eab70ae` | Board güncelleme ve silme |
 | 11 | `5409ffa` | Liste yönetimi — `GET/POST /lists` |
 | 12 | `212d83a` | Kart CRUD — tam UI entegrasyonu |
-| 13 | `5895d04` | Sürükle-bırak kart taşıma (listeler arası) |
-| 14 | `d538964` | Card detail: gerçek checklist + yorum entegrasyonu |
+| 13 | 5895d04 | Sürükle-bırak kart taşıma (sadece listeler arası çalışıyor) |
+| 14 | d538964 | Card detail ekranında checklist + yorum entegrasyonu |
 | 15 | `d538964` | Workspace yönetim ekranı (CRUD) |
 
 ---
@@ -91,7 +91,7 @@ DELETE /invitations/{id}        → Daveti iptal et
 
 ---
 
-### 3. 👥 Workspace Üye Yönetimi — `YÜKSEK ÖNCELİK`
+### 3. 👥 Workspace Üye Yönetimi — `YÜKSEK ÖNCELİK` ✅ **TAMAMLANDI**
 
 **Web'deki durum:** `workspaces.tsx` genişletildiğinde üyeleri gösterir, ekler, rolünü değiştirir, çıkarır.
 
@@ -104,18 +104,18 @@ PUT    /workspaces/{id}/members/{member_id} → Rol güncelle
 DELETE /workspaces/{id}/members/{member_id} → Üyeyi çıkar
 ```
 
-**Yapılacaklar:**
-- [ ] `WorkspaceMember` domain modeli
-- [ ] `WorkspacesViewModel`'e üye metodları ekle:
-  - `fetchMembers(workspaceId)`
-  - `inviteMember(workspaceId, email, role)`
-  - `updateMemberRole(workspaceId, memberId, role)`
-  - `removeMember(workspaceId, memberId)`
-- [ ] `workspaces.dart` ekranına workspace'e tıklayınca üye listesi açılan panel
-  - Üye avatarları + isim + rol badge
-  - Rol değiştirme (owner/admin ise)
-  - Üyeyi çıkar (swipe veya buton)
-  - "Üye Davet Et" butonu
+**Tamamlanan İşler:**
+- [x] `WorkspaceMember` domain modeli (`lib/domain/models/workspace_member.dart`)
+- [x] `WorkspacesViewModel`'e üye metodları:
+  - `fetchWorkspaceMembers(workspaceId)` ✅
+  - `updateMemberRole(workspaceId, memberId, role)` ✅
+  - `removeMember(workspaceId, memberId)` ✅
+- [x] `workspace_members.dart` ekranı (full CRUD UI):
+  - Üye avatarları + isim + rol badge ✅
+  - Rol değiştirme (Admin/Member/Observer) ✅
+  - Üyeyi çıkar (confirmation dialog ile) ✅
+  - "Ben" göstergesi ✅
+- [x] `workspaces.dart`'ta "Üyeleri Yönet" ve "Üye Davet Et" menüleri ✅
 
 ---
 
@@ -251,6 +251,26 @@ PUT /cards/{id} → { due_date: "ISO 8601 string" }
 
 ---
 
+### 11. 🔄 Aynı Liste İçinde Kart Sıralama (Drag & Drop) — `YÜKSEK ÖNCELİK`
+
+**Mevcut mobil:** Kartlar *farklı* listelere sürüklenebiliyor ancak **aynı liste içinde** yukarı/aşağı sıralamayı değiştirmek kapalı (`board_detail.dart` satır 222'de aynı liste engellenmiş).
+
+**Yapılacaklar:**
+- [ ] `board_detail.dart` içindeki drag/drop mantığını, aynı liste içinde sıralama yapabilecek şekilde güncelle.
+- [ ] `CardsViewModel.moveCardToList` veya `reorderCard` fonksiyonunda `position` hesaplamalarını aynı liste içi durumlara uygun hale getir.
+
+---
+
+### 12. 📊 Kart Üzerinde Özet Bilgiler (Checklist & Yorum Sayısı) — `ORTA ÖNCELİK`
+
+**Mevcut mobil:** Kart detayına girildiğinde Checklist ve Yorumlar çalışıyor ancak Board görünümünde (kartların ön yüzünde) bu veriler sahte (mock) olarak duruyor (`commentCount = 0`, `checklistProgress = '0/0'`).
+
+**Yapılacaklar:**
+- [ ] `BoardCard` modeli için backend'den bu istatistikler gelmiyorsa UI'da sakla veya backend'den bu verileri çekecek/hesaplayacak bir yapı kur.
+- [ ] Kart ön yüzünde (Board ekranı) checklist ilerlemesini (örn: 2/5) ve yorum sayısını gösteren küçük rozetler (badges) ekle.
+
+---
+
 ## 📊 Öncelik Özeti
 
 | Özellik | Öncelik | API Hazır | ViewModel Hazır |
@@ -258,10 +278,12 @@ PUT /cards/{id} → { due_date: "ISO 8601 string" }
 | Bildirimler | 🔴 Yüksek | ✅ | ❌ |
 | Davetiyeler | 🔴 Yüksek | ✅ | ❌ |
 | Workspace Üye Yönetimi | 🔴 Yüksek | ✅ | ⚠️ Kısmi |
+| Aynı Liste İçi Kart Sıralama | 🔴 Yüksek | ✅ | ⚠️ Kısmi |
 | Activity Log | 🟡 Orta | ✅ | ❌ |
 | Board Arka Plan Seçici | 🟡 Orta | ✅ | ⚠️ Kısmi |
 | Dashboard / Ana Ekran | 🟡 Orta | ✅ | ✅ |
 | Liste Güncelle/Sil UI | 🟡 Orta | ✅ | ✅ |
+| Kart Üzerinde Özet Bilgiler | 🟡 Orta | ⚠️ | ❌ |
 | Profil Fotoğrafı Upload | 🟢 Düşük | ✅ | ❌ |
 | Kart Atama | 🟢 Düşük | ✅ | ⚠️ Kısmi |
 | Bitiş Tarihi Düzenleme | 🟢 Düşük | ✅ | ⚠️ Kısmi |

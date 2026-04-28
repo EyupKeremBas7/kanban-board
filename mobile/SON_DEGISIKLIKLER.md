@@ -7,19 +7,19 @@
 ## 📅 Tarih: 28 Nisan 2026
 
 ### ✅ Tamamlanan Son İşler
-- **Davetiyeler (Invitations) Entegrasyonu:** `Invitation` modeli ve `InvitationsViewModel` oluşturuldu. `inbox.dart` ekranı sekmeli yapıya çevrilerek "Davetler" kısmı eklendi (kabul/red/iptal işlemleriyle birlikte). `workspaces.dart` ekranına "Üye Davet Et" özelliği eklendi.
-- **Hata Çözümü (Bugfix):** Yeni kullanıcıların (hiç çalışma alanı olmayanların) pano oluştururken karşılaştığı sonsuz yükleme ekranı hatası çözüldü. Artık kullanıcı, "Pano oluşturmak için önce bir Çalışma Alanı oluşturmalısınız" şeklinde yönlendiriliyor.
-- **Bildirimler (Notifications) Entegrasyonu:** `NotificationsViewModel` oluşturuldu ve tüm CRUD operasyonları (getirme, okundu işaretleme, silme) API'ye bağlandı. `inbox.dart` ekranına eklendi.
+- **Drag-and-Drop Kart Taşıma:** Kartlar uzun bas ile sürükle-bırak destekli, farklı listeler arasında taşınabiliyor. `CardsViewModel`'e `moveCardToList()` metodu eklendi. `board_detail.dart`'ta `DragTarget` + `LongPressDraggable` UI integration tamamlandı.
+- **Workspace Üye Yönetimi (Sprint 1 Tamamlanış):** `WorkspaceMember` domain modeli + `WorkspacesViewModel` üye metodları (`fetchWorkspaceMembers`, `updateMemberRole`, `removeMember`) zaten mevcut durumdaydı. `workspace_members.dart` ekranı, tam CRUD + UI (role badges, member list, remove dialog) ile tamamlandı. `workspaces.dart`'ta "Üyeleri Yönet" ve "Üye Davet Et" menüleri entegre edildi.
 
 ### 🚧 Şu Anki Durum (Current State)
-Temel Kanban özellikleri, Bildirimler ve Davetiyeler (Invitations) modülü tamamlandı. Sıradaki hedef, davet edilen üyelerin çalışma alanı içerisinde yönetilmesi (Workspace Member Management) sürecidir.
+**Sprint 1 -- TAMAMLANDI.** Tüm temel Kanban özellikleri (Boards, Lists, Cards + Drag-and-Drop), Bildirimler, Davetiyeler, Üye Yönetimi hayata geçti. Kullanıcılar workspace oluştur, üye davet et, pano/liste/kart CRUD yapabilir, kartları taşıyabilir, bildirim ve davet yönetebilir.
 
 ### ⏭️ Bir Sonraki Adım (Next Steps)
-`EKSIK_FEATURELAR.md` dosyasında belirlenen **Sprint 1 (Yüksek Öncelik)** son görevlerine devam edilecek.
-Gelecek ajanın yapması gereken ilk iş (Workspace Üye Yönetimi):
-1. `WorkspaceMember` domain modeli oluştur.
-2. `WorkspacesViewModel`'e üye metodlarını (fetchMembers, updateMemberRole, removeMember) ekle.
-3. `workspaces.dart` ekranına üye listesi panelini (avatar, isim, rol badge) ve yönetim arayüzünü (rol değiştirme, üyeyi çıkarma) entegre et.
+**Sprint 2 (Orta Öncelik)** başlanabilir:
+1. **Activity Log (Aktivite Akışı):** Board/workspace/card activity timeline
+2. **Board Arka Plan Seçici:** Renk gradyası + fotoğraf background
+3. **Çevrimdışı Desteği Temel:** LocalStorage/Cache layer
+
+Bu görevler `EKSIK_FEATURELAR.md`'de ayrıntılı olarak listelenir.
 
 ---
 
