@@ -27,9 +27,9 @@ class CardsViewModel extends ChangeNotifier {
     required String listId,
     String? excludeCardId,
   }) {
-    final listCards = getCardsForList(listId)
-        .where((card) => card.id != excludeCardId)
-        .toList();
+    final listCards = getCardsForList(
+      listId,
+    ).where((card) => card.id != excludeCardId).toList();
 
     if (listCards.isEmpty) {
       return 65535.0;
@@ -48,7 +48,7 @@ class CardsViewModel extends ChangeNotifier {
     try {
       // Şimdilik tüm kartları çekip, UI katmanında filtreleyeceğiz
       final response = await _apiService.get('/cards/?skip=0&limit=1000');
-      
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         final items = data['data'] as List;
@@ -93,7 +93,7 @@ class CardsViewModel extends ChangeNotifier {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         final newCard = BoardCard.fromJson(data);
         _cards.add(newCard);
-        
+
         _isLoading = false;
         notifyListeners();
         return true;
@@ -112,7 +112,7 @@ class CardsViewModel extends ChangeNotifier {
     }
   }
 
-  /// Kart taşıma — başka listeye geçirir (PUT /cards/{id})
+  /// Kart taşıma — başka listeye geçirir veya aynı liste içinde sıralar (PUT /cards/{id})
   Future<bool> moveCardToList({
     required String cardId,
     required String targetListId,
@@ -125,10 +125,24 @@ class CardsViewModel extends ChangeNotifier {
     }
 
     final currentCard = _cards[cardIndex];
+
+    // Aynı liste: listedeki son karta sonra koy (position değiştirme sıralaması)
     if (currentCard.listId == targetListId) {
-      return true;
+      final listCards = getCardsForList(
+        targetListId,
+      ).where((c) => c.id != cardId).toList();
+
+      if (listCards.isEmpty) {
+        return true; // Hiç başka kart yoksa zaten son
+      }
+
+      final lastCard = listCards.last;
+      final newPosition = lastCard.position + 1024.0;
+
+      return updateCard(cardId: cardId, position: newPosition);
     }
 
+    // Farklı liste
     final nextPosition = _calculateNextPositionForList(
       listId: targetListId,
       excludeCardId: cardId,

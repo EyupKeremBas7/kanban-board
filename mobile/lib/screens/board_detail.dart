@@ -43,9 +43,9 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
         title: Consumer<BoardsViewModel>(
           builder: (context, boardsVM, child) {
             final board = boardsVM.boards.cast<dynamic>().firstWhere(
-                  (b) => b.id == widget.boardId,
-                  orElse: () => null,
-                );
+              (b) => b.id == widget.boardId,
+              orElse: () => null,
+            );
             return Text(
               board?.name ?? widget.boardName,
               overflow: TextOverflow.ellipsis,
@@ -53,6 +53,11 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
           },
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.format_paint_outlined),
+            tooltip: 'Arka Plan',
+            onPressed: () => _showBackgroundPicker(context),
+          ),
           IconButton(
             icon: const Icon(Icons.filter_list),
             onPressed: () {
@@ -167,9 +172,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                             Expanded(
                               child: Text(
                                 list.name,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
+                                style: Theme.of(context).textTheme.titleMedium
                                     ?.copyWith(fontWeight: FontWeight.bold),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -198,9 +201,16 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                                   value: 'delete',
                                   child: Row(
                                     children: [
-                                      Icon(Icons.delete, color: Colors.red, size: 20),
+                                      Icon(
+                                        Icons.delete,
+                                        color: Colors.red,
+                                        size: 20,
+                                      ),
                                       SizedBox(width: 8),
-                                      Text('Listeyi Sil', style: TextStyle(color: Colors.red)),
+                                      Text(
+                                        'Listeyi Sil',
+                                        style: TextStyle(color: Colors.red),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -213,8 +223,6 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                       Expanded(
                         child: DragTarget<BoardCard>(
                           onWillAcceptWithDetails: (details) {
-                            final incomingCard = details.data;
-                            if (incomingCard.listId == list.id) return false;
                             setState(() => _activeDropListId = list.id);
                             return true;
                           },
@@ -233,7 +241,8 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                           },
                           builder: (context, candidateData, rejectedData) {
                             final isActiveTarget =
-                                _activeDropListId == list.id || candidateData.isNotEmpty;
+                                _activeDropListId == list.id ||
+                                candidateData.isNotEmpty;
 
                             return AnimatedContainer(
                               duration: const Duration(milliseconds: 120),
@@ -241,9 +250,9 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                               decoration: BoxDecoration(
                                 color: isActiveTarget
                                     ? Theme.of(context)
-                                        .colorScheme
-                                        .surfaceContainerHighest
-                                    .withValues(alpha: 0.5)
+                                          .colorScheme
+                                          .surfaceContainerHighest
+                                          .withValues(alpha: 0.5)
                                     : Colors.transparent,
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
@@ -348,9 +357,9 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
   void _showEditBoardDialog(BuildContext context) {
     final boardsVM = context.read<BoardsViewModel>();
     final board = boardsVM.boards.cast<dynamic>().firstWhere(
-          (b) => b.id == widget.boardId,
-          orElse: () => null,
-        );
+      (b) => b.id == widget.boardId,
+      orElse: () => null,
+    );
 
     if (board == null) return;
 
@@ -402,13 +411,19 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(vm.errorMessage ?? 'Hata'),
-                                backgroundColor: Theme.of(context).colorScheme.error,
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.error,
                               ),
                             );
                           }
                         },
                   child: vm.isLoading
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : const Text('Kaydet'),
                 );
               },
@@ -425,7 +440,9 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Panoyu Sil'),
-          content: const Text('Bu panoyu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.'),
+          content: const Text(
+            'Bu panoyu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
@@ -449,14 +466,22 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(vm.errorMessage ?? 'Hata'),
-                                backgroundColor: Theme.of(context).colorScheme.error,
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.error,
                               ),
                             );
                           }
                         },
-                  style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  ),
                   child: vm.isLoading
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : const Text('Sil'),
                 );
               },
@@ -515,13 +540,19 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(vm.errorMessage ?? 'Hata'),
-                                backgroundColor: Theme.of(context).colorScheme.error,
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.error,
                               ),
                             );
                           }
                         },
                   child: vm.isLoading
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : const Text('Ekle'),
                 );
               },
@@ -578,13 +609,19 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(vm.errorMessage ?? 'Hata'),
-                                backgroundColor: Theme.of(context).colorScheme.error,
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.error,
                               ),
                             );
                           }
                         },
                   child: vm.isLoading
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : const Text('Kaydet'),
                 );
               },
@@ -601,7 +638,9 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Listeyi Sil'),
-          content: Text('${list.name} isimli listeyi silmek istediğinize emin misiniz?'),
+          content: Text(
+            '${list.name} isimli listeyi silmek istediğinize emin misiniz?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
@@ -621,14 +660,22 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(vm.errorMessage ?? 'Hata'),
-                                backgroundColor: Theme.of(context).colorScheme.error,
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.error,
                               ),
                             );
                           }
                         },
-                  style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  ),
                   child: vm.isLoading
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : const Text('Sil'),
                 );
               },
@@ -687,13 +734,19 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(vm.errorMessage ?? 'Hata'),
-                                backgroundColor: Theme.of(context).colorScheme.error,
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.error,
                               ),
                             );
                           }
                         },
                   child: vm.isLoading
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : const Text('Ekle'),
                 );
               },
@@ -726,7 +779,9 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                     border: OutlineInputBorder(),
                   ),
                   validator: (val) {
-                    if (val == null || val.trim().isEmpty) return 'Başlık gerekli';
+                    if (val == null || val.trim().isEmpty) {
+                      return 'Başlık gerekli';
+                    }
                     return null;
                   },
                 ),
@@ -766,13 +821,19 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(vm.errorMessage ?? 'Hata'),
-                                backgroundColor: Theme.of(context).colorScheme.error,
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.error,
                               ),
                             );
                           }
                         },
                   child: vm.isLoading
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : const Text('Kaydet'),
                 );
               },
@@ -789,7 +850,9 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Kartı Sil'),
-          content: Text('"${card.title}" kartını silmek istediğinize emin misiniz?'),
+          content: Text(
+            '"${card.title}" kartını silmek istediğinize emin misiniz?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
@@ -809,14 +872,22 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(vm.errorMessage ?? 'Hata'),
-                                backgroundColor: Theme.of(context).colorScheme.error,
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.error,
                               ),
                             );
                           }
                         },
-                  style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  ),
                   child: vm.isLoading
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : const Text('Sil'),
                 );
               },
@@ -824,6 +895,133 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
           ],
         );
       },
+    );
+  }
+  // ==================== Background Seçici ====================
+
+  void _showBackgroundPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Pano Arka Planı',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            Text('Renkler:', style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 60,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _buildBackgroundOption(
+                    context,
+                    'none',
+                    'Varsayılan',
+                    Colors.grey.shade300,
+                  ),
+                  _buildBackgroundOption(
+                    context,
+                    'purple',
+                    'Mor',
+                    Colors.purple,
+                  ),
+                  _buildBackgroundOption(context, 'blue', 'Mavi', Colors.blue),
+                  _buildBackgroundOption(
+                    context,
+                    'green',
+                    'Yeşil',
+                    Colors.green,
+                  ),
+                  _buildBackgroundOption(
+                    context,
+                    'orange',
+                    'Turuncu',
+                    Colors.orange,
+                  ),
+                  _buildBackgroundOption(context, 'pink', 'Pembe', Colors.pink),
+                  _buildBackgroundOption(
+                    context,
+                    'teal',
+                    'Turkuaz',
+                    Colors.teal,
+                  ),
+                  _buildBackgroundOption(
+                    context,
+                    'amber',
+                    'Sarı',
+                    Colors.amber,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBackgroundOption(
+    BuildContext context,
+    String value,
+    String label,
+    Color color,
+  ) {
+    return GestureDetector(
+      onTap: () async {
+        Navigator.pop(context);
+        final boardsVM = context.read<BoardsViewModel>();
+        final bgValue = value == 'none' ? null : value;
+        final success = await boardsVM.updateBoard(
+          boardId: widget.boardId,
+          backgroundImage: bgValue,
+        );
+        if (!context.mounted) return;
+        if (!success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                boardsVM.errorMessage ?? 'Arka plan güncellenemedi',
+              ),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      },
+      child: Container(
+        width: 60,
+        height: 60,
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outline,
+            width: 1,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: color.computeLuminance() > 0.5
+                  ? Colors.black
+                  : Colors.white,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
