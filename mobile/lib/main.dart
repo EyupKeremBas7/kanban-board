@@ -9,6 +9,7 @@ import 'package:mobile/viewmodels/cards_viewmodel.dart';
 import 'package:mobile/viewmodels/comments_viewmodel.dart';
 import 'package:mobile/viewmodels/checklists_viewmodel.dart';
 import 'package:mobile/viewmodels/workspaces_viewmodel.dart';
+import 'package:mobile/viewmodels/notifications_viewmodel.dart';
 import 'package:mobile/screens/splash.dart';
 
 /// Kanban Board — Mobil Uygulama
@@ -29,10 +30,8 @@ class KanbanBoardApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => AuthViewModel(
-            apiService: apiService,
-            authService: authService,
-          ),
+          create: (_) =>
+              AuthViewModel(apiService: apiService, authService: authService),
         ),
         ChangeNotifierProvider(
           create: (_) => BoardsViewModel(apiService: apiService),
@@ -51,6 +50,9 @@ class KanbanBoardApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => WorkspacesViewModel(apiService: apiService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => NotificationsViewModel(apiService: apiService),
         ),
       ],
       child: MaterialApp(

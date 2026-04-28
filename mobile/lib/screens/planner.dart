@@ -36,10 +36,9 @@ class PlannerScreen extends StatelessWidget {
                 ),
                 Text(
                   '${_monthName(now.month)} ${now.year}',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
@@ -60,10 +59,9 @@ class PlannerScreen extends StatelessWidget {
                     Icon(
                       Icons.calendar_month_rounded,
                       size: 80,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primary
-                          .withValues(alpha: 0.4),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.4),
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -75,11 +73,10 @@ class PlannerScreen extends StatelessWidget {
                       'Bitiş tarihi olan kartlarınız burada takvim üzerinde görünecek.',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.6),
-                          ),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
                     ),
                   ],
                 ),
@@ -93,8 +90,18 @@ class PlannerScreen extends StatelessWidget {
 
   String _monthName(int month) {
     const months = [
-      'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-      'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
+      'Ocak',
+      'Şubat',
+      'Mart',
+      'Nisan',
+      'Mayıs',
+      'Haziran',
+      'Temmuz',
+      'Ağustos',
+      'Eylül',
+      'Ekim',
+      'Kasım',
+      'Aralık',
     ];
     return months[(month - 1).clamp(0, 11)];
   }

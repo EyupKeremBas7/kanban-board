@@ -26,9 +26,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final authVM = context.read<AuthViewModel>();
-    final success = await authVM.recoverPassword(
-      _emailController.text.trim(),
-    );
+    final success = await authVM.recoverPassword(_emailController.text.trim());
 
     if (!mounted) return;
 
@@ -47,12 +45,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Şifremi Unuttum'),
-      ),
+      appBar: AppBar(title: const Text('Şifremi Unuttum')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
-        child: _emailSent ? _buildSuccessView(context) : _buildFormView(context),
+        child: _emailSent
+            ? _buildSuccessView(context)
+            : _buildFormView(context),
       ),
     );
   }
@@ -79,11 +77,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           Text(
             'E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.6),
-                ),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
@@ -150,11 +147,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Text(
           '${_emailController.text.trim()} adresine şifre sıfırlama bağlantısı gönderildi. Lütfen e-postanızı kontrol edin.',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.6),
-              ),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 32),

@@ -57,9 +57,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     if (!mounted) return;
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profil güncellendi')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Profil güncellendi')));
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -117,12 +117,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       child: Text(
                         initials.isNotEmpty ? initials : '?',
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
+                        style: Theme.of(context).textTheme.headlineMedium
                             ?.copyWith(
-                              color:
-                                  Theme.of(context).colorScheme.onPrimary,
+                              color: Theme.of(context).colorScheme.onPrimary,
                             ),
                       ),
                     );

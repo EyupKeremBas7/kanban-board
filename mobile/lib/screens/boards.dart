@@ -86,30 +86,27 @@ class _BoardsScreenState extends State<BoardsScreen> {
                   Icon(
                     Icons.dashboard_outlined,
                     size: 64,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.3),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.3),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Henüz pano yok',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.5),
-                        ),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'İlk panonuzu oluşturun',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.4),
-                        ),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.4),
+                    ),
                   ),
                 ],
               ),
@@ -169,7 +166,7 @@ class _BoardsScreenState extends State<BoardsScreen> {
     String? selectedWorkspaceId;
 
     final boardsVM = context.read<BoardsViewModel>();
-    
+
     // Dialog açılırken workspaces yoksa çek
     if (boardsVM.workspaces.isEmpty) {
       boardsVM.fetchWorkspaces();
@@ -271,15 +268,18 @@ class _BoardsScreenState extends State<BoardsScreen> {
                                 Navigator.pop(dialogContext);
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                      content: Text('Pano oluşturuldu')),
+                                    content: Text('Pano oluşturuldu'),
+                                  ),
                                 );
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text(vm.errorMessage ??
-                                        'Oluşturma başarısız'),
-                                    backgroundColor:
-                                        Theme.of(context).colorScheme.error,
+                                    content: Text(
+                                      vm.errorMessage ?? 'Oluşturma başarısız',
+                                    ),
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.error,
                                   ),
                                 );
                               }

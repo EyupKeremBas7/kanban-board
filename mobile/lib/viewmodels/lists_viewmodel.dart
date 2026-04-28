@@ -7,8 +7,7 @@ import 'package:mobile/services/api_service.dart';
 class ListsViewModel extends ChangeNotifier {
   final ApiService _apiService;
 
-  ListsViewModel({required ApiService apiService})
-      : _apiService = apiService;
+  ListsViewModel({required ApiService apiService}) : _apiService = apiService;
 
   List<BoardList> _lists = [];
   bool _isLoading = false;
@@ -30,11 +29,11 @@ class ListsViewModel extends ChangeNotifier {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         final listsData = data['data'] as List<dynamic>;
-        
+
         _lists = listsData
             .map((json) => BoardList.fromJson(json as Map<String, dynamic>))
             .toList();
-        
+
         // Pozisyona göre sırala
         _lists.sort((a, b) => a.position.compareTo(b.position));
       } else {
@@ -68,26 +67,98 @@ class ListsViewModel extends ChangeNotifier {
 
       final response = await _apiService.post(
         '/lists/',
-        body: {
-          'board_id': boardId,
-          'name': name,
-          'position': newPosition,
-        },
+        body: {'board_id': boardId, 'name': name, 'position': newPosition},
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         final newList = BoardList.fromJson(data);
-        
+
         _lists.add(newList);
         _lists.sort((a, b) => a.position.compareTo(b.position));
-        
+
         _isLoading = false;
         notifyListeners();
         return true;
       } else {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         _errorMessage = data['detail'] as String? ?? 'Liste oluşturulamadı';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = 'Bağlantı hatası: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Liste Güncelleme — PUT /lists/{id}
+  Future<bool> updateList({
+    required String listId,
+    String? name,
+    double? position,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final Map<String, dynamic> body = {};
+      if (name != null) body['name'] = name;
+      if (position != null) body['position'] = position;
+
+      final response = await _apiService.put('/lists/$listId', body: body);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final updatedList = BoardList.fromJson(data);
+
+        final index = _lists.indexWhere((l) => l.id == listId);
+        if (index != -1) {
+          _lists[index] = updatedList;
+          _lists.sort((a, b) => a.position.compareTo(b.position));
+        }
+
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        _errorMessage = data['detail'] as String? ?? 'Güncelleme başarısız';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = 'Bağlantı hatası: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Liste Silme — DELETE /lists/{id}
+  Future<bool> deleteList(String listId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _apiService.delete('/lists/$listId');
+
+      if (response.statusCode == 200) {
+        // Yerel listeden kaldır
+        _lists.removeWhere((l) => l.id == listId);
+
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        _errorMessage = data['detail'] as String? ?? 'Silme başarısız';
         _isLoading = false;
         notifyListeners();
         return false;

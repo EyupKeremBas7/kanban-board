@@ -35,7 +35,9 @@ class ApiService {
     bool withAuth = true,
     Map<String, String>? queryParams,
   }) async {
-    final uri = Uri.parse('$baseUrl$endpoint').replace(queryParameters: queryParams);
+    final uri = Uri.parse(
+      '$baseUrl$endpoint',
+    ).replace(queryParameters: queryParams);
     final headers = await _headers(withAuth: withAuth);
     return http.get(uri, headers: headers);
   }
@@ -87,10 +89,7 @@ class ApiService {
   }
 
   /// DELETE isteği
-  Future<http.Response> delete(
-    String endpoint, {
-    bool withAuth = true,
-  }) async {
+  Future<http.Response> delete(String endpoint, {bool withAuth = true}) async {
     final uri = Uri.parse('$baseUrl$endpoint');
     final headers = await _headers(withAuth: withAuth);
     return http.delete(uri, headers: headers);

@@ -13,8 +13,8 @@ class AuthViewModel extends ChangeNotifier {
   AuthViewModel({
     required ApiService apiService,
     required AuthService authService,
-  })  : _apiService = apiService,
-        _authService = authService;
+  }) : _apiService = apiService,
+       _authService = authService;
 
   // State
   bool _isLoading = false;
@@ -69,8 +69,7 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   /// Kayıt olma — POST /users/signup
-  Future<bool> signup(String email, String password,
-      {String? fullName}) async {
+  Future<bool> signup(String email, String password, {String? fullName}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -227,7 +226,8 @@ class AuthViewModel extends ChangeNotifier {
         return true;
       } else {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
-        _errorMessage = data['detail'] as String? ?? 'Şifre değiştirme başarısız';
+        _errorMessage =
+            data['detail'] as String? ?? 'Şifre değiştirme başarısız';
         _isLoading = false;
         notifyListeners();
         return false;

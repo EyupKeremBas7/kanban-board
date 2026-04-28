@@ -66,10 +66,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   Icon(
                     Icons.notifications_none_rounded,
                     size: 80,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .primary
-                        .withValues(alpha: 0.4),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.4),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -89,17 +88,15 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   leading: CircleAvatar(
                     backgroundColor: notification.isRead
                         ? Theme.of(context).colorScheme.surfaceContainerHighest
-                        : Theme.of(context)
-                            .colorScheme
-                            .primary
-                            .withValues(alpha: 0.15),
+                        : Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.15),
                     child: Icon(
                       notification.icon,
                       color: notification.isRead
-                          ? Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.5)
+                          ? Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.5)
                           : Theme.of(context).colorScheme.primary,
                       size: 20,
                     ),
@@ -107,10 +104,10 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   title: Text(
                     notification.title,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: notification.isRead
-                              ? FontWeight.normal
-                              : FontWeight.bold,
-                        ),
+                      fontWeight: notification.isRead
+                          ? FontWeight.normal
+                          : FontWeight.bold,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                   subtitle: Text(

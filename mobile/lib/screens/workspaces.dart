@@ -35,7 +35,8 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Yenile',
-            onPressed: () => context.read<WorkspacesViewModel>().fetchWorkspaces(),
+            onPressed: () =>
+                context.read<WorkspacesViewModel>().fetchWorkspaces(),
           ),
         ],
       ),
@@ -83,30 +84,27 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
                   Icon(
                     Icons.workspaces_outlined,
                     size: 64,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.3),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.3),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Henüz çalışma alanı yok',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.5),
-                        ),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Yeni bir çalışma alanı oluşturun',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.4),
-                        ),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.4),
+                    ),
                   ),
                 ],
               ),
@@ -199,8 +197,9 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(vm.errorMessage ?? 'Oluşturulamadı'),
-                            backgroundColor:
-                                Theme.of(context).colorScheme.error,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.error,
                           ),
                         );
                       } else {
@@ -242,21 +241,16 @@ class _WorkspaceTile extends StatelessWidget {
         leading: CircleAvatar(
           backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
           child: Text(
-            workspace.name.isNotEmpty
-                ? workspace.name[0].toUpperCase()
-                : '?',
+            workspace.name.isNotEmpty ? workspace.name[0].toUpperCase() : '?',
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSecondaryContainer,
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
-        title: Text(
-          workspace.name,
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: workspace.description != null &&
-                workspace.description!.isNotEmpty
+        title: Text(workspace.name, overflow: TextOverflow.ellipsis),
+        subtitle:
+            workspace.description != null && workspace.description!.isNotEmpty
             ? Text(
                 workspace.description!,
                 overflow: TextOverflow.ellipsis,
@@ -365,10 +359,12 @@ class _WorkspaceTile extends StatelessWidget {
                       if (!success) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content:
-                                Text(vm2.errorMessage ?? 'Güncelleme başarısız'),
-                            backgroundColor:
-                                Theme.of(context).colorScheme.error,
+                            content: Text(
+                              vm2.errorMessage ?? 'Güncelleme başarısız',
+                            ),
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.error,
                           ),
                         );
                       }

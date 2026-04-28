@@ -57,10 +57,7 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.cardTitle,
-          overflow: TextOverflow.ellipsis,
-        ),
+        title: Text(widget.cardTitle, overflow: TextOverflow.ellipsis),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_outlined),
@@ -142,10 +139,9 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
         Expanded(
           child: Text(
             title,
-            style: Theme.of(context)
-                .textTheme
-                .titleSmall
-                ?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         ?trailing,
@@ -199,10 +195,7 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
     if (title.isEmpty) return;
 
     final vm = context.read<ChecklistsViewModel>();
-    final success = await vm.createItem(
-      cardId: widget.cardId,
-      title: title,
-    );
+    final success = await vm.createItem(cardId: widget.cardId, title: title);
 
     if (!mounted) return;
     if (!dialogContext.mounted) return;
@@ -271,8 +264,12 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
                       if (!success) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text(vm.errorMessage ?? 'Güncelleme başarısız'),
-                            backgroundColor: Theme.of(context).colorScheme.error,
+                            content: Text(
+                              vm.errorMessage ?? 'Güncelleme başarısız',
+                            ),
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.error,
                           ),
                         );
                       }
@@ -301,17 +298,11 @@ class _DescriptionTile extends StatelessWidget {
       return Text(
         'Henüz bir açıklama eklenmemiş.',
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context)
-                  .colorScheme
-                  .onSurface
-                  .withValues(alpha: 0.5),
-            ),
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+        ),
       );
     }
-    return Text(
-      description,
-      style: Theme.of(context).textTheme.bodyMedium,
-    );
+    return Text(description, style: Theme.of(context).textTheme.bodyMedium);
   }
 }
 
@@ -328,11 +319,8 @@ class _DueDateTile extends StatelessWidget {
     return Text(
       'Belirlenmemiş',
       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context)
-                .colorScheme
-                .onSurface
-                .withValues(alpha: 0.5),
-          ),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+      ),
     );
   }
 }
@@ -367,11 +355,10 @@ class _ChecklistSection extends StatelessWidget {
           return Text(
             'Henüz öğe yok. Ekle butonuna tıklayın.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.5),
-                ),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
           );
         }
 
@@ -394,9 +381,9 @@ class _ChecklistSection extends StatelessWidget {
                 Expanded(
                   child: LinearProgressIndicator(
                     value: progress.clamp(0.0, 1.0),
-                    backgroundColor: Theme.of(context)
-                        .colorScheme
-                        .surfaceContainerHighest,
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                   ),
                 ),
               ],
@@ -472,10 +459,7 @@ class _CommentInput extends StatelessWidget {
   final TextEditingController controller;
   final String cardId;
 
-  const _CommentInput({
-    required this.controller,
-    required this.cardId,
-  });
+  const _CommentInput({required this.controller, required this.cardId});
 
   @override
   Widget build(BuildContext context) {
@@ -488,7 +472,10 @@ class _CommentInput extends StatelessWidget {
             decoration: const InputDecoration(
               hintText: 'Yorum yaz...',
               border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
             ),
             maxLines: 3,
             minLines: 1,
@@ -565,11 +552,10 @@ class _CommentsSection extends StatelessWidget {
           return Text(
             'Henüz yorum yok.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.5),
-                ),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
           );
         }
 
@@ -598,7 +584,8 @@ class _CommentTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.read<CommentsViewModel>();
-    final displayName = comment.userFullName ?? comment.userEmail ?? 'Kullanıcı';
+    final displayName =
+        comment.userFullName ?? comment.userEmail ?? 'Kullanıcı';
     final initials = displayName
         .split(' ')
         .where((s) => s.isNotEmpty)
@@ -615,8 +602,8 @@ class _CommentTile extends StatelessWidget {
           child: Text(
             initials.isNotEmpty ? initials : '?',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            ),
           ),
         ),
         const SizedBox(width: 10),
@@ -629,21 +616,19 @@ class _CommentTile extends StatelessWidget {
                   Expanded(
                     child: Text(
                       displayName,
-                      style: Theme.of(context)
-                          .textTheme
-                          .labelMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   Text(
                     _formatDate(comment.createdAt),
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.5),
-                        ),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
                   ),
                   // Sil butonu
                   IconButton(
@@ -662,7 +647,9 @@ class _CommentTile extends StatelessWidget {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(vm.errorMessage ?? 'Silme başarısız'),
-                            backgroundColor: Theme.of(context).colorScheme.error,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.error,
                           ),
                         );
                       }

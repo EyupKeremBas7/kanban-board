@@ -103,9 +103,7 @@ class AccountScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Hesap'),
-      ),
+      appBar: AppBar(title: const Text('Hesap')),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -129,17 +127,12 @@ class AccountScreen extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 32,
-                        backgroundColor:
-                            Theme.of(context).colorScheme.primary,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         child: Text(
                           initials.isNotEmpty ? initials : '?',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge
+                          style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimary,
+                                color: Theme.of(context).colorScheme.onPrimary,
                               ),
                         ),
                       ),
@@ -150,17 +143,13 @@ class AccountScreen extends StatelessWidget {
                           children: [
                             Text(
                               displayName,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
+                              style: Theme.of(context).textTheme.titleMedium
                                   ?.copyWith(fontWeight: FontWeight.bold),
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
                               email,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
+                              style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(
                                     color: Theme.of(context)
                                         .colorScheme
@@ -180,55 +169,56 @@ class AccountScreen extends StatelessWidget {
             const Divider(height: 1),
 
             // Ayarlar bölümleri
-            ...settingsSections.map((section) => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Bölüm başlığı
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                      child: Text(
-                        section.title,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withValues(alpha: 0.6),
-                              fontWeight: FontWeight.w600,
-                            ),
+            ...settingsSections.map(
+              (section) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Bölüm başlığı
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                    child: Text(
+                      section.title,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.6),
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    // Bölüm öğeleri — ListView.separated (settings pattern)
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: section.items.length,
-                      separatorBuilder: (context, index) =>
-                          const Divider(height: 1, indent: 56),
-                      itemBuilder: (context, index) {
-                        final item = section.items[index];
-                        return ListTile(
-                          leading: Icon(item.icon),
-                          title: Text(
-                            item.title,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          subtitle: item.subtitle != null
-                              ? Text(
-                                  item.subtitle!,
-                                  overflow: TextOverflow.ellipsis,
-                                )
-                              : null,
-                          trailing: const Icon(Icons.chevron_right, size: 20),
-                          onTap: () {
-                            if (item.onTap != null) {
-                              item.onTap!(context);
-                            }
-                          },
-                        );
-                      },
-                    ),
-                  ],
-                )),
+                  ),
+                  // Bölüm öğeleri — ListView.separated (settings pattern)
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: section.items.length,
+                    separatorBuilder: (context, index) =>
+                        const Divider(height: 1, indent: 56),
+                    itemBuilder: (context, index) {
+                      final item = section.items[index];
+                      return ListTile(
+                        leading: Icon(item.icon),
+                        title: Text(
+                          item.title,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: item.subtitle != null
+                            ? Text(
+                                item.subtitle!,
+                                overflow: TextOverflow.ellipsis,
+                              )
+                            : null,
+                        trailing: const Icon(Icons.chevron_right, size: 20),
+                        onTap: () {
+                          if (item.onTap != null) {
+                            item.onTap!(context);
+                          }
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
 
             const SizedBox(height: 16),
 
@@ -258,7 +248,8 @@ class AccountScreen extends StatelessWidget {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Theme.of(context).colorScheme.error,
                     side: BorderSide(
-                        color: Theme.of(context).colorScheme.error),
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                 ),
@@ -314,18 +305,16 @@ class AccountScreen extends StatelessWidget {
               if (success) {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const SplashScreen(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const SplashScreen()),
                   (route) => false,
                 );
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                        authVM.errorMessage ?? 'Hesap silme başarısız'),
-                    backgroundColor:
-                        Theme.of(context).colorScheme.error,
+                      authVM.errorMessage ?? 'Hesap silme başarısız',
+                    ),
+                    backgroundColor: Theme.of(context).colorScheme.error,
                   ),
                 );
               }

@@ -57,9 +57,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Şifre Değiştir'),
-      ),
+      appBar: AppBar(title: const Text('Şifre Değiştir')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(
@@ -140,9 +138,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscureConfirm
-                          ? Icons.visibility_off
-                          : Icons.visibility,
+                      _obscureConfirm ? Icons.visibility_off : Icons.visibility,
                     ),
                     onPressed: () {
                       setState(() => _obscureConfirm = !_obscureConfirm);
@@ -165,8 +161,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               Consumer<AuthViewModel>(
                 builder: (context, authVM, child) {
                   return FilledButton(
-                    onPressed:
-                        authVM.isLoading ? null : _handleChangePassword,
+                    onPressed: authVM.isLoading ? null : _handleChangePassword,
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),

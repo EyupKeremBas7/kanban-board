@@ -9,8 +9,7 @@ import 'package:mobile/services/api_service.dart';
 class BoardsViewModel extends ChangeNotifier {
   final ApiService _apiService;
 
-  BoardsViewModel({required ApiService apiService})
-      : _apiService = apiService;
+  BoardsViewModel({required ApiService apiService}) : _apiService = apiService;
 
   // State
   List<Board> _boards = [];
@@ -81,10 +80,7 @@ class BoardsViewModel extends ChangeNotifier {
     try {
       final response = await _apiService.post(
         '/boards/',
-        body: {
-          'name': name,
-          'workspace_id': workspaceId,
-        },
+        body: {'name': name, 'workspace_id': workspaceId},
       );
 
       if (response.statusCode == 200) {
@@ -92,7 +88,7 @@ class BoardsViewModel extends ChangeNotifier {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         final newBoard = Board.fromJson(data);
         _boards.insert(0, newBoard); // Başa ekle
-        
+
         _isLoading = false;
         notifyListeners();
         return true;
@@ -128,10 +124,7 @@ class BoardsViewModel extends ChangeNotifier {
       if (visibility != null) body['visibility'] = visibility;
       if (backgroundImage != null) body['background_image'] = backgroundImage;
 
-      final response = await _apiService.put(
-        '/boards/$boardId',
-        body: body,
-      );
+      final response = await _apiService.put('/boards/$boardId', body: body);
 
       if (response.statusCode == 200) {
         // Obje döndü, yerelde de güncelleyelim
@@ -142,7 +135,7 @@ class BoardsViewModel extends ChangeNotifier {
         if (index != -1) {
           _boards[index] = updatedBoard;
         }
-        
+
         _isLoading = false;
         notifyListeners();
         return true;
@@ -173,7 +166,7 @@ class BoardsViewModel extends ChangeNotifier {
       if (response.statusCode == 200) {
         // Listeden çıkar
         _boards.removeWhere((b) => b.id == boardId);
-        
+
         _isLoading = false;
         notifyListeners();
         return true;
