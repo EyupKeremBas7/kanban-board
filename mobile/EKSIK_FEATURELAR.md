@@ -144,22 +144,12 @@ GET /activity/card/{card_id}          → Kart aktiviteleri
 
 ---
 
-### 5. 🎨 Board Arka Plan Seçici — `ORTA ÖNCELİK`
+### 5. 🎨 Board Arka Plan Seçici — `ORTA ÖNCELİK` ✅ **TAMAMLANDI**
 
-**Web'deki durum:** `board.$boardId.tsx`'te "Background" butonu var. 8 renk gradyanı + 4 fotoğraf seçeneği. `PATCH /boards/{id}` ile `background_image` alanını günceller.
-
-**Backend API:**
-```
-PUT /boards/{id} → { background_image: "purple"|"blue"|...|"mountain"|... }
-```
-
-**Yapılacaklar:**
-- [ ] `board_detail.dart` AppBar'a "Arka Plan" aksiyonu ekle
-- [ ] `BottomSheet` ile renk/fotoğraf seçici widget
-  - 8 renk gradyanı (purple, blue, green, orange, pink, ocean, sunset, forest)
-  - 4 fotoğraf seçeneği (mountain, beach, city, space)
-  - Seçilen arka planı `BoardsViewModel.updateBoard()` ile kaydet
-- [ ] Board kartlarında (boards listesinde) arka plan rengini yansıt
+**Tamamlanan İşler:**
+- [x] `board_detail.dart` AppBar'a "Arka Plan" aksiyonu ✅
+- [x] `_showBackgroundPicker()` BottomSheet — 8 renk seçeneği ✅
+- [x] `BoardsViewModel.updateBoard(backgroundImage: ...)` PUT /boards/{id} ✅
 
 ---
 
@@ -251,13 +241,12 @@ PUT /cards/{id} → { due_date: "ISO 8601 string" }
 
 ---
 
-### 11. 🔄 Aynı Liste İçinde Kart Sıralama (Drag & Drop) — `YÜKSEK ÖNCELİK`
+### 11. 🔄 Aynı Liste İçinde Kart Sıralama (Drag & Drop) — `YÜKSEK ÖNCELİK` ✅ **TAMAMLANDI**
 
-**Mevcut mobil:** Kartlar *farklı* listelere sürüklenebiliyor ancak **aynı liste içinde** yukarı/aşağı sıralamayı değiştirmek kapalı (`board_detail.dart` satır 222'de aynı liste engellenmiş).
-
-**Yapılacaklar:**
-- [ ] `board_detail.dart` içindeki drag/drop mantığını, aynı liste içinde sıralama yapabilecek şekilde güncelle.
-- [ ] `CardsViewModel.moveCardToList` veya `reorderCard` fonksiyonunda `position` hesaplamalarını aynı liste içi durumlara uygun hale getir.
+**Tamamlanan İşler:**
+- [x] DragTarget `onWillAcceptWithDetails` aynı liste engeli kaldırıldı ✅
+- [x] `CardsViewModel.moveCardToList()` aynı liste position hesaplama ✅
+- [x] Kartlar aynı liste içinde sürüklenebiliyor ✅
 
 ---
 

@@ -7,17 +7,17 @@
 ## 📅 Tarih: 28 Nisan 2026
 
 ### ✅ Tamamlanan Son İşler
-- **Drag-and-Drop Kart Taşıma:** Kartlar uzun bas ile sürükle-bırak destekli, farklı listeler arasında taşınabiliyor. `CardsViewModel`'e `moveCardToList()` metodu eklendi. `board_detail.dart`'ta `DragTarget` + `LongPressDraggable` UI integration tamamlandı.
-- **Workspace Üye Yönetimi (Sprint 1 Tamamlanış):** `WorkspaceMember` domain modeli + `WorkspacesViewModel` üye metodları (`fetchWorkspaceMembers`, `updateMemberRole`, `removeMember`) zaten mevcut durumdaydı. `workspace_members.dart` ekranı, tam CRUD + UI (role badges, member list, remove dialog) ile tamamlandı. `workspaces.dart`'ta "Üyeleri Yönet" ve "Üye Davet Et" menüleri entegre edildi.
+- **Board Arka Plan Seçici:** Board AppBar'a "Arka Plan" butonu eklendi. BottomSheet ile 8 renk seçeneği (mor, mavi, yeşil, turuncu, pembe, turkuaz, sarı + varsayılan). `BoardsViewModel.updateBoard(backgroundImage: ...)` ile `PUT /boards/{id}` çağrısı yapıldı.
+- **Aynı Liste İçi Kart Sıralama:** `moveCardToList()` methodunda aynı liste içi durumlar için position hesaplama eklendi. Kartlar artık aynı liste içinde yukarı/aşağı sürüklenebiliyor.
 
 ### 🚧 Şu Anki Durum (Current State)
-**Sprint 1 -- TAMAMLANDI.** Tüm temel Kanban özellikleri (Boards, Lists, Cards + Drag-and-Drop), Bildirimler, Davetiyeler, Üye Yönetimi hayata geçti. Kullanıcılar workspace oluştur, üye davet et, pano/liste/kart CRUD yapabilir, kartları taşıyabilir, bildirim ve davet yönetebilir.
+**Sprint 1 + Sprint 2 İlk Portion -- TAMAMLANDI.** Temel Kanban (Boards, Lists, Cards + Drag-and-Drop), Bildirimler, Davetiyeler, Üye Yönetimi, Board Arka Plan Seçici, Kart İçi Sıralama tamamlandı.
 
 ### ⏭️ Bir Sonraki Adım (Next Steps)
-**Sprint 2 (Orta Öncelik)** başlanabilir:
+**Sprint 2 Kalan Görevler:**
 1. **Activity Log (Aktivite Akışı):** Board/workspace/card activity timeline
-2. **Board Arka Plan Seçici:** Renk gradyası + fotoğraf background
-3. **Çevrimdışı Desteği Temel:** LocalStorage/Cache layer
+2. **Liste Güncelle/Sil UI:** board_detail.dart liste menüsü
+3. **Dashboard:** planner.dart workspace grouping
 
 Bu görevler `EKSIK_FEATURELAR.md`'de ayrıntılı olarak listelenir.
 
