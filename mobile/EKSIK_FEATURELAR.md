@@ -56,13 +56,13 @@ DELETE /notifications/{id}        → Bildirim sil
 
 **Yapılacaklar:**
 - [x] `AppNotification` domain modeli (`lib/domain/models/notification.dart` içinde zaten mevcut)
-- [ ] `NotificationsViewModel` oluştur (tüm CRUD)
-- [ ] `inbox.dart` ekranını gerçek veriyle doldur
+- [x] `NotificationsViewModel` oluştur (tüm CRUD)
+- [x] `inbox.dart` ekranını gerçek veriyle doldur
   - Okunmamış badge sayısı (bottom nav'a ekle)
   - Liste: avatar + mesaj + zaman + okundu/okunmadı ikonu
   - Swipe to delete
   - "Tümünü okundu işaretle" butonu
-- [ ] `main.dart`'a `NotificationsViewModel` Provider kaydı
+- [x] `main.dart`'a `NotificationsViewModel` Provider kaydı
 
 ---
 

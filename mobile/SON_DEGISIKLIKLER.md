@@ -7,21 +7,21 @@
 ## 📅 Tarih: 28 Nisan 2026
 
 ### ✅ Tamamlanan Son İşler
+- **Bildirimler (Notifications) Entegrasyonu:** `NotificationsViewModel` oluşturuldu ve tüm CRUD operasyonları (getirme, okundu işaretleme, silme) API'ye bağlandı. `inbox.dart` ekranı güncellenerek pull-to-refresh, swipe-to-delete ve okunmamış bildirim mantığı eklendi. `main.dart` dosyasına Provider olarak eklendi.
 - **Card Detail Entegrasyonu:** `card_detail.dart` ekranı gerçek verilere bağlandı. Checklist işlemleri (ekleme, silme, işaretleme) ve Yorum işlemleri (ekleme, silme) tamamen çalışır hale getirildi. 
 - **Workspace Yönetimi:** `workspaces.dart` ekranı oluşturuldu. Kullanıcıların çalışma alanlarını listelemesi, yeni çalışma alanı oluşturması, mevcutları düzenlemesi ve silmesi (CRUD) işlemleri `WorkspacesViewModel` üzerinden entegre edildi.
-- **Navigasyon ve Uyumluluk:** `account.dart` içerisindeki "Çalışma Alanları" ayar öğesi, yeni `WorkspacesScreen` ekranına bağlandı. Tüm yeni kodlar `FLUTTER_KURALLARI.md`'ye uygun hale getirildi ve `flutter analyze` uyarıları (sıfır hata) giderildi.
-- **Analiz ve Planlama:** Kanban board'un web (frontend/backend) kısımları analiz edilerek, mobil uygulamada eksik olan özellikler tespit edildi ve `EKSIK_FEATURELAR.md` dosyası oluşturuldu.
 
 ### 🚧 Şu Anki Durum (Current State)
-Uygulama temel Kanban özelliklerine sahip durumda. Ancak bildirimler (notifications), davetiyeler (invitations) ve çalışma alanlarındaki üye yönetimi (workspace members) gibi kritik ortak çalışma özellikleri mobilde henüz bulunmuyor.
+Temel Kanban özellikleri ve Bildirimler tamamlandı. Ancak davetiyeler (invitations) ve çalışma alanlarındaki üye yönetimi (workspace members) gibi kritik ortak çalışma özellikleri mobilde henüz bulunmuyor.
 
 ### ⏭️ Bir Sonraki Adım (Next Steps)
-`EKSIK_FEATURELAR.md` dosyasında belirlenen **Sprint 1 (Yüksek Öncelik)** görevlerine başlanacak.
-Gelecek ajanın yapması gereken ilk iş:
-1. `NotificationModel` zaten mevcut (`AppNotification`).
-2. `NotificationsViewModel` oluşturulacak ve tüm CRUD işlemleri bağlanacak.
-3. `inbox.dart` (şu an stub/placeholder) ekranı, gerçek bildirimleri listeleyecek şekilde (okundu/okunmadı, swipe to delete vb.) doldurulacak.
-4. `main.dart` içerisine `NotificationsViewModel` provider olarak kaydedilecek.
+`EKSIK_FEATURELAR.md` dosyasında belirlenen **Sprint 1 (Yüksek Öncelik)** görevlerine devam edilecek.
+Gelecek ajanın yapması gereken ilk iş (Davetiyeler - Invitations):
+1. `Invitation` domain modelini oluştur ve `enums.dart` içine `InvitationStatus` enum'ını ekle.
+2. `InvitationsViewModel` oluştur ve API fonksiyonlarını yaz.
+3. `inbox.dart` ekranına sekme (tab) sistemi kur ("Bildirimler" | "Davetler").
+4. `workspaces.dart` ekranına "Üye Davet Et" özelliği (e-posta ile) ekle.
+5. `main.dart` içerisine `InvitationsViewModel` provider olarak kaydet.
 
 ---
 
