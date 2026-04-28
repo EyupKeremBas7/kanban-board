@@ -27,9 +27,9 @@ class CardsViewModel extends ChangeNotifier {
     required String listId,
     String? excludeCardId,
   }) {
-    final listCards = getCardsForList(
-      listId,
-    ).where((card) => card.id != excludeCardId).toList();
+    final listCards = getCardsForList(listId)
+        .where((card) => card.id != excludeCardId)
+        .toList();
 
     if (listCards.isEmpty) {
       return 65535.0;
@@ -48,7 +48,7 @@ class CardsViewModel extends ChangeNotifier {
     try {
       // Şimdilik tüm kartları çekip, UI katmanında filtreleyeceğiz
       final response = await _apiService.get('/cards/?skip=0&limit=1000');
-
+      
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         final items = data['data'] as List;
@@ -93,7 +93,7 @@ class CardsViewModel extends ChangeNotifier {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         final newCard = BoardCard.fromJson(data);
         _cards.add(newCard);
-
+        
         _isLoading = false;
         notifyListeners();
         return true;

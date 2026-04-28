@@ -43,9 +43,9 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
         title: Consumer<BoardsViewModel>(
           builder: (context, boardsVM, child) {
             final board = boardsVM.boards.cast<dynamic>().firstWhere(
-              (b) => b.id == widget.boardId,
-              orElse: () => null,
-            );
+                  (b) => b.id == widget.boardId,
+                  orElse: () => null,
+                );
             return Text(
               board?.name ?? widget.boardName,
               overflow: TextOverflow.ellipsis,
@@ -167,7 +167,9 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                             Expanded(
                               child: Text(
                                 list.name,
-                                style: Theme.of(context).textTheme.titleMedium
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
                                     ?.copyWith(fontWeight: FontWeight.bold),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -196,16 +198,9 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                                   value: 'delete',
                                   child: Row(
                                     children: [
-                                      Icon(
-                                        Icons.delete,
-                                        color: Colors.red,
-                                        size: 20,
-                                      ),
+                                      Icon(Icons.delete, color: Colors.red, size: 20),
                                       SizedBox(width: 8),
-                                      Text(
-                                        'Listeyi Sil',
-                                        style: TextStyle(color: Colors.red),
-                                      ),
+                                      Text('Listeyi Sil', style: TextStyle(color: Colors.red)),
                                     ],
                                   ),
                                 ),
@@ -238,8 +233,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                           },
                           builder: (context, candidateData, rejectedData) {
                             final isActiveTarget =
-                                _activeDropListId == list.id ||
-                                candidateData.isNotEmpty;
+                                _activeDropListId == list.id || candidateData.isNotEmpty;
 
                             return AnimatedContainer(
                               duration: const Duration(milliseconds: 120),
@@ -247,9 +241,9 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                               decoration: BoxDecoration(
                                 color: isActiveTarget
                                     ? Theme.of(context)
-                                          .colorScheme
-                                          .surfaceContainerHighest
-                                          .withValues(alpha: 0.5)
+                                        .colorScheme
+                                        .surfaceContainerHighest
+                                    .withValues(alpha: 0.5)
                                     : Colors.transparent,
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
@@ -354,9 +348,9 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
   void _showEditBoardDialog(BuildContext context) {
     final boardsVM = context.read<BoardsViewModel>();
     final board = boardsVM.boards.cast<dynamic>().firstWhere(
-      (b) => b.id == widget.boardId,
-      orElse: () => null,
-    );
+          (b) => b.id == widget.boardId,
+          orElse: () => null,
+        );
 
     if (board == null) return;
 
@@ -408,19 +402,13 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(vm.errorMessage ?? 'Hata'),
-                                backgroundColor: Theme.of(
-                                  context,
-                                ).colorScheme.error,
+                                backgroundColor: Theme.of(context).colorScheme.error,
                               ),
                             );
                           }
                         },
                   child: vm.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Text('Kaydet'),
                 );
               },
@@ -437,9 +425,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Panoyu Sil'),
-          content: const Text(
-            'Bu panoyu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
-          ),
+          content: const Text('Bu panoyu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
@@ -463,22 +449,14 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(vm.errorMessage ?? 'Hata'),
-                                backgroundColor: Theme.of(
-                                  context,
-                                ).colorScheme.error,
+                                backgroundColor: Theme.of(context).colorScheme.error,
                               ),
                             );
                           }
                         },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                  ),
+                  style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
                   child: vm.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Text('Sil'),
                 );
               },
@@ -537,19 +515,13 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(vm.errorMessage ?? 'Hata'),
-                                backgroundColor: Theme.of(
-                                  context,
-                                ).colorScheme.error,
+                                backgroundColor: Theme.of(context).colorScheme.error,
                               ),
                             );
                           }
                         },
                   child: vm.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Text('Ekle'),
                 );
               },
@@ -606,19 +578,13 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(vm.errorMessage ?? 'Hata'),
-                                backgroundColor: Theme.of(
-                                  context,
-                                ).colorScheme.error,
+                                backgroundColor: Theme.of(context).colorScheme.error,
                               ),
                             );
                           }
                         },
                   child: vm.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Text('Kaydet'),
                 );
               },
@@ -635,9 +601,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Listeyi Sil'),
-          content: Text(
-            '${list.name} isimli listeyi silmek istediğinize emin misiniz?',
-          ),
+          content: Text('${list.name} isimli listeyi silmek istediğinize emin misiniz?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
@@ -657,22 +621,14 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(vm.errorMessage ?? 'Hata'),
-                                backgroundColor: Theme.of(
-                                  context,
-                                ).colorScheme.error,
+                                backgroundColor: Theme.of(context).colorScheme.error,
                               ),
                             );
                           }
                         },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                  ),
+                  style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
                   child: vm.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Text('Sil'),
                 );
               },
@@ -731,19 +687,13 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(vm.errorMessage ?? 'Hata'),
-                                backgroundColor: Theme.of(
-                                  context,
-                                ).colorScheme.error,
+                                backgroundColor: Theme.of(context).colorScheme.error,
                               ),
                             );
                           }
                         },
                   child: vm.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Text('Ekle'),
                 );
               },
@@ -776,9 +726,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                     border: OutlineInputBorder(),
                   ),
                   validator: (val) {
-                    if (val == null || val.trim().isEmpty) {
-                      return 'Başlık gerekli';
-                    }
+                    if (val == null || val.trim().isEmpty) return 'Başlık gerekli';
                     return null;
                   },
                 ),
@@ -818,19 +766,13 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(vm.errorMessage ?? 'Hata'),
-                                backgroundColor: Theme.of(
-                                  context,
-                                ).colorScheme.error,
+                                backgroundColor: Theme.of(context).colorScheme.error,
                               ),
                             );
                           }
                         },
                   child: vm.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Text('Kaydet'),
                 );
               },
@@ -847,9 +789,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Kartı Sil'),
-          content: Text(
-            '"${card.title}" kartını silmek istediğinize emin misiniz?',
-          ),
+          content: Text('"${card.title}" kartını silmek istediğinize emin misiniz?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
@@ -869,22 +809,14 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(vm.errorMessage ?? 'Hata'),
-                                backgroundColor: Theme.of(
-                                  context,
-                                ).colorScheme.error,
+                                backgroundColor: Theme.of(context).colorScheme.error,
                               ),
                             );
                           }
                         },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                  ),
+                  style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
                   child: vm.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Text('Sil'),
                 );
               },
