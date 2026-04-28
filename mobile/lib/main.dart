@@ -10,6 +10,7 @@ import 'package:mobile/viewmodels/comments_viewmodel.dart';
 import 'package:mobile/viewmodels/checklists_viewmodel.dart';
 import 'package:mobile/viewmodels/workspaces_viewmodel.dart';
 import 'package:mobile/viewmodels/notifications_viewmodel.dart';
+import 'package:mobile/viewmodels/invitations_viewmodel.dart';
 import 'package:mobile/screens/splash.dart';
 
 /// Kanban Board — Mobil Uygulama
@@ -53,6 +54,9 @@ class KanbanBoardApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => NotificationsViewModel(apiService: apiService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => InvitationsViewModel(apiService: apiService),
         ),
       ],
       child: MaterialApp(

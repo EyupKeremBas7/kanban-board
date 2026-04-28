@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/viewmodels/boards_viewmodel.dart';
+import 'package:mobile/viewmodels/workspaces_viewmodel.dart';
 import 'package:mobile/screens/board_detail.dart';
 
 /// Panolar listesi ekranı — referans: panolar.jpeg
@@ -165,11 +166,11 @@ class _BoardsScreenState extends State<BoardsScreen> {
     final formKey = GlobalKey<FormState>();
     String? selectedWorkspaceId;
 
-    final boardsVM = context.read<BoardsViewModel>();
+    final workspacesVM = context.read<WorkspacesViewModel>();
 
     // Dialog açılırken workspaces yoksa çek
-    if (boardsVM.workspaces.isEmpty) {
-      boardsVM.fetchWorkspaces();
+    if (workspacesVM.workspaces.isEmpty) {
+      workspacesVM.fetchWorkspaces();
     }
 
     showDialog(
@@ -199,12 +200,24 @@ class _BoardsScreenState extends State<BoardsScreen> {
                     ),
                     const SizedBox(height: 16),
                     // Workspace seçimi
-                    Consumer<BoardsViewModel>(
+                    Consumer<WorkspacesViewModel>(
                       builder: (context, vm, child) {
-                        if (vm.workspaces.isEmpty) {
+                        if (vm.isLoading) {
                           return const Padding(
                             padding: EdgeInsets.all(8.0),
-                            child: CircularProgressIndicator(),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+
+                        if (vm.workspaces.isEmpty) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Text(
+                              'Pano oluşturmak için önce bir Çalışma Alanı oluşturmalısınız.',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
                           );
                         }
 

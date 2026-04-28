@@ -4,6 +4,8 @@ enum Visibility { private, workspace, public }
 
 enum MemberRole { admin, member, observer }
 
+enum InvitationStatus { pending, accepted, rejected, cancelled }
+
 enum NotificationType {
   workspaceInvitation,
   invitationAccepted,

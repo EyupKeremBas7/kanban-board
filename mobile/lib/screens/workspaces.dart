@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/viewmodels/workspaces_viewmodel.dart';
+import 'package:mobile/viewmodels/invitations_viewmodel.dart';
 import 'package:mobile/domain/models/workspace.dart';
 
 /// Workspace yönetim ekranı
@@ -265,9 +266,21 @@ class _WorkspaceTile extends StatelessWidget {
                 _showEditDialog(context, workspace, vm);
               case _WorkspaceAction.delete:
                 _showDeleteConfirm(context, workspace, vm);
+              case _WorkspaceAction.invite:
+                _showInviteDialog(context, workspace);
             }
           },
           itemBuilder: (_) => const [
+            PopupMenuItem(
+              value: _WorkspaceAction.invite,
+              child: Row(
+                children: [
+                  Icon(Icons.person_add_alt_1_outlined, size: 18),
+                  SizedBox(width: 8),
+                  Text('Üye Davet Et'),
+                ],
+              ),
+            ),
             PopupMenuItem(
               value: _WorkspaceAction.edit,
               child: Row(
@@ -420,7 +433,132 @@ class _WorkspaceTile extends StatelessWidget {
       ),
     );
   }
+
+  // ── Invite Dialog ─────────────────────────────────────────────────────────
+
+  void _showInviteDialog(BuildContext context, Workspace workspace) {
+    final emailCtrl = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    String selectedRole = 'member'; // Default role
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Üye Davet Et'),
+              content: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${workspace.name} alanına yeni bir üye davet edin.',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: emailCtrl,
+                      autofocus: true,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(
+                        labelText: 'E-posta Adresi',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.email_outlined),
+                      ),
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty) {
+                          return 'E-posta gerekli';
+                        }
+                        if (!v.contains('@')) {
+                          return 'Geçerli bir e-posta girin';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedRole,
+                      decoration: const InputDecoration(
+                        labelText: 'Rol',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'admin',
+                          child: Text('Yönetici (Admin)'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'member',
+                          child: Text('Üye (Member)'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'observer',
+                          child: Text('Gözlemci (Observer)'),
+                        ),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) setState(() => selectedRole = val);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('İptal'),
+                ),
+                Consumer<InvitationsViewModel>(
+                  builder: (context, vm, child) => FilledButton(
+                    onPressed: vm.isLoading
+                        ? null
+                        : () async {
+                            if (!formKey.currentState!.validate()) return;
+                            final success = await vm.sendInvitation(
+                              workspaceId: workspace.id,
+                              inviteeEmail: emailCtrl.text.trim(),
+                              role: selectedRole,
+                            );
+                            if (!context.mounted) return;
+                            Navigator.pop(dialogContext);
+                            if (!success) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    vm.errorMessage ?? 'Davet gönderilemedi',
+                                  ),
+                                  backgroundColor: Theme.of(
+                                    context,
+                                  ).colorScheme.error,
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Davet başarıyla gönderildi'),
+                                ),
+                              );
+                            }
+                          },
+                    child: vm.isLoading
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Gönder'),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 }
 
 /// Kural 20: Magic string/int yerine enum kullan
-enum _WorkspaceAction { edit, delete }
+enum _WorkspaceAction { edit, delete, invite }
