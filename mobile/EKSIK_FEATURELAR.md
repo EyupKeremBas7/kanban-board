@@ -80,14 +80,14 @@ DELETE /invitations/{id}        → Daveti iptal et
 ```
 
 **Yapılacaklar:**
-- [ ] `Invitation` domain modeli ve `InvitationStatus` enum'ı (`enums.dart`'a eklenecek)
-- [ ] `InvitationsViewModel` oluştur
-- [ ] `inbox.dart` ekranına tab sistemi: "Bildirimler" | "Davetler"
+- [x] `Invitation` domain modeli ve `InvitationStatus` enum'ı (`enums.dart`'a eklenecek)
+- [x] `InvitationsViewModel` oluştur
+- [x] `inbox.dart` ekranına tab sistemi: "Bildirimler" | "Davetler"
   - Gelen davetler: workspace adı, davet eden kişi, rol, kabul/reddet butonları
   - Gönderilen davetler: bekleyen davetleri iptal etme
-- [ ] `workspaces.dart` ekranına davet gönderme özelliği
+- [x] `workspaces.dart` ekranına davet gönderme özelliği
   - "Üye Davet Et" butonu → e-posta gir + rol seç dialog
-- [ ] `main.dart`'a `InvitationsViewModel` Provider kaydı
+- [x] `main.dart`'a `InvitationsViewModel` Provider kaydı
 
 ---
 

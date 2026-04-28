@@ -7,21 +7,19 @@
 ## 📅 Tarih: 28 Nisan 2026
 
 ### ✅ Tamamlanan Son İşler
-- **Bildirimler (Notifications) Entegrasyonu:** `NotificationsViewModel` oluşturuldu ve tüm CRUD operasyonları (getirme, okundu işaretleme, silme) API'ye bağlandı. `inbox.dart` ekranı güncellenerek pull-to-refresh, swipe-to-delete ve okunmamış bildirim mantığı eklendi. `main.dart` dosyasına Provider olarak eklendi.
-- **Card Detail Entegrasyonu:** `card_detail.dart` ekranı gerçek verilere bağlandı. Checklist işlemleri (ekleme, silme, işaretleme) ve Yorum işlemleri (ekleme, silme) tamamen çalışır hale getirildi. 
-- **Workspace Yönetimi:** `workspaces.dart` ekranı oluşturuldu. Kullanıcıların çalışma alanlarını listelemesi, yeni çalışma alanı oluşturması, mevcutları düzenlemesi ve silmesi (CRUD) işlemleri `WorkspacesViewModel` üzerinden entegre edildi.
+- **Davetiyeler (Invitations) Entegrasyonu:** `Invitation` modeli ve `InvitationsViewModel` oluşturuldu. `inbox.dart` ekranı sekmeli yapıya çevrilerek "Davetler" kısmı eklendi (kabul/red/iptal işlemleriyle birlikte). `workspaces.dart` ekranına "Üye Davet Et" özelliği eklendi.
+- **Hata Çözümü (Bugfix):** Yeni kullanıcıların (hiç çalışma alanı olmayanların) pano oluştururken karşılaştığı sonsuz yükleme ekranı hatası çözüldü. Artık kullanıcı, "Pano oluşturmak için önce bir Çalışma Alanı oluşturmalısınız" şeklinde yönlendiriliyor.
+- **Bildirimler (Notifications) Entegrasyonu:** `NotificationsViewModel` oluşturuldu ve tüm CRUD operasyonları (getirme, okundu işaretleme, silme) API'ye bağlandı. `inbox.dart` ekranına eklendi.
 
 ### 🚧 Şu Anki Durum (Current State)
-Temel Kanban özellikleri ve Bildirimler tamamlandı. Ancak davetiyeler (invitations) ve çalışma alanlarındaki üye yönetimi (workspace members) gibi kritik ortak çalışma özellikleri mobilde henüz bulunmuyor.
+Temel Kanban özellikleri, Bildirimler ve Davetiyeler (Invitations) modülü tamamlandı. Sıradaki hedef, davet edilen üyelerin çalışma alanı içerisinde yönetilmesi (Workspace Member Management) sürecidir.
 
 ### ⏭️ Bir Sonraki Adım (Next Steps)
-`EKSIK_FEATURELAR.md` dosyasında belirlenen **Sprint 1 (Yüksek Öncelik)** görevlerine devam edilecek.
-Gelecek ajanın yapması gereken ilk iş (Davetiyeler - Invitations):
-1. `Invitation` domain modelini oluştur ve `enums.dart` içine `InvitationStatus` enum'ını ekle.
-2. `InvitationsViewModel` oluştur ve API fonksiyonlarını yaz.
-3. `inbox.dart` ekranına sekme (tab) sistemi kur ("Bildirimler" | "Davetler").
-4. `workspaces.dart` ekranına "Üye Davet Et" özelliği (e-posta ile) ekle.
-5. `main.dart` içerisine `InvitationsViewModel` provider olarak kaydet.
+`EKSIK_FEATURELAR.md` dosyasında belirlenen **Sprint 1 (Yüksek Öncelik)** son görevlerine devam edilecek.
+Gelecek ajanın yapması gereken ilk iş (Workspace Üye Yönetimi):
+1. `WorkspaceMember` domain modeli oluştur.
+2. `WorkspacesViewModel`'e üye metodlarını (fetchMembers, updateMemberRole, removeMember) ekle.
+3. `workspaces.dart` ekranına üye listesi panelini (avatar, isim, rol badge) ve yönetim arayüzünü (rol değiştirme, üyeyi çıkarma) entegre et.
 
 ---
 
