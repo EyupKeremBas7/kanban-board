@@ -14,9 +14,13 @@ import 'package:mobile/viewmodels/notifications_viewmodel.dart';
 import 'package:mobile/viewmodels/invitations_viewmodel.dart';
 import 'package:mobile/screens/splash.dart';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 /// Kanban Board — Mobil Uygulama
 /// Mimari: MVVM + Provider
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   runApp(const KanbanBoardApp());
 }
 
