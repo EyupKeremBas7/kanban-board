@@ -2,11 +2,12 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:mobile/services/auth_service.dart';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 /// Merkezi HTTP istemcisi — tüm API çağrıları buradan yapılır.
 /// JWT token otomatik olarak header'a eklenir.
 class ApiService {
-  // TODO: Gerçek backend URL'si ile değiştirilecek
-  static const String baseUrl = 'http://10.0.2.2:8000/api/v1';
+  String get baseUrl => dotenv.env['API_URL'] ?? 'http://10.0.2.2:8000/api/v1';
 
   final AuthService _authService;
 
@@ -93,5 +94,23 @@ class ApiService {
     final uri = Uri.parse('$baseUrl$endpoint');
     final headers = await _headers(withAuth: withAuth);
     return http.delete(uri, headers: headers);
+  }
+
+  /// IMAGE UPLOAD isteği
+  Future<http.Response> uploadImage(String endpoint, {required String filePath}) async {
+    final uri = Uri.parse('$baseUrl$endpoint');
+    final request = http.MultipartRequest('POST', uri);
+    
+    // Auth headers
+    final token = await _authService.getToken();
+    if (token != null) {
+      request.headers['Authorization'] = 'Bearer $token';
+    }
+
+    // Attach file
+    request.files.add(await http.MultipartFile.fromPath('file', filePath));
+
+    final streamedResponse = await request.send();
+    return await http.Response.fromStream(streamedResponse);
   }
 }
