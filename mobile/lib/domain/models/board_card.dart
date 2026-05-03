@@ -5,6 +5,8 @@ class BoardCard {
   final String? description;
   final double position;
   final String? assignedTo;
+  final DateTime? dueDate;
+  final String? coverImage;
   final int commentCount; // MOCK for now
   final String checklistProgress; // MOCK for now
 
@@ -15,6 +17,8 @@ class BoardCard {
     this.description,
     required this.position,
     this.assignedTo,
+    this.dueDate,
+    this.coverImage,
     this.commentCount = 0,
     this.checklistProgress = '0/0',
   });
@@ -27,6 +31,8 @@ class BoardCard {
       description: json['description'] as String?,
       position: (json['position'] as num?)?.toDouble() ?? 65535.0,
       assignedTo: json['assigned_to'] as String?,
+      dueDate: json['due_date'] != null ? DateTime.tryParse(json['due_date'] as String) : null,
+      coverImage: json['cover_image'] as String?,
       // API currently doesn't return counts, use 0
       commentCount: 0,
       checklistProgress: '0/0',
@@ -41,6 +47,8 @@ class BoardCard {
       'description': description,
       'position': position,
       'assigned_to': assignedTo,
+      'due_date': dueDate?.toIso8601String(),
+      'cover_image': coverImage,
     };
   }
 }
