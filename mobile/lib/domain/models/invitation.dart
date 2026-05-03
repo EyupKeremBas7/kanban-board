@@ -28,15 +28,17 @@ class Invitation {
     this.respondedAt,
   });
 
-  factory Invitation.fromJson(Map<String, dynamic> json) {
+factory Invitation.fromJson(Map<String, dynamic> json) {
     return Invitation(
-      id: json['id'] as String,
-      workspaceId: json['workspace_id'] as String,
-      workspaceName: json['workspace_name'] as String? ?? '',
-      inviterId: json['inviter_id'] as String,
+      // ?? '' koyarak null gelse bile boş string ile devam etmesini sağlıyoruz
+      id: json['id'] as String? ?? '', 
+      workspaceId: json['workspace_id'] as String? ?? '',
+      workspaceName: json['workspace_name'] as String? ?? 'Bilinmeyen Workspace',
+      inviterId: json['inviter_id'] as String? ?? '',
       inviterName: json['inviter_name'] as String? ?? 'Bilinmiyor',
-      inviteeId: json['invitee_id'] as String?,
-      inviteeEmail: json['invitee_email'] as String,
+      inviteeId: json['invitee_id'] as String?, // Zaten nullable tanımlamışsın, sorun yok
+      inviteeEmail: json['invitee_email'] as String? ?? '',
+
       role: MemberRole.values.firstWhere(
         (e) => e.name == (json['role'] as String? ?? 'member'),
         orElse: () => MemberRole.member,
@@ -45,7 +47,12 @@ class Invitation {
         (e) => e.name == (json['status'] as String? ?? 'pending'),
         orElse: () => InvitationStatus.pending,
       ),
-      createdAt: DateTime.parse(json['created_at'] as String),
+
+      // DateTime için null kontrolü önemli
+      createdAt: json['created_at'] != null 
+          ? DateTime.parse(json['created_at'] as String) 
+          : DateTime.now(), // Eğer null ise şu anki zamanı ata
+          
       respondedAt: json['responded_at'] != null
           ? DateTime.parse(json['responded_at'] as String)
           : null,
