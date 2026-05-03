@@ -4,6 +4,8 @@ import 'package:mobile/viewmodels/cards_viewmodel.dart';
 import 'package:mobile/viewmodels/checklists_viewmodel.dart';
 import 'package:mobile/viewmodels/comments_viewmodel.dart';
 import 'package:mobile/viewmodels/activity_viewmodel.dart';
+import 'package:mobile/viewmodels/workspaces_viewmodel.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mobile/domain/models/board_card.dart';
 import 'package:mobile/domain/models/checklist_item.dart';
 import 'package:mobile/domain/models/card_comment.dart';
@@ -14,11 +16,13 @@ import 'package:mobile/domain/models/activity_log.dart';
 class CardDetailScreen extends StatefulWidget {
   final String cardId;
   final String cardTitle;
+  final String workspaceId;
 
   const CardDetailScreen({
     super.key,
     required this.cardId,
     required this.cardTitle,
+    required this.workspaceId,
   });
 
   @override
@@ -38,6 +42,9 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
       context.read<ChecklistsViewModel>().fetchItems(widget.cardId);
       context.read<CommentsViewModel>().fetchComments(widget.cardId);
       context.read<ActivityViewModel>().fetchCardActivity(widget.cardId);
+      if (widget.workspaceId.isNotEmpty) {
+        context.read<WorkspacesViewModel>().fetchWorkspaceMembers(widget.workspaceId);
+      }
     });
   }
 
@@ -74,6 +81,10 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── Kapak Resmi ───────────────────────────────────────────────
+            _CoverImageSection(card: card, cardId: widget.cardId),
+            if (card?.coverImage != null) const SizedBox(height: 16),
+
             // ── Açıklama ─────────────────────────────────────────────────
             _buildSectionHeader(
               context,
@@ -92,6 +103,16 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
             ),
             const SizedBox(height: 8),
             _DueDateTile(card: card, cardId: widget.cardId),
+            const Divider(height: 32),
+
+            // ── Atanan Kişi ───────────────────────────────────────────────
+            _buildSectionHeader(
+              context,
+              icon: Icons.person_outline,
+              title: 'Atanan Kişi',
+            ),
+            const SizedBox(height: 8),
+            _AssigneeTile(card: card, cardId: widget.cardId),
             const Divider(height: 32),
 
             // ── Checklist ─────────────────────────────────────────────────
@@ -327,13 +348,250 @@ class _DueDateTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // BoardCard modeli dueDate içermiyor — KanbanCard modeli içeriyor.
-    // CardsViewModel BoardCard kullanıyor, dueDate şimdilik yok.
-    return Text(
-      'Belirlenmemiş',
-      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+    final hasDate = card?.dueDate != null;
+
+    return InkWell(
+      onTap: () async {
+        final initialDate = card?.dueDate ?? DateTime.now();
+        final selectedDate = await showDatePicker(
+          context: context,
+          initialDate: initialDate,
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2100),
+        );
+
+        if (selectedDate != null && context.mounted) {
+          final vm = context.read<CardsViewModel>();
+          final success = await vm.updateCard(
+            cardId: cardId,
+            dueDate: selectedDate,
+          );
+          if (!success && context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(vm.errorMessage ?? 'Tarih güncellenemedi')),
+            );
+          }
+        }
+      },
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.calendar_month,
+              size: 20,
+              color: hasDate ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              hasDate
+                  ? '${card!.dueDate!.day.toString().padLeft(2, '0')}.${card!.dueDate!.month.toString().padLeft(2, '0')}.${card!.dueDate!.year}'
+                  : 'Belirlenmemiş',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: hasDate ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                    fontWeight: hasDate ? FontWeight.bold : FontWeight.normal,
+                  ),
+            ),
+            if (hasDate) ...[
+              const SizedBox(width: 12),
+              InkWell(
+                onTap: () async {
+                  final vm = context.read<CardsViewModel>();
+                  await vm.updateCard(cardId: cardId, clearDueDate: true);
+                },
+                child: Icon(
+                  Icons.close,
+                  size: 16,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class _AssigneeTile extends StatelessWidget {
+  final BoardCard? card;
+  final String cardId;
+
+  const _AssigneeTile({required this.card, required this.cardId});
+
+  @override
+  Widget build(BuildContext context) {
+    final hasAssignee = card?.assignedTo != null;
+
+    return Consumer<WorkspacesViewModel>(
+      builder: (context, workspaceVM, child) {
+        String assigneeName = 'Atanmamış';
+        if (hasAssignee) {
+          final member = workspaceVM.currentMembers.where((m) => m.member.userId == card!.assignedTo).firstOrNull;
+          assigneeName = member?.fullName ?? member?.email ?? 'Kullanıcı Bulunamadı';
+        }
+
+        return InkWell(
+          onTap: () {
+            if (workspaceVM.isLoading) return;
+            _showAssigneePicker(context, workspaceVM);
+          },
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(
+                  radius: 12,
+                  backgroundColor: hasAssignee ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceContainerHighest,
+                  child: Icon(
+                    Icons.person,
+                    size: 16,
+                    color: hasAssignee ? Theme.of(context).colorScheme.onPrimaryContainer : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  assigneeName,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: hasAssignee ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                        fontWeight: hasAssignee ? FontWeight.bold : FontWeight.normal,
+                      ),
+                ),
+                if (hasAssignee) ...[
+                  const SizedBox(width: 12),
+                  InkWell(
+                    onTap: () async {
+                      final vm = context.read<CardsViewModel>();
+                      await vm.updateCard(cardId: cardId, clearAssignedTo: true);
+                    },
+                    child: Icon(
+                      Icons.close,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showAssigneePicker(BuildContext context, WorkspacesViewModel workspaceVM) {
+    showModalBottomSheet(
+      context: context,
+      builder: (bottomSheetContext) {
+        final members = workspaceVM.currentMembers;
+        if (members.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text('Çalışma alanında üye bulunamadı.'),
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(8),
+          itemCount: members.length,
+          itemBuilder: (context, index) {
+            final member = members[index];
+            final name = member.fullName ?? member.email ?? 'Bilinmeyen Kullanıcı';
+            return ListTile(
+              leading: const CircleAvatar(child: Icon(Icons.person)),
+              title: Text(name),
+              onTap: () async {
+                Navigator.pop(bottomSheetContext);
+                final vm = context.read<CardsViewModel>();
+                final success = await vm.updateCard(
+                  cardId: cardId,
+                  assignedTo: member.member.userId,
+                );
+                if (!success && context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(vm.errorMessage ?? 'Kişi atanamadı')),
+                  );
+                }
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _CoverImageSection extends StatelessWidget {
+  final BoardCard? card;
+  final String cardId;
+
+  const _CoverImageSection({required this.card, required this.cardId});
+
+  @override
+  Widget build(BuildContext context) {
+    final hasCover = card?.coverImage != null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (hasCover)
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  card!.coverImage!,
+                  width: double.infinity,
+                  height: 160,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    width: double.infinity,
+                    height: 160,
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    child: const Icon(Icons.broken_image, size: 48),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: IconButton(
+                  onPressed: () async {
+                    final vm = context.read<CardsViewModel>();
+                    await vm.updateCard(cardId: cardId, clearCoverImage: true);
+                  },
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  style: IconButton.styleFrom(backgroundColor: Colors.black54),
+                ),
+              ),
+            ],
+          ),
+        if (!hasCover)
+          TextButton.icon(
+            onPressed: () async {
+              final picker = ImagePicker();
+              final xfile = await picker.pickImage(source: ImageSource.gallery);
+              if (xfile != null && context.mounted) {
+                final vm = context.read<CardsViewModel>();
+                final success = await vm.uploadCoverImage(
+                  cardId: cardId,
+                  filePath: xfile.path,
+                );
+                if (!success && context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(vm.errorMessage ?? 'Resim yüklenemedi')),
+                  );
+                }
+              }
+            },
+            icon: const Icon(Icons.image_outlined),
+            label: const Text('Kapak Resmi Ekle'),
+          ),
+      ],
     );
   }
 }
