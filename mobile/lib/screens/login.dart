@@ -45,13 +45,47 @@ class _LoginScreenState extends State<LoginScreen> {
         (route) => false,
       );
     } else {
-      // Hata mesajını SnackBar ile göster (Kural 15)
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(authViewModel.errorMessage ?? 'Giriş başarısız'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      final errorMsg = authViewModel.errorMessage ?? 'Giriş başarısız';
+      
+      // E-mail bulunamadı ise signup'a yönlendir
+      if (errorMsg.toLowerCase().contains('user') || 
+          errorMsg.toLowerCase().contains('exists') ||
+          errorMsg.toLowerCase().contains('bulunamadı')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('E-posta bulunmadı. Lütfen kayıt olun.'),
+            backgroundColor: Theme.of(context).colorScheme.secondary,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+        
+        if (!mounted) return;
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SignupScreen(),
+              ),
+            );
+          }
+        });
+      } else {
+        // Diğer hataları göster
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Giriş Hatası'),
+            content: Text(errorMsg),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Tamam'),
+              ),
+            ],
+          ),
+        );
+      }
     }
   }
 

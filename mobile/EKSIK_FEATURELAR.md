@@ -14,6 +14,20 @@ Aşağıdaki kaynaklar incelendi:
 
 ---
 
+1-Kart aktiviteleri düzgün çalışmıyor yani karta yorum geldiğinde veya kart farklı listelere taşındığında bu aktivitelere yazılmıyor daha eklenmemiş  olabilir.
+2-Hafif bir takılma var sebebini araştırabilirsin
+3-Silinmiş bir calisma alanına sahip panolar ve cardlar silinmiyor kişi manuel silmesi gerekiyor veri tabanı sağlığı için bu normal ama bir şey yapabilir miyiz bakıcaz
+4-Üye davet et kısmında klavye acılınca çözünürlük overflow hatası oluyor
+5-Hatalı şifre giridliğinde söylemiyor
+6-Giriş yapmaya çalışanmail yoksa kaydol kısmına iletmesi lazım yapmıyor
+7-Çalışma alanlarıan davet edilen kişilere mail veya bildiirm gitmiyor
+8-Davetlerin bildirimi gözüküyor ama bağlantı hatası list<dynamics> is not a subtype of type Map<String,dynmacis> diyor
+9-Bildirim ayarları kısmı çalışmıyor
+10-Görünüm kısmı çalışmıyor
+11- Dil eklenicek 
+12- Kullanım koşulları ve gizlilik politakası kısmına bazı mock yazılar vs eklenicek 
+13-Cache first yapıya geçmek için sqllite entegre edilecek
+
 ## ✅ Mobilde Mevcut Olan Özellikler (Git Geçmişinden)
 
 | # | Commit | Özellik |

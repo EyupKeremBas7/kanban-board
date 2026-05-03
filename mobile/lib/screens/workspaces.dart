@@ -466,61 +466,64 @@ class _WorkspaceTile extends StatelessWidget {
           builder: (context, setState) {
             return AlertDialog(
               title: const Text('Üye Davet Et'),
-              content: Form(
-                key: formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${workspace.name} alanına yeni bir üye davet edin.',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: emailCtrl,
-                      autofocus: true,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: 'E-posta Adresi',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.email_outlined),
+              scrollable: true,
+              content: SingleChildScrollView(
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${workspace.name} alanına yeni bir üye davet edin.',
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'E-posta gerekli';
-                        }
-                        if (!v.contains('@')) {
-                          return 'Geçerli bir e-posta girin';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      initialValue: selectedRole,
-                      decoration: const InputDecoration(
-                        labelText: 'Rol',
-                        border: OutlineInputBorder(),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: emailCtrl,
+                        autofocus: true,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: const InputDecoration(
+                          labelText: 'E-posta Adresi',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.email_outlined),
+                        ),
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) {
+                            return 'E-posta gerekli';
+                          }
+                          if (!v.contains('@')) {
+                            return 'Geçerli bir e-posta girin';
+                          }
+                          return null;
+                        },
                       ),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'admin',
-                          child: Text('Yönetici (Admin)'),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<String>(
+                        initialValue: selectedRole,
+                        decoration: const InputDecoration(
+                          labelText: 'Rol',
+                          border: OutlineInputBorder(),
                         ),
-                        DropdownMenuItem(
-                          value: 'member',
-                          child: Text('Üye (Member)'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'observer',
-                          child: Text('Gözlemci (Observer)'),
-                        ),
-                      ],
-                      onChanged: (val) {
-                        if (val != null) setState(() => selectedRole = val);
-                      },
-                    ),
-                  ],
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'admin',
+                            child: Text('Yönetici (Admin)'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'member',
+                            child: Text('Üye (Member)'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'observer',
+                            child: Text('Gözlemci (Observer)'),
+                          ),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) setState(() => selectedRole = val);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
               actions: [

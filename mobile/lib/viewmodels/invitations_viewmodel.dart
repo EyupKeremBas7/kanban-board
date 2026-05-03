@@ -32,14 +32,24 @@ class InvitationsViewModel extends ChangeNotifier {
       final response = await _apiService.get('/invitations/?status=pending');
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        final list = data['data'] as List<dynamic>;
+        final decoded = jsonDecode(response.body);
+        List<dynamic> list;
+        
+        // Handle both wrapped (Map with 'data' key) and bare List responses
+        if (decoded is Map<String, dynamic>) {
+          list = (decoded['data'] ?? decoded['result'] ?? []) as List<dynamic>;
+        } else if (decoded is List<dynamic>) {
+          list = decoded;
+        } else {
+          list = [];
+        }
+        
         _receivedInvitations = list
             .map((json) => Invitation.fromJson(json as Map<String, dynamic>))
             .toList();
       } else {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        _errorMessage = data['detail'] as String? ?? 'Davetler alınamadı';
+        final data = jsonDecode(response.body) as Map<String, dynamic>?;
+        _errorMessage = data?['detail'] as String? ?? 'Davetler alınamadı';
       }
     } catch (e) {
       _errorMessage = 'Bağlantı hatası: $e';
@@ -59,14 +69,24 @@ class InvitationsViewModel extends ChangeNotifier {
       final response = await _apiService.get('/invitations/sent');
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        final list = data['data'] as List<dynamic>;
+        final decoded = jsonDecode(response.body);
+        List<dynamic> list;
+        
+        // Handle both wrapped (Map with 'data' key) and bare List responses
+        if (decoded is Map<String, dynamic>) {
+          list = (decoded['data'] ?? decoded['result'] ?? []) as List<dynamic>;
+        } else if (decoded is List<dynamic>) {
+          list = decoded;
+        } else {
+          list = [];
+        }
+        
         _sentInvitations = list
             .map((json) => Invitation.fromJson(json as Map<String, dynamic>))
             .toList();
       } else {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        _errorMessage = data['detail'] as String? ?? 'Davetler alınamadı';
+        final data = jsonDecode(response.body) as Map<String, dynamic>?;
+        _errorMessage = data?['detail'] as String? ?? 'Davetler alınamadı';
       }
     } catch (e) {
       _errorMessage = 'Bağlantı hatası: $e';
