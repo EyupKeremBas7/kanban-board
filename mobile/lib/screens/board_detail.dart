@@ -5,6 +5,7 @@ import 'package:mobile/viewmodels/boards_viewmodel.dart';
 import 'package:mobile/viewmodels/lists_viewmodel.dart';
 import 'package:mobile/viewmodels/cards_viewmodel.dart';
 import 'package:mobile/screens/activity.dart';
+import 'package:mobile/screens/card_detail.dart';
 
 /// Pano detay (Kanban görünümü) — referans: panoların-içi.jpeg
 /// Yatay kaydırma ile sütunlar (listeler), her sütunda dikey kart listesi.
@@ -25,6 +26,9 @@ class BoardDetailScreen extends StatefulWidget {
 
 class _BoardDetailScreenState extends State<BoardDetailScreen> {
   String? _activeDropListId;
+  bool _isFiltering = false;
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -38,6 +42,12 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Consumer<BoardsViewModel>(
       builder: (context, boardsVM, child) {
@@ -48,10 +58,24 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(
-              board?.name ?? widget.boardName,
-              overflow: TextOverflow.ellipsis,
-            ),
+            title: _isFiltering
+                ? TextField(
+                    controller: _searchController,
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                      hintText: 'Kartlarda ara...',
+                      border: InputBorder.none,
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value.toLowerCase();
+                      });
+                    },
+                  )
+                : Text(
+                    board?.name ?? widget.boardName,
+                    overflow: TextOverflow.ellipsis,
+                  ),
             actions: [
               IconButton(
                 icon: const Icon(Icons.timeline_outlined),
@@ -71,16 +95,22 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                 onPressed: () => _showBackgroundPicker(context),
               ),
               IconButton(
-                icon: const Icon(Icons.filter_list),
+                icon: Icon(_isFiltering ? Icons.filter_list_off : Icons.filter_list),
                 onPressed: () {
-                  // TODO: Filtre
+                  setState(() {
+                    if (_isFiltering) {
+                      _isFiltering = false;
+                      _searchQuery = '';
+                      _searchController.clear();
+                    } else {
+                      _isFiltering = true;
+                    }
+                  });
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.notifications_outlined),
-                onPressed: () {
-                  // TODO: Board bildirimleri
-                },
+                onPressed: () => _showNotificationSettings(context),
               ),
               PopupMenuButton<String>(
                 onSelected: (value) {
@@ -172,7 +202,10 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                     }
 
                     final list = listsVM.lists[listIndex];
-                    final listCards = cardsVM.getCardsForList(list.id);
+                    var listCards = cardsVM.getCardsForList(list.id);
+                    if (_searchQuery.isNotEmpty) {
+                      listCards = listCards.where((c) => c.title.toLowerCase().contains(_searchQuery)).toList();
+                    }
 
                     return DragTarget<BoardCard>(
                       onWillAcceptWithDetails: (details) {
@@ -356,7 +389,22 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: InkWell(
-        onTap: () => _showEditCardDialog(context, card),
+        onTap: () {
+          final board = context.read<BoardsViewModel>().boards.cast<dynamic>().firstWhere(
+            (b) => b.id == widget.boardId,
+            orElse: () => null,
+          );
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CardDetailScreen(
+                cardId: card.id,
+                cardTitle: card.title,
+                workspaceId: board?.workspaceId ?? '',
+              ),
+            ),
+          );
+        },
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Text(
@@ -464,6 +512,40 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
   }
 
   // ==================== Board Dialogları ====================
+
+  void _showNotificationSettings(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'Bildirim Ayarları',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.notifications_active),
+                title: const Text('Tüm Bildirimler'),
+                subtitle: const Text('Bu panodaki tüm etkinlikler için bildirim al'),
+                trailing: Switch(value: true, onChanged: (val) {}),
+              ),
+              ListTile(
+                leading: const Icon(Icons.person),
+                title: const Text('Sadece Bana Atananlar'),
+                subtitle: const Text('Sadece bana atanan veya etiketlendiğim durumlarda'),
+                trailing: Switch(value: false, onChanged: (val) {}),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   void _showEditBoardDialog(BuildContext context) {
     final boardsVM = context.read<BoardsViewModel>();
