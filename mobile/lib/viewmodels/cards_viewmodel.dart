@@ -162,6 +162,12 @@ class CardsViewModel extends ChangeNotifier {
     String? description,
     String? listId,
     double? position,
+    DateTime? dueDate,
+    String? assignedTo,
+    String? coverImage,
+    bool clearDueDate = false,
+    bool clearAssignedTo = false,
+    bool clearCoverImage = false,
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -173,6 +179,24 @@ class CardsViewModel extends ChangeNotifier {
       if (description != null) body['description'] = description;
       if (listId != null) body['list_id'] = listId;
       if (position != null) body['position'] = position;
+      
+      if (clearDueDate) {
+        body['due_date'] = null;
+      } else if (dueDate != null) {
+        body['due_date'] = dueDate.toIso8601String();
+      }
+      
+      if (clearAssignedTo) {
+        body['assigned_to'] = null;
+      } else if (assignedTo != null) {
+        body['assigned_to'] = assignedTo;
+      }
+
+      if (clearCoverImage) {
+        body['cover_image'] = null;
+      } else if (coverImage != null) {
+        body['cover_image'] = coverImage;
+      }
 
       final response = await _apiService.put('/cards/$cardId', body: body);
 
@@ -191,6 +215,39 @@ class CardsViewModel extends ChangeNotifier {
       } else {
         final err = jsonDecode(response.body) as Map<String, dynamic>;
         _errorMessage = err['detail'] as String? ?? 'Kart güncellenemedi.';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = 'Bağlantı hatası: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Kapak resmi yükle
+  Future<bool> uploadCoverImage({
+    required String cardId,
+    required String filePath,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _apiService.uploadImage('/uploads/image', filePath: filePath);
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final url = data['url'] as String;
+        
+        // updateCard metodunu çağırarak modeli de güncelle
+        return await updateCard(cardId: cardId, coverImage: url);
+      } else {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        _errorMessage = data['detail'] as String? ?? 'Resim yüklenemedi';
         _isLoading = false;
         notifyListeners();
         return false;
