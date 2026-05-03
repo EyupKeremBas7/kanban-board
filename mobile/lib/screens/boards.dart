@@ -14,6 +14,10 @@ class BoardsScreen extends StatefulWidget {
 }
 
 class _BoardsScreenState extends State<BoardsScreen> {
+  bool _isSearching = false;
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -23,24 +27,53 @@ class _BoardsScreenState extends State<BoardsScreen> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Panolar'),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: 'Pano ara...',
+                  border: InputBorder.none,
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value.toLowerCase();
+                  });
+                },
+              )
+            : const Text('Panolar'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
             onPressed: () {
-              // TODO: Arama işlevi
+              setState(() {
+                if (_isSearching) {
+                  _isSearching = false;
+                  _searchQuery = '';
+                  _searchController.clear();
+                } else {
+                  _isSearching = true;
+                }
+              });
             },
           ),
           // Yenile butonu
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              context.read<BoardsViewModel>().fetchBoards();
-            },
-          ),
+          if (!_isSearching)
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                context.read<BoardsViewModel>().fetchBoards();
+              },
+            ),
         ],
       ),
       body: Consumer<BoardsViewModel>(
@@ -116,13 +149,21 @@ class _BoardsScreenState extends State<BoardsScreen> {
 
           // Board listesi — workspace'e göre grouped
           // Backend workspace_id döner, şimdilik düz liste göster
+          final filteredBoards = boardsVM.boards.where((b) {
+            return b.name.toLowerCase().contains(_searchQuery);
+          }).toList();
+
+          if (filteredBoards.isEmpty && _searchQuery.isNotEmpty) {
+            return const Center(child: Text('Aranan kriterlere uygun pano bulunamadı.'));
+          }
+
           return RefreshIndicator(
             onRefresh: () => boardsVM.fetchBoards(),
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: boardsVM.boards.length,
+              itemCount: filteredBoards.length,
               itemBuilder: (context, index) {
-                final board = boardsVM.boards[index];
+                final board = filteredBoards[index];
                 return Card(
                   margin: const EdgeInsets.only(bottom: 8),
                   child: ListTile(
