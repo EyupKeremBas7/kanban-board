@@ -340,20 +340,32 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                                             color: Colors.transparent,
                                             child: SizedBox(
                                               width: 240,
-                                              child: _buildCardTile(
-                                                context,
-                                                card,
+                                              child: Builder(
+                                                builder: (innerContext) =>
+                                                    _buildCardTile(
+                                                  innerContext,
+                                                  card,
+                                                ),
                                               ),
                                             ),
                                           ),
                                           childWhenDragging: Opacity(
                                             opacity: 0.35,
-                                            child: _buildCardTile(
-                                              context,
+                                            child: Builder(
+                                              builder: (innerContext) =>
+                                                  _buildCardTile(
+                                                innerContext,
+                                                card,
+                                              ),
+                                            ),
+                                          ),
+                                          child: Builder(
+                                            builder: (innerContext) =>
+                                                _buildCardTile(
+                                              innerContext,
                                               card,
                                             ),
                                           ),
-                                          child: _buildCardTile(context, card),
                                         );
                                       },
                                     ),
@@ -950,92 +962,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
     );
   }
 
-  void _showEditCardDialog(BuildContext context, dynamic card) {
-    final titleController = TextEditingController(text: card.title);
-    final descController = TextEditingController(text: card.description ?? '');
-    final formKey = GlobalKey<FormState>();
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Kartı Düzenle'),
-          content: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Kart Başlığı',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (val) {
-                    if (val == null || val.trim().isEmpty) {
-                      return 'Başlık gerekli';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: descController,
-                  decoration: const InputDecoration(
-                    labelText: 'Açıklama',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 3,
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('İptal'),
-            ),
-            Consumer<CardsViewModel>(
-              builder: (context, vm, child) {
-                return FilledButton(
-                  onPressed: vm.isLoading
-                      ? null
-                      : () async {
-                          if (!formKey.currentState!.validate()) return;
-                          final success = await vm.updateCard(
-                            cardId: card.id,
-                            title: titleController.text.trim(),
-                            description: descController.text.trim(),
-                          );
-                          if (!context.mounted) return;
-                          if (success) {
-                            Navigator.pop(dialogContext);
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(vm.errorMessage ?? 'Hata'),
-                                backgroundColor: Theme.of(
-                                  context,
-                                ).colorScheme.error,
-                              ),
-                            );
-                          }
-                        },
-                  child: vm.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Kaydet'),
-                );
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+  
 
   // ==================== Background Seçici ====================
 

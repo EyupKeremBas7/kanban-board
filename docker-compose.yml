@@ -41,15 +41,6 @@ services:
       - traefik-public
       - default
 
-  tunnel:
-    container_name: tunnel
-    image: cloudflare/cloudflared:latest
-    restart: always
-    command: tunnel --no-autoupdate run --protocol http2 --token ${CLOUDFLARE_TUNNEL_TOKEN?Variable not set}
-    networks:
-      - traefik-public
-      - default
-
   db:
     container_name: db
     image: postgres:17
@@ -136,7 +127,11 @@ services:
       - REDIS_PORT=6379
       - SENTRY_DSN=${SENTRY_DSN}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/utils/health-check/').read()\"",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5

@@ -153,22 +153,20 @@ GET /activity/card/{card_id}          → Kart aktiviteleri
 
 ---
 
-### 6. 🏠 Dashboard / Ana Ekran — `ORTA ÖNCELİK`
+### 6. 🏠 Dashboard / Ana Ekran — `ORTA ÖNCELİK` ✅ **TAMAMLANDI**
 
 **Web'deki durum:** `index.tsx` — Workspace'e göre gruplandırılmış board listesi, "Son Görüntülenenler" paneli.
 
-**Mevcut mobil:** `planner.dart` stub ekranı var.
-
-**Yapılacaklar:**
-- [ ] `planner.dart`'ı gerçek Dashboard ekranına dönüştür:
-  - Workspace'e göre gruplandırılmış board grid'i
-  - Her workspace için "+" ile hızlı board oluşturma
-  - Son gezilen boardlar (local state veya SharedPreferences)
-- [ ] Bottom nav'daki "Planner" sekmesini "Ana Sayfa" olarak yeniden adlandır
+**Tamamlanan İşler:**
+- [x] `planner.dart` gerçek Dashboard ekranına dönüştürüldü ✅
+  - Workspace'e göre gruplandırılmış board grid'i ✅
+  - Her workspace için "+" ile hızlı board oluşturma ✅
+  - Son gezilen boardlar (SharedPreferences ile kalıcı) ✅
+- [x] Bottom nav'daki "Planner" sekmesi "Ana Sayfa" olarak adlandırıldı ✅
 
 ---
 
-### 7. 📋 Liste Güncelleme ve Silme — `ORTA ÖNCELİK`
+### 7. 📋 Liste Güncelleme ve Silme — `ORTA ÖNCELİK` ✅ **TAMAMLANDI**
 
 **Web'deki durum:** `lists.tsx` sayfasında liste CRUD tam. Board detay ekranında listenin `⋯` butonu var ama sadece UI'da.
 
@@ -178,12 +176,10 @@ PUT    /lists/{id} → Liste adı / sırası güncelle
 DELETE /lists/{id} → Liste sil
 ```
 
-**Mevcut mobil:** `lists_viewmodel.dart` zaten `updateList` ve `deleteList` metodları var ama `board_detail.dart`'ta `⋯` butonu bağlı değil.
-
-**Yapılacaklar:**
-- [ ] `board_detail.dart`'ta her listenin üstündeki `⋯` butonuna PopupMenu ekle:
-  - "Listeyi Düzenle" → ad değiştirme dialogu
-  - "Listeyi Sil" → onay dialogu
+**Tamamlanan İşler:**
+- [x] `board_detail.dart`'ta her listenin üstündeki `⋯` butonuna PopupMenu eklendi ✅
+  - "Listeyi Düzenle" → ad değiştirme dialogu ✅
+  - "Listeyi Sil" → onay dialogu ✅
 
 ---
 
@@ -222,7 +218,7 @@ PUT /cards/{id} → { assigned_to: "user_id" }
 
 ---
 
-### 10. 📅 Bitiş Tarihi (Due Date) Düzenleme — `DÜŞÜK ÖNCELİK`
+### 10. 📅 Bitiş Tarihi (Due Date) Düzenleme — `DÜŞÜK ÖNCELİK` ✅ **TAMAMLANDI**
 
 **Web'deki durum:** Kart detayda due date seçici mevcut.
 
@@ -231,13 +227,12 @@ PUT /cards/{id} → { assigned_to: "user_id" }
 PUT /cards/{id} → { due_date: "ISO 8601 string" }
 ```
 
-**Mevcut mobil:** `card_detail.dart`'ta `_DueDateTile` stub olarak "Belirlenmemiş" yazıyor.
-
-**Yapılacaklar:**
-- [ ] `card_detail.dart`'ta `_DueDateTile`'ı tıklanabilir yap
-  - `showDatePicker` ile tarih seçici
-  - Seçilen tarihi `CardsViewModel.updateCard(dueDate: ...)` ile kaydet
-  - Geçmiş tarihse kırmızı renk uyarısı
+**Tamamlanan İşler:**
+- [x] `card_detail.dart`'ta `_DueDateTile` tıklanabilir hale getirildi ✅
+  - `showDatePicker` ile tarih seçimi ✅
+  - Seçilen tarih `CardsViewModel.updateCard(dueDate: ...)` ile kaydediliyor ✅
+  - Geçmiş tarih için kırmızı uyarı (`Gecikti`) gösteriliyor ✅
+  - Mevcut tarihi temizleme (clear due date) desteği ✅
 
 ---
 
@@ -250,13 +245,16 @@ PUT /cards/{id} → { due_date: "ISO 8601 string" }
 
 ---
 
-### 12. 📊 Kart Üzerinde Özet Bilgiler (Checklist & Yorum Sayısı) — `ORTA ÖNCELİK`
+### 12. 📊 Kart Üzerinde Özet Bilgiler (Checklist & Yorum Sayısı) — `ORTA ÖNCELİK` ✅ **TAMAMLANDI**
 
-**Mevcut mobil:** Kart detayına girildiğinde Checklist ve Yorumlar çalışıyor ancak Board görünümünde (kartların ön yüzünde) bu veriler sahte (mock) olarak duruyor (`commentCount = 0`, `checklistProgress = '0/0'`).
-
-**Yapılacaklar:**
-- [ ] `BoardCard` modeli için backend'den bu istatistikler gelmiyorsa UI'da sakla veya backend'den bu verileri çekecek/hesaplayacak bir yapı kur.
-- [ ] Kart ön yüzünde (Board ekranı) checklist ilerlemesini (örn: 2/5) ve yorum sayısını gösteren küçük rozetler (badges) ekle.
+**Tamamlanan İşler:**
+- [x] `CardsViewModel` içine kart bazlı istatistik cache yapısı eklendi ✅
+  - Yorum sayısı (`/comments/?card_id=...`) ✅
+  - Checklist ilerlemesi (`/checklists/?card_id=...` → `tamamlanan/toplam`) ✅
+  - Kart açıp kapandıktan sonra tek kart için force refresh ✅
+- [x] `board_detail.dart` kart tile UI rozetleri eklendi ✅
+  - Checklist ilerleme rozeti (örn: `2/5`) ✅
+  - Yorum sayısı rozeti ✅
 
 ---
 
@@ -272,10 +270,10 @@ PUT /cards/{id} → { due_date: "ISO 8601 string" }
 | Board Arka Plan Seçici | 🟡 Orta | ✅ | ⚠️ Kısmi |
 | Dashboard / Ana Ekran | 🟡 Orta | ✅ | ✅ |
 | Liste Güncelle/Sil UI | 🟡 Orta | ✅ | ✅ |
-| Kart Üzerinde Özet Bilgiler | 🟡 Orta | ⚠️ | ❌ |
+| Kart Üzerinde Özet Bilgiler | 🟡 Orta | ✅ | ✅ |
 | Profil Fotoğrafı Upload | 🟢 Düşük | ✅ | ❌ |
 | Kart Atama | 🟢 Düşük | ✅ | ⚠️ Kısmi |
-| Bitiş Tarihi Düzenleme | 🟢 Düşük | ✅ | ⚠️ Kısmi |
+| Bitiş Tarihi Düzenleme | 🟢 Düşük | ✅ | ✅ |
 
 ---
 

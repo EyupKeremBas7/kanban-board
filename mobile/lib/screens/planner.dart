@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:mobile/domain/models/board.dart';
 import 'package:mobile/domain/models/workspace.dart';
 import 'package:mobile/screens/board_detail.dart';
+import 'package:mobile/services/recent_boards_service.dart';
 import 'package:mobile/viewmodels/boards_viewmodel.dart';
 import 'package:mobile/viewmodels/workspaces_viewmodel.dart';
 
@@ -16,6 +17,7 @@ class PlannerScreen extends StatefulWidget {
 }
 
 class _PlannerScreenState extends State<PlannerScreen> {
+  final RecentBoardsService _recentBoardsService = RecentBoardsService();
   final List<String> _recentBoardIds = [];
 
   @override
@@ -25,6 +27,17 @@ class _PlannerScreenState extends State<PlannerScreen> {
       if (!mounted) return;
       context.read<BoardsViewModel>().fetchBoards();
       context.read<WorkspacesViewModel>().fetchWorkspaces();
+      _loadRecentBoards();
+    });
+  }
+
+  Future<void> _loadRecentBoards() async {
+    final ids = await _recentBoardsService.getRecentBoardIds();
+    if (!mounted) return;
+    setState(() {
+      _recentBoardIds
+        ..clear()
+        ..addAll(ids);
     });
   }
 
@@ -203,6 +216,8 @@ class _PlannerScreenState extends State<PlannerScreen> {
         _recentBoardIds.removeLast();
       }
     });
+
+    _recentBoardsService.addRecentBoard(board.id);
 
     Navigator.push(
       context,
@@ -499,12 +514,12 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 0,
-      color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+      color: Theme.of(
+        context,
+      ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
+        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -516,16 +531,16 @@ class _StatCard extends StatelessWidget {
             Text(
               value,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               title,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),

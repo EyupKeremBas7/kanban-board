@@ -43,7 +43,9 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
       context.read<CommentsViewModel>().fetchComments(widget.cardId);
       context.read<ActivityViewModel>().fetchCardActivity(widget.cardId);
       if (widget.workspaceId.isNotEmpty) {
-        context.read<WorkspacesViewModel>().fetchWorkspaceMembers(widget.workspaceId);
+        context.read<WorkspacesViewModel>().fetchWorkspaceMembers(
+          widget.workspaceId,
+        );
       }
     });
   }
@@ -349,67 +351,109 @@ class _DueDateTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasDate = card?.dueDate != null;
+    final dueDate = card?.dueDate;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dueDay = dueDate != null
+        ? DateTime(dueDate.year, dueDate.month, dueDate.day)
+        : null;
+    final isOverdue = hasDate && dueDay!.isBefore(today);
 
-    return InkWell(
-      onTap: () async {
-        final initialDate = card?.dueDate ?? DateTime.now();
-        final selectedDate = await showDatePicker(
-          context: context,
-          initialDate: initialDate,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2100),
-        );
+    final textColor = !hasDate
+        ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)
+        : isOverdue
+        ? Theme.of(context).colorScheme.error
+        : Theme.of(context).colorScheme.onSurface;
 
-        if (selectedDate != null && context.mounted) {
-          final vm = context.read<CardsViewModel>();
-          final success = await vm.updateCard(
-            cardId: cardId,
-            dueDate: selectedDate,
-          );
-          if (!success && context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(vm.errorMessage ?? 'Tarih güncellenemedi')),
-            );
-          }
-        }
-      },
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.calendar_month,
-              size: 20,
-              color: hasDate ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              hasDate
-                  ? '${card!.dueDate!.day.toString().padLeft(2, '0')}.${card!.dueDate!.month.toString().padLeft(2, '0')}.${card!.dueDate!.year}'
-                  : 'Belirlenmemiş',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: hasDate ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+    final iconColor = !hasDate
+        ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)
+        : isOverdue
+        ? Theme.of(context).colorScheme.error
+        : Theme.of(context).colorScheme.primary;
+
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          InkWell(
+            onTap: () async {
+              final initialDate = card?.dueDate ?? DateTime.now();
+              final selectedDate = await showDatePicker(
+                context: context,
+                initialDate: initialDate,
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2100),
+              );
+
+              if (selectedDate != null && context.mounted) {
+                final vm = context.read<CardsViewModel>();
+                final success = await vm.updateCard(
+                  cardId: cardId,
+                  dueDate: selectedDate,
+                );
+                if (!success && context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(vm.errorMessage ?? 'Tarih güncellenemedi'),
+                    ),
+                  );
+                }
+              }
+            },
+            borderRadius: BorderRadius.circular(8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.calendar_month, size: 20, color: iconColor),
+                const SizedBox(width: 8),
+                Text(
+                  hasDate
+                      ? '${card!.dueDate!.day.toString().padLeft(2, '0')}.${card!.dueDate!.month.toString().padLeft(2, '0')}.${card!.dueDate!.year}'
+                      : 'Belirlenmemiş',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: textColor,
                     fontWeight: hasDate ? FontWeight.bold : FontWeight.normal,
                   ),
-            ),
-            if (hasDate) ...[
-              const SizedBox(width: 12),
-              InkWell(
-                onTap: () async {
-                  final vm = context.read<CardsViewModel>();
-                  await vm.updateCard(cardId: cardId, clearDueDate: true);
-                },
-                child: Icon(
-                  Icons.close,
-                  size: 16,
-                  color: Theme.of(context).colorScheme.error,
                 ),
+                if (isOverdue) ...[
+                  const SizedBox(width: 8),
+                  Text(
+                    '(Gecikti)',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.error,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (hasDate) ...[
+            const SizedBox(width: 12),
+            InkWell(
+              onTap: () async {
+                final vm = context.read<CardsViewModel>();
+                final success = await vm.updateCard(
+                  cardId: cardId,
+                  clearDueDate: true,
+                );
+                if (!success && context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(vm.errorMessage ?? 'Tarih temizlenemedi'),
+                    ),
+                  );
+                }
+              },
+              child: Icon(
+                Icons.close,
+                size: 16,
+                color: Theme.of(context).colorScheme.error,
               ),
-            ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -429,8 +473,11 @@ class _AssigneeTile extends StatelessWidget {
       builder: (context, workspaceVM, child) {
         String assigneeName = 'Atanmamış';
         if (hasAssignee) {
-          final member = workspaceVM.currentMembers.where((m) => m.member.userId == card!.assignedTo).firstOrNull;
-          assigneeName = member?.fullName ?? member?.email ?? 'Kullanıcı Bulunamadı';
+          final member = workspaceVM.currentMembers
+              .where((m) => m.member.userId == card!.assignedTo)
+              .firstOrNull;
+          assigneeName =
+              member?.fullName ?? member?.email ?? 'Kullanıcı Bulunamadı';
         }
 
         return InkWell(
@@ -446,27 +493,42 @@ class _AssigneeTile extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 12,
-                  backgroundColor: hasAssignee ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceContainerHighest,
+                  backgroundColor: hasAssignee
+                      ? Theme.of(context).colorScheme.primaryContainer
+                      : Theme.of(context).colorScheme.surfaceContainerHighest,
                   child: Icon(
                     Icons.person,
                     size: 16,
-                    color: hasAssignee ? Theme.of(context).colorScheme.onPrimaryContainer : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                    color: hasAssignee
+                        ? Theme.of(context).colorScheme.onPrimaryContainer
+                        : Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   assigneeName,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: hasAssignee ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-                        fontWeight: hasAssignee ? FontWeight.bold : FontWeight.normal,
-                      ),
+                    color: hasAssignee
+                        ? Theme.of(context).colorScheme.onSurface
+                        : Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.5),
+                    fontWeight: hasAssignee
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
                 ),
                 if (hasAssignee) ...[
                   const SizedBox(width: 12),
                   InkWell(
                     onTap: () async {
                       final vm = context.read<CardsViewModel>();
-                      await vm.updateCard(cardId: cardId, clearAssignedTo: true);
+                      await vm.updateCard(
+                        cardId: cardId,
+                        clearAssignedTo: true,
+                      );
                     },
                     child: Icon(
                       Icons.close,
@@ -483,7 +545,10 @@ class _AssigneeTile extends StatelessWidget {
     );
   }
 
-  void _showAssigneePicker(BuildContext context, WorkspacesViewModel workspaceVM) {
+  void _showAssigneePicker(
+    BuildContext context,
+    WorkspacesViewModel workspaceVM,
+  ) {
     showModalBottomSheet(
       context: context,
       builder: (bottomSheetContext) {
@@ -500,7 +565,8 @@ class _AssigneeTile extends StatelessWidget {
           itemCount: members.length,
           itemBuilder: (context, index) {
             final member = members[index];
-            final name = member.fullName ?? member.email ?? 'Bilinmeyen Kullanıcı';
+            final name =
+                member.fullName ?? member.email ?? 'Bilinmeyen Kullanıcı';
             return ListTile(
               leading: const CircleAvatar(child: Icon(Icons.person)),
               title: Text(name),
@@ -513,7 +579,9 @@ class _AssigneeTile extends StatelessWidget {
                 );
                 if (!success && context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(vm.errorMessage ?? 'Kişi atanamadı')),
+                    SnackBar(
+                      content: Text(vm.errorMessage ?? 'Kişi atanamadı'),
+                    ),
                   );
                 }
               },
@@ -548,10 +616,12 @@ class _CoverImageSection extends StatelessWidget {
                   width: double.infinity,
                   height: 160,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (context, error, stackTrace) => Container(
                     width: double.infinity,
                     height: 160,
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                     child: const Icon(Icons.broken_image, size: 48),
                   ),
                 ),
@@ -583,7 +653,9 @@ class _CoverImageSection extends StatelessWidget {
                 );
                 if (!success && context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(vm.errorMessage ?? 'Resim yüklenemedi')),
+                    SnackBar(
+                      content: Text(vm.errorMessage ?? 'Resim yüklenemedi'),
+                    ),
                   );
                 }
               }

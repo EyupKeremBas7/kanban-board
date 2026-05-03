@@ -9,12 +9,77 @@ class CardsViewModel extends ChangeNotifier {
   CardsViewModel({required ApiService apiService}) : _apiService = apiService;
 
   List<BoardCard> _cards = [];
+  final Map<String, int> _commentCounts = {};
+  final Map<String, String> _checklistProgressByCard = {};
+  final Set<String> _statsLoadedCardIds = {};
+  final Set<String> _statsLoadingCardIds = {};
   bool _isLoading = false;
   String? _errorMessage;
 
   List<BoardCard> get cards => _cards;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+
+  int getCommentCount(String cardId) {
+    final cached = _commentCounts[cardId];
+    if (cached != null) return cached;
+    final card = _cards.where((c) => c.id == cardId).firstOrNull;
+    return card?.commentCount ?? 0;
+  }
+
+  String getChecklistProgress(String cardId) {
+    final cached = _checklistProgressByCard[cardId];
+    if (cached != null) return cached;
+    final card = _cards.where((c) => c.id == cardId).firstOrNull;
+    return card?.checklistProgress ?? '0/0';
+  }
+
+  Future<void> prefetchCardStats(
+    Iterable<String> cardIds, {
+    bool forceRefresh = false,
+  }) async {
+    final targets = cardIds.where((id) {
+      if (_statsLoadingCardIds.contains(id)) return false;
+      if (forceRefresh) return true;
+      return !_statsLoadedCardIds.contains(id);
+    }).toList();
+
+    if (targets.isEmpty) return;
+
+    _statsLoadingCardIds.addAll(targets);
+
+    for (final cardId in targets) {
+      try {
+        final commentsRes = await _apiService.get('/comments/?card_id=$cardId');
+        if (commentsRes.statusCode == 200) {
+          final commentsData =
+              jsonDecode(commentsRes.body) as Map<String, dynamic>;
+          final comments = commentsData['data'] as List? ?? [];
+          _commentCounts[cardId] = comments.length;
+        }
+
+        final checklistRes = await _apiService.get(
+          '/checklists/?card_id=$cardId',
+        );
+        if (checklistRes.statusCode == 200) {
+          final checklistData =
+              jsonDecode(checklistRes.body) as Map<String, dynamic>;
+          final items = checklistData['data'] as List? ?? [];
+          final completedCount = items.where((item) {
+            final json = item as Map<String, dynamic>;
+            return json['is_completed'] == true;
+          }).length;
+          _checklistProgressByCard[cardId] = '$completedCount/${items.length}';
+        }
+      } catch (_) {
+      } finally {
+        _statsLoadingCardIds.remove(cardId);
+        _statsLoadedCardIds.add(cardId);
+      }
+    }
+
+    notifyListeners();
+  }
 
   /// Belirli bir liste altındaki kartları döndürür
   List<BoardCard> getCardsForList(String listId) {
@@ -55,6 +120,9 @@ class CardsViewModel extends ChangeNotifier {
         _cards = items.map((json) => BoardCard.fromJson(json)).toList();
         _isLoading = false;
         notifyListeners();
+
+        final cardIds = _cards.map((c) => c.id).toList();
+        Future.microtask(() => prefetchCardStats(cardIds));
       } else {
         _errorMessage = 'Kartlar yüklenemedi: ${response.statusCode}';
         _isLoading = false;
@@ -179,13 +247,13 @@ class CardsViewModel extends ChangeNotifier {
       if (description != null) body['description'] = description;
       if (listId != null) body['list_id'] = listId;
       if (position != null) body['position'] = position;
-      
+
       if (clearDueDate) {
         body['due_date'] = null;
       } else if (dueDate != null) {
         body['due_date'] = dueDate.toIso8601String();
       }
-      
+
       if (clearAssignedTo) {
         body['assigned_to'] = null;
       } else if (assignedTo != null) {
@@ -237,12 +305,15 @@ class CardsViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _apiService.uploadImage('/uploads/image', filePath: filePath);
-      
+      final response = await _apiService.uploadImage(
+        '/uploads/image',
+        filePath: filePath,
+      );
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         final url = data['url'] as String;
-        
+
         // updateCard metodunu çağırarak modeli de güncelle
         return await updateCard(cardId: cardId, coverImage: url);
       } else {
@@ -271,6 +342,10 @@ class CardsViewModel extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         _cards.removeWhere((c) => c.id == cardId);
+        _commentCounts.remove(cardId);
+        _checklistProgressByCard.remove(cardId);
+        _statsLoadedCardIds.remove(cardId);
+        _statsLoadingCardIds.remove(cardId);
         _isLoading = false;
         notifyListeners();
         return true;
