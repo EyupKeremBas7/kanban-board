@@ -58,10 +58,12 @@ Bu görevler `EKSIK_FEATURELAR.md`'de ayrıntılı olarak listelenir.
 - **Kart Rozetleri Gerçek Veriye Bağlandı:** `board_detail.dart` kart tile üzerinde checklist ilerleme (`x/y`) ve yorum sayısı rozetleri eklendi.
 - **Stats Cache Altyapısı:** `cards_viewmodel.dart` içine kart bazlı yorum sayısı + checklist ilerleme cache/prefetch mekanizması eklendi.
 - **Geri Dönüşte Tazeleme:** Kart detay ekranından dönüldüğünde ilgili kartın rozet verisi force-refresh ediliyor.
+- **Bildirim Sayısı Badge’i:** `bottom_nav_shell.dart` içindeki “Gelen Kutusu” sekmesine okunmamış bildirim sayısı badge’i eklendi.
 - **Plan Dokümanı Güncellemesi:** `EKSIK_FEATURELAR.md` içinde “Kart Üzerinde Özet Bilgiler” maddesi tamamlandı olarak işaretlendi.
 
 ### 🚧 Güncel Sıradaki İşler
 - Kart atama UX iyileştirmesi (üyelerde arama/filtreleme + daha net seçim deneyimi)
+- Profil fotoğrafı yükleme için backend destek uyumu doğrulanmalı
 
 ---
 

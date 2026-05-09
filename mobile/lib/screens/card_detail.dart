@@ -792,7 +792,87 @@ class _ChecklistItemTile extends StatelessWidget {
         ),
         controlAffinity: ListTileControlAffinity.leading,
         contentPadding: EdgeInsets.zero,
+        secondary: IconButton(
+          icon: Icon(
+            Icons.edit_outlined,
+            size: 20,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          onPressed: () => _showEditChecklistItemDialog(context, item, vm),
+        ),
       ),
+    );
+  }
+
+  void _showEditChecklistItemDialog(
+    BuildContext context,
+    ChecklistItem item,
+    ChecklistsViewModel vm,
+  ) {
+    final controller = TextEditingController(text: item.title);
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Öğeyi Düzenle'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: const InputDecoration(
+              hintText: 'Öğe başlığı',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('İptal'),
+            ),
+            Consumer<ChecklistsViewModel>(
+              builder: (context, vmConsumer, child) {
+                return FilledButton(
+                  onPressed: vmConsumer.isLoading
+                      ? null
+                      : () async {
+                          final title = controller.text.trim();
+                          if (title.isEmpty) return;
+
+                          final success = await vmConsumer.updateItem(
+                            itemId: item.id,
+                            title: title,
+                          );
+
+                          if (!context.mounted) return;
+                          if (success) {
+                            Navigator.pop(dialogContext);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  vmConsumer.errorMessage ??
+                                      'Güncelleme başarısız',
+                                ),
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.error,
+                              ),
+                            );
+                          }
+                        },
+                  child: vmConsumer.isLoading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Kaydet'),
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -1099,6 +1179,18 @@ class _CommentTile extends StatelessWidget {
                       ).colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
+                  // Düzenle butonu
+                  IconButton(
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () => _showEditCommentDialog(context, comment, vm),
+                  ),
+                  const SizedBox(width: 8),
                   // Sil butonu
                   IconButton(
                     icon: Icon(
@@ -1141,5 +1233,77 @@ class _CommentTile extends StatelessWidget {
     return '${dt.day.toString().padLeft(2, '0')}.'
         '${dt.month.toString().padLeft(2, '0')}.'
         '${dt.year}';
+  }
+
+  void _showEditCommentDialog(
+    BuildContext context,
+    CardComment comment,
+    CommentsViewModel vm,
+  ) {
+    final controller = TextEditingController(text: comment.content);
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Yorumu Düzenle'),
+          content: TextField(
+            controller: controller,
+            maxLines: 3,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Yorumunuz...',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('İptal'),
+            ),
+            Consumer<CommentsViewModel>(
+              builder: (context, vmConsumer, child) {
+                return FilledButton(
+                  onPressed: vmConsumer.isLoading
+                      ? null
+                      : () async {
+                          final content = controller.text.trim();
+                          if (content.isEmpty) return;
+
+                          final success = await vmConsumer.updateComment(
+                            commentId: comment.id,
+                            content: content,
+                          );
+
+                          if (!context.mounted) return;
+                          if (success) {
+                            Navigator.pop(dialogContext);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  vmConsumer.errorMessage ??
+                                      'Güncelleme başarısız',
+                                ),
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.error,
+                              ),
+                            );
+                          }
+                        },
+                  child: vmConsumer.isLoading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Kaydet'),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }

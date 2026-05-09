@@ -235,12 +235,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
             text: 'Çalışma alanı bulunamadı.',
           );
         }
-        return DropdownButtonFormField<String>(
-          initialValue: _selectedWorkspaceId,
-          decoration: const InputDecoration(
-            labelText: 'Çalışma Alanı',
-            border: OutlineInputBorder(),
-          ),
+        return DropdownButton<String>(
+          value: _selectedWorkspaceId,
+          isExpanded: true,
           items: workspacesVM.workspaces
               .map(
                 (workspace) => DropdownMenuItem(
@@ -261,12 +258,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
             text: 'Pano bulunamadı.',
           );
         }
-        return DropdownButtonFormField<String>(
-          initialValue: _selectedBoardId,
-          decoration: const InputDecoration(
-            labelText: 'Pano',
-            border: OutlineInputBorder(),
-          ),
+        return DropdownButton<String>(
+          value: _selectedBoardId,
+          isExpanded: true,
           items: boardsVM.boards
               .map(
                 (board) => DropdownMenuItem(
@@ -287,12 +281,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
             text: 'Kart bulunamadı.',
           );
         }
-        return DropdownButtonFormField<String>(
-          initialValue: _selectedCardId,
-          decoration: const InputDecoration(
-            labelText: 'Kart',
-            border: OutlineInputBorder(),
-          ),
+        return DropdownButton<String>(
+          value: _selectedCardId,
+          isExpanded: true,
           items: cardsVM.cards
               .map(
                 (card) => DropdownMenuItem(
@@ -318,19 +309,28 @@ class _ActivityScreenState extends State<ActivityScreen> {
     BoardsViewModel boardsVM,
     CardsViewModel cardsVM,
   ) async {
-    if (_scope == ActivityScope.workspace) {
-      _selectedWorkspaceId ??= workspacesVM.workspaces.isNotEmpty
-          ? workspacesVM.workspaces.first.id
-          : null;
-    } else if (_scope == ActivityScope.board) {
-      _selectedBoardId ??= boardsVM.boards.isNotEmpty
-          ? boardsVM.boards.first.id
-          : null;
-    } else {
-      _selectedCardId ??= cardsVM.cards.isNotEmpty
-          ? cardsVM.cards.first.id
-          : null;
-    }
+    setState(() {
+      if (_scope == ActivityScope.workspace) {
+        if (_selectedWorkspaceId == null ||
+            !workspacesVM.workspaces.any((w) => w.id == _selectedWorkspaceId)) {
+          _selectedWorkspaceId = workspacesVM.workspaces.isNotEmpty
+              ? workspacesVM.workspaces.first.id
+              : null;
+        }
+      } else if (_scope == ActivityScope.board) {
+        if (_selectedBoardId == null ||
+            !boardsVM.boards.any((b) => b.id == _selectedBoardId)) {
+          _selectedBoardId =
+              boardsVM.boards.isNotEmpty ? boardsVM.boards.first.id : null;
+        }
+      } else {
+        if (_selectedCardId == null ||
+            !cardsVM.cards.any((c) => c.id == _selectedCardId)) {
+          _selectedCardId =
+              cardsVM.cards.isNotEmpty ? cardsVM.cards.first.id : null;
+        }
+      }
+    });
   }
 
   Future<void> _loadCurrentScopeActivity() async {
@@ -403,7 +403,7 @@ class _ActivityTile extends StatelessWidget {
   }
 
   String _titleText(ActivityLog log) {
-    final actor = log.userName ?? log.userEmail ?? 'Bilinmeyen kullanıcı';
+    final actor = log.userFullName ?? log.userName ?? log.userEmail ?? 'Bilinmeyen kullanıcı';
     return '$actor · ${log.action}';
   }
 

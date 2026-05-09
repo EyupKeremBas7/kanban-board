@@ -3,6 +3,7 @@ class ActivityLog {
   final String? userId;
   final String? userEmail;
   final String? userName;
+  final String? userFullName;
   final String action;
   final String entityType;
   final String? entityId;
@@ -16,6 +17,7 @@ class ActivityLog {
     this.userId,
     this.userEmail,
     this.userName,
+    this.userFullName,
     required this.action,
     required this.entityType,
     this.entityId,
@@ -31,6 +33,7 @@ class ActivityLog {
       userId: json['user_id'] as String?,
       userEmail: json['user_email'] as String?,
       userName: json['user_name'] as String?,
+      userFullName: json['user_full_name'] as String?,
       action: json['action'] as String? ?? 'unknown',
       entityType: json['entity_type'] as String? ?? 'unknown',
       entityId: json['entity_id'] as String?,

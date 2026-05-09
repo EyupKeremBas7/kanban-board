@@ -27,6 +27,32 @@ Aşağıdaki kaynaklar incelendi:
 11- Dil eklenicek 
 12- Kullanım koşulları ve gizlilik politakası kısmına bazı mock yazılar vs eklenicek 
 13-Cache first yapıya geçmek için sqllite entegre edilecek
+14-Gerekli sayfalarda sayfa yenileme kısmı olucak veya Stream yapısı getirelecek
+15-screensin altında activity de 
+```dart
+enum ActivityScope { workspace, board, card }
+
+class ActivityScreen extends StatefulWidget {
+  final String? boardId;
+  final String? boardName;
+  final String? workspaceId;
+  final String? workspaceName;
+  final String? cardId;
+  final String? cardName;
+  final ActivityScope initialScope;
+
+  const ActivityScreen({
+    super.key,
+    this.boardId,
+    this.boardName,
+    this.workspaceId,
+    this.workspaceName,
+    this.cardId,
+    this.cardName,
+    this.initialScope = ActivityScope.workspace,
+  });
+  ```
+  şeklinde kod var bunun olmaması lazım bence
 
 ## ✅ Mobilde Mevcut Olan Özellikler (Git Geçmişinden)
 
@@ -207,10 +233,12 @@ POST /uploads/image        → Resim yükle (multipart/form-data)
 GET  /uploads/files/{filename} → Resmi al
 ```
 
+**Not:** Mobilde profil güncelleme uç noktası `PATCH /users/me` mevcut ancak backend `UserPublic` modelinde profile/avatar alanı görünmüyor. Bu nedenle fotoğraf URL'sinin kullanıcı profiline kaydedilmesi şu an backend desteği gerektiriyor.
+
 **Yapılacaklar:**
 - [ ] `pubspec.yaml`'a `image_picker` paketi ekle (kullanıcı onayı gerekli!)
 - [ ] `profile_edit.dart`'ta avatar'a tıklanınca fotoğraf seçici
-- [ ] Upload işlemi → dönen URL'yi `PATCH /users/me` ile kaydet
+- [ ] Upload işlemi → dönen URL'yi `PATCH /users/me` ile kaydet (backend alanı hazır olmalı)
 
 ---
 
@@ -276,17 +304,17 @@ PUT /cards/{id} → { due_date: "ISO 8601 string" }
 
 | Özellik | Öncelik | API Hazır | ViewModel Hazır |
 |---------|---------|-----------|-----------------|
-| Bildirimler | 🔴 Yüksek | ✅ | ❌ |
-| Davetiyeler | 🔴 Yüksek | ✅ | ❌ |
+| Bildirimler | 🔴 Yüksek | ✅ | ✅ |
+| Davetiyeler | 🔴 Yüksek | ✅ | ✅ |
 | Workspace Üye Yönetimi | 🔴 Yüksek | ✅ | ⚠️ Kısmi |
-| Aynı Liste İçi Kart Sıralama | 🔴 Yüksek | ✅ | ⚠️ Kısmi |
-| Activity Log | 🟡 Orta | ✅ | ❌ |
-| Board Arka Plan Seçici | 🟡 Orta | ✅ | ⚠️ Kısmi |
+| Aynı Liste İçi Kart Sıralama | 🔴 Yüksek | ✅ | ✅ |
+| Activity Log | 🟡 Orta | ✅ | ✅ |
+| Board Arka Plan Seçici | 🟡 Orta | ✅ | ✅ |
 | Dashboard / Ana Ekran | 🟡 Orta | ✅ | ✅ |
 | Liste Güncelle/Sil UI | 🟡 Orta | ✅ | ✅ |
 | Kart Üzerinde Özet Bilgiler | 🟡 Orta | ✅ | ✅ |
 | Profil Fotoğrafı Upload | 🟢 Düşük | ✅ | ❌ |
-| Kart Atama | 🟢 Düşük | ✅ | ⚠️ Kısmi |
+| Kart Atama | 🟢 Düşük | ✅ | ✅ |
 | Bitiş Tarihi Düzenleme | 🟢 Düşük | ✅ | ✅ |
 
 ---
