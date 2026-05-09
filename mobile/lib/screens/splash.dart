@@ -4,6 +4,7 @@ import 'package:mobile/viewmodels/auth_viewmodel.dart';
 import 'package:mobile/screens/login.dart';
 import 'package:mobile/screens/signup.dart';
 import 'package:mobile/widgets/bottom_nav_shell.dart';
+import 'package:mobile/services/socket_service.dart';
 
 /// Karşılama ekranı — referans: giris.jpeg
 /// Otomatik giriş kontrolü yapar. Giriş yapılmışsa direkt ana ekrana yönlendirir.
@@ -28,6 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     if (isLoggedIn) {
+      context.read<SocketService>().connect();
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const BottomNavShell()),

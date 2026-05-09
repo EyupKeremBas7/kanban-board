@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/services/api_service.dart';
 import 'package:mobile/services/auth_service.dart';
+import 'package:mobile/services/socket_service.dart';
 import 'package:mobile/viewmodels/auth_viewmodel.dart';
 import 'package:mobile/viewmodels/boards_viewmodel.dart';
 import 'package:mobile/viewmodels/lists_viewmodel.dart';
@@ -32,6 +33,7 @@ class KanbanBoardApp extends StatelessWidget {
     // Service'leri oluştur
     final authService = AuthService();
     final apiService = ApiService(authService);
+    final socketService = SocketService(authService);
 
     return MultiProvider(
       providers: [
@@ -66,6 +68,7 @@ class KanbanBoardApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => InvitationsViewModel(apiService: apiService),
         ),
+        ChangeNotifierProvider.value(value: socketService),
       ],
       child: MaterialApp(
         title: 'Kanban Board',

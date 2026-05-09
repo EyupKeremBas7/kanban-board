@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:mobile/domain/models/user.dart';
 import 'package:mobile/services/api_service.dart';
 import 'package:mobile/services/auth_service.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 /// Auth ViewModel — Giriş, kayıt ve oturum yönetimi.
 /// Provider (ChangeNotifier) ile state yönetimi (MVVM — Kural 5).
@@ -277,6 +278,70 @@ class AuthViewModel extends ChangeNotifier {
     await _authService.clearToken();
     _currentUser = null;
     _errorMessage = null;
+    try {
+      final googleSignIn = GoogleSignIn();
+      if (await googleSignIn.isSignedIn()) {
+        await googleSignIn.signOut();
+      }
+    } catch (_) {}
     notifyListeners();
+  }
+
+  /// Google ile Giriş
+  Future<bool> loginWithGoogle() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile', 'openid'],
+      );
+
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        // User canceled the sign-in
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final idToken = googleAuth.idToken;
+
+      if (idToken == null) {
+        _errorMessage = 'Google yetkilendirme hatası (Token alınamadı).';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Backend çağrısı (Örnek: POST /oauth/google/token)
+      final response = await _apiService.post(
+        '/oauth/google/token',
+        body: {'id_token': idToken},
+        withAuth: false,
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final token = data['access_token'] as String;
+        await _authService.saveToken(token);
+        await fetchCurrentUser();
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = 'Google giriş entegrasyonu backend tarafında eksik.';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = 'Bağlantı hatası: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
 }

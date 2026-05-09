@@ -4,6 +4,7 @@ import 'package:mobile/viewmodels/auth_viewmodel.dart';
 import 'package:mobile/screens/signup.dart';
 import 'package:mobile/screens/forgot_password.dart';
 import 'package:mobile/widgets/bottom_nav_shell.dart';
+import 'package:mobile/services/socket_service.dart';
 
 /// Oturum açma ekranı — referans: giris-login.jpeg
 /// AuthViewModel üzerinden gerçek API çağrısı yapar.
@@ -39,6 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (success) {
+      context.read<SocketService>().connect();
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const BottomNavShell()),
@@ -77,6 +79,38 @@ class _LoginScreenState extends State<LoginScreen> {
           builder: (ctx) => AlertDialog(
             title: const Text('Giriş Hatası'),
             content: Text(errorMsg),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Tamam'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleGoogleLogin() async {
+    final authViewModel = context.read<AuthViewModel>();
+    final success = await authViewModel.loginWithGoogle();
+
+    if (!mounted) return;
+
+    if (success) {
+      context.read<SocketService>().connect();
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const BottomNavShell()),
+        (route) => false,
+      );
+    } else {
+      if (authViewModel.errorMessage != null) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Giriş Hatası'),
+            content: Text(authViewModel.errorMessage!),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
@@ -170,6 +204,20 @@ class _LoginScreenState extends State<LoginScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Text('Giriş Yap'),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                // Google ile giriş butonu
+                Consumer<AuthViewModel>(
+                  builder: (context, authVM, child) {
+                    return OutlinedButton.icon(
+                      onPressed: authVM.isLoading ? null : _handleGoogleLogin,
+                      icon: const Icon(Icons.g_mobiledata, size: 28),
+                      label: const Text('Google ile Giriş Yap'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
                     );
                   },
                 ),

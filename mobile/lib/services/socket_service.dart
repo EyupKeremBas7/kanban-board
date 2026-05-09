@@ -1,0 +1,86 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:mobile/services/auth_service.dart';
+
+class SocketService extends ChangeNotifier {
+  IO.Socket? _socket;
+  final AuthService _authService;
+
+  bool _isConnected = false;
+  bool get isConnected => _isConnected;
+
+  // Event stream to notify listeners of incoming events
+  final _eventController = StreamController<Map<String, dynamic>>.broadcast();
+  Stream<Map<String, dynamic>> get eventStream => _eventController.stream;
+
+  SocketService(this._authService);
+
+  void connect() async {
+    if (_socket != null && _socket!.connected) return;
+
+    final token = await _authService.getToken();
+    final baseUrl = dotenv.env['API_URL']?.replaceAll('/api/v1', '') ?? 'http://10.0.2.2:8000';
+
+    _socket = IO.io(
+      baseUrl,
+      IO.OptionBuilder()
+          .setTransports(['websocket'])
+          .disableAutoConnect()
+          .setExtraHeaders(token != null ? {'Authorization': 'Bearer $token'} : {})
+          .build(),
+    );
+
+    _socket!.onConnect((_) {
+      if (kDebugMode) print('Socket.IO: Connected');
+      _isConnected = true;
+      notifyListeners();
+    });
+
+    _socket!.onDisconnect((_) {
+      if (kDebugMode) print('Socket.IO: Disconnected');
+      _isConnected = false;
+      notifyListeners();
+    });
+
+    _socket!.onConnectError((err) {
+      if (kDebugMode) print('Socket.IO: Connect Error: $err');
+    });
+
+    _socket!.onError((err) {
+      if (kDebugMode) print('Socket.IO: Error: $err');
+    });
+
+    // Handle generic events
+    _socket!.onAny((event, data) {
+      if (kDebugMode) print('Socket.IO Event: $event -> $data');
+      _eventController.add({
+        'event': event,
+        'data': data,
+      });
+    });
+
+    _socket!.connect();
+  }
+
+  void disconnect() {
+    _socket?.disconnect();
+    _socket = null;
+    _isConnected = false;
+    notifyListeners();
+  }
+
+  void emit(String event, dynamic data) {
+    if (_socket != null && _socket!.connected) {
+      _socket!.emit(event, data);
+    }
+  }
+
+  @override
+  void dispose() {
+    _eventController.close();
+    disconnect();
+    super.dispose();
+  }
+}
