@@ -118,7 +118,7 @@ const WorkspaceBoardsSection = () => {
     <VStack align="stretch" gap={6}>
       {workspaces.map((workspace) => {
         const workspaceBoards = boards.filter((b) => b.workspace_id === workspace.id)
-        
+
         return (
           <Box key={workspace.id}>
             <HStack mb={3}>
@@ -138,7 +138,7 @@ const WorkspaceBoardsSection = () => {
               </Box>
               <Text fontWeight="bold">{workspace.name}</Text>
             </HStack>
-            
+
             {workspaceBoards.length > 0 ? (
               <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} gap={4}>
                 {workspaceBoards.map((board) => (

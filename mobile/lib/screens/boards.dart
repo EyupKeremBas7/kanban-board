@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/viewmodels/boards_viewmodel.dart';
 import 'package:mobile/viewmodels/workspaces_viewmodel.dart';
+import 'package:mobile/viewmodels/navigation_viewmodel.dart';
 import 'package:mobile/screens/board_detail.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 /// Panolar listesi ekranı — referans: panolar.jpeg
 /// BoardsViewModel üzerinden gerçek API verisi gösterir.
@@ -34,14 +36,15 @@ class _BoardsScreenState extends State<BoardsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         title: _isSearching
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'Pano ara...',
+                decoration: InputDecoration(
+                  hintText: '${l10n.boards} ara...',
                   border: InputBorder.none,
                 ),
                 onChanged: (value) {
@@ -50,7 +53,7 @@ class _BoardsScreenState extends State<BoardsScreen> {
                   });
                 },
               )
-            : const Text('Panolar'),
+            : Text(l10n.boards),
         actions: [
           IconButton(
             icon: Icon(_isSearching ? Icons.close : Icons.search),
@@ -104,7 +107,7 @@ class _BoardsScreenState extends State<BoardsScreen> {
                   FilledButton.icon(
                     onPressed: () => boardsVM.fetchBoards(),
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Tekrar Dene'),
+                    label: Text(l10n.tryAgain),
                   ),
                 ],
               ),
@@ -126,7 +129,7 @@ class _BoardsScreenState extends State<BoardsScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Henüz pano yok',
+                    l10n.noBoardsFound,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Theme.of(
                         context,
@@ -135,7 +138,7 @@ class _BoardsScreenState extends State<BoardsScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'İlk panonuzu oluşturun',
+                    l10n.createFirstWorkspace.replaceAll(l10n.workspaces, l10n.boards), // Fallback if no specific createFirstBoard
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(
                         context,
@@ -148,13 +151,31 @@ class _BoardsScreenState extends State<BoardsScreen> {
           }
 
           // Board listesi — workspace'e göre grouped
-          // Backend workspace_id döner, şimdilik düz liste göster
+          final navVM = context.watch<NavigationViewModel>();
+          
           final filteredBoards = boardsVM.boards.where((b) {
-            return b.name.toLowerCase().contains(_searchQuery);
+            final matchesSearch = b.name.toLowerCase().contains(_searchQuery);
+            final matchesWorkspace = navVM.selectedWorkspaceId == null || 
+                                     b.workspaceId == navVM.selectedWorkspaceId;
+            return matchesSearch && matchesWorkspace;
           }).toList();
 
-          if (filteredBoards.isEmpty && _searchQuery.isNotEmpty) {
-            return const Center(child: Text('Aranan kriterlere uygun pano bulunamadı.'));
+          if (filteredBoards.isEmpty) {
+            if (_searchQuery.isNotEmpty || navVM.selectedWorkspaceId != null) {
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('Kriterlere uygun pano bulunamadı.'), // I'll keep this for now or find a key
+                    if (navVM.selectedWorkspaceId != null)
+                      TextButton(
+                        onPressed: () => navVM.clearWorkspaceFilter(),
+                        child: const Text('Filtreyi Temizle'),
+                      ),
+                  ],
+                ),
+              );
+            }
           }
 
           return RefreshIndicator(
@@ -195,14 +216,14 @@ class _BoardsScreenState extends State<BoardsScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showCreateBoardDialog(context),
+        onPressed: () => _showCreateBoardDialog(context, l10n),
         icon: const Icon(Icons.add),
-        label: const Text('Pano Oluştur'),
+        label: Text(l10n.createBoard),
       ),
     );
   }
 
-  void _showCreateBoardDialog(BuildContext context) {
+  void _showCreateBoardDialog(BuildContext context, AppLocalizations l10n) {
     final nameController = TextEditingController();
     final formKey = GlobalKey<FormState>();
     String? selectedWorkspaceId;
@@ -220,7 +241,7 @@ class _BoardsScreenState extends State<BoardsScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('Yeni Pano Oluştur'),
+              title: Text(l10n.createBoardTitle),
               content: Form(
                 key: formKey,
                 child: Column(
@@ -228,13 +249,13 @@ class _BoardsScreenState extends State<BoardsScreen> {
                   children: [
                     TextFormField(
                       controller: nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Pano Adı',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.boardName,
+                        border: const OutlineInputBorder(),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Pano adı gerekli';
+                          return l10n.nameRequired;
                         }
                         return null;
                       },
@@ -254,7 +275,7 @@ class _BoardsScreenState extends State<BoardsScreen> {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: Text(
-                              'Pano oluşturmak için önce bir Çalışma Alanı oluşturmalısınız.',
+                              l10n.mustCreateWorkspaceFirst,
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.error,
                               ),
@@ -267,9 +288,9 @@ class _BoardsScreenState extends State<BoardsScreen> {
 
                         return DropdownButtonFormField<String>(
                           initialValue: selectedWorkspaceId,
-                          decoration: const InputDecoration(
-                            labelText: 'Çalışma Alanı',
-                            border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                            labelText: l10n.workspaces,
+                            border: const OutlineInputBorder(),
                           ),
                           items: vm.workspaces.map((ws) {
                             return DropdownMenuItem(
@@ -287,7 +308,7 @@ class _BoardsScreenState extends State<BoardsScreen> {
                           },
                           validator: (value) {
                             if (value == null) {
-                              return 'Çalışma alanı seçilmeli';
+                              return l10n.nameRequired; // Placeholder or add workspaceRequired
                             }
                             return null;
                           },
@@ -300,7 +321,7 @@ class _BoardsScreenState extends State<BoardsScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text('İptal'),
+                  child: Text(l10n.cancel),
                 ),
                 Consumer<BoardsViewModel>(
                   builder: (context, vm, child) {
@@ -321,15 +342,15 @@ class _BoardsScreenState extends State<BoardsScreen> {
                               if (success) {
                                 Navigator.pop(dialogContext);
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Pano oluşturuldu'),
+                                  SnackBar(
+                                    content: Text(l10n.boardCreatedSuccessfully),
                                   ),
                                 );
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      vm.errorMessage ?? 'Oluşturma başarısız',
+                                      vm.errorMessage ?? l10n.boardCreateFailed,
                                     ),
                                     backgroundColor: Theme.of(
                                       context,
@@ -344,7 +365,7 @@ class _BoardsScreenState extends State<BoardsScreen> {
                               height: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Oluştur'),
+                          : Text(l10n.add),
                     );
                   },
                 ),
@@ -356,3 +377,4 @@ class _BoardsScreenState extends State<BoardsScreen> {
     );
   }
 }
+

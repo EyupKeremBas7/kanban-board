@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/viewmodels/auth_viewmodel.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 /// Şifre değiştirme ekranı — PATCH /users/me/password
 /// StatefulWidget (form — Kural 16), SingleChildScrollView (Kural 10).
@@ -28,7 +29,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     super.dispose();
   }
 
-  Future<void> _handleChangePassword() async {
+  Future<void> _handleChangePassword(AppLocalizations l10n) async {
     if (!_formKey.currentState!.validate()) return;
 
     final authVM = context.read<AuthViewModel>();
@@ -41,13 +42,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Şifre başarıyla değiştirildi')),
+        SnackBar(content: Text(l10n.passwordChangedSuccessfully)),
       );
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(authVM.errorMessage ?? 'Şifre değiştirme başarısız'),
+          content: Text(authVM.errorMessage ?? l10n.changePasswordFailed),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -56,8 +57,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Şifre Değiştir')),
+      appBar: AppBar(title: Text(l10n.changePassword)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(
@@ -72,7 +74,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 obscureText: _obscureCurrent,
                 textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
-                  labelText: 'Mevcut Şifre',
+                  labelText: l10n.currentPassword,
                   prefixIcon: const Icon(Icons.lock_outlined),
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
@@ -86,7 +88,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Mevcut şifre gerekli';
+                    return l10n.passwordRequired;
                   }
                   return null;
                 },
@@ -98,7 +100,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 obscureText: _obscureNew,
                 textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
-                  labelText: 'Yeni Şifre',
+                  labelText: l10n.newPassword,
                   prefixIcon: const Icon(Icons.lock_outline),
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
@@ -112,16 +114,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Yeni şifre gerekli';
+                    return l10n.passwordRequired;
                   }
                   if (value.length < 8) {
-                    return 'Şifre en az 8 karakter olmalı';
+                    return l10n.passwordTooShort;
                   }
                   if (value.length > 40) {
-                    return 'Şifre en fazla 40 karakter olabilir';
+                    return l10n.passwordTooLong;
                   }
                   if (value == _currentPasswordController.text) {
-                    return 'Yeni şifre mevcut şifreyle aynı olamaz';
+                    return l10n.passwordSameAsCurrent;
                   }
                   return null;
                 },
@@ -133,7 +135,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 obscureText: _obscureConfirm,
                 textInputAction: TextInputAction.done,
                 decoration: InputDecoration(
-                  labelText: 'Yeni Şifre (Tekrar)',
+                  labelText: l10n.confirmPassword,
                   prefixIcon: const Icon(Icons.lock_outline),
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
@@ -147,21 +149,21 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Şifre tekrarı gerekli';
+                    return l10n.passwordRequired;
                   }
                   if (value != _newPasswordController.text) {
-                    return 'Şifreler eşleşmiyor';
+                    return l10n.passwordsDoNotMatch;
                   }
                   return null;
                 },
-                onFieldSubmitted: (_) => _handleChangePassword(),
+                onFieldSubmitted: (_) => _handleChangePassword(l10n),
               ),
               const SizedBox(height: 24),
               // Kaydet butonu
               Consumer<AuthViewModel>(
                 builder: (context, authVM, child) {
                   return FilledButton(
-                    onPressed: authVM.isLoading ? null : _handleChangePassword,
+                    onPressed: authVM.isLoading ? null : () => _handleChangePassword(l10n),
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
@@ -171,7 +173,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Şifreyi Değiştir'),
+                        : Text(l10n.changePassword),
                   );
                 },
               ),
@@ -182,3 +184,4 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     );
   }
 }
+

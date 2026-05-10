@@ -5,6 +5,7 @@ import 'package:mobile/viewmodels/activity_viewmodel.dart';
 import 'package:mobile/viewmodels/boards_viewmodel.dart';
 import 'package:mobile/viewmodels/cards_viewmodel.dart';
 import 'package:mobile/viewmodels/workspaces_viewmodel.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 enum ActivityScope { workspace, board, card }
 
@@ -68,9 +69,10 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final title = widget.boardName != null
-        ? '${widget.boardName} Aktivite'
-        : 'Aktivite';
+        ? '${widget.boardName} ${l10n.activity}'
+        : l10n.activity;
 
     return Scaffold(
       appBar: AppBar(
@@ -103,18 +105,18 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     await _loadCurrentScopeActivity();
                   },
                   borderRadius: BorderRadius.circular(12),
-                  children: const [
+                  children: [
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: Text('Workspace'),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(l10n.workspaces),
                     ),
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: Text('Board'),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(l10n.boards),
                     ),
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: Text('Kart'),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(l10n.card),
                     ),
                   ],
                 ),
@@ -126,6 +128,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   workspacesVM,
                   boardsVM,
                   cardsVM,
+                  l10n,
                 ),
               ),
               const SizedBox(height: 12),
@@ -158,7 +161,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                               FilledButton.icon(
                                 onPressed: _reload,
                                 icon: const Icon(Icons.refresh),
-                                label: const Text('Tekrar Dene'),
+                                label: Text(l10n.tryAgain),
                               ),
                             ],
                           ),
@@ -182,12 +185,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
                               ),
                               const SizedBox(height: 16),
                               Text(
-                                'Aktivite yok',
+                                l10n.noActivity,
                                 style: Theme.of(context).textTheme.titleLarge,
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'Bu seçime ait aktivite kaydı bulunmuyor.',
+                                l10n.noActivityFoundForSelection,
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
@@ -207,7 +210,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                             const SizedBox(height: 12),
                         itemBuilder: (context, index) {
                           final log = activityVM.logs[index];
-                          return _ActivityTile(log: log);
+                          return _ActivityTile(log: log, l10n: l10n);
                         },
                       ),
                     );
@@ -226,13 +229,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
     WorkspacesViewModel workspacesVM,
     BoardsViewModel boardsVM,
     CardsViewModel cardsVM,
+    AppLocalizations l10n,
   ) {
     switch (_scope) {
       case ActivityScope.workspace:
         if (workspacesVM.workspaces.isEmpty) {
           return _EmptySelectorHint(
             icon: Icons.workspaces_outline,
-            text: 'Çalışma alanı bulunamadı.',
+            text: l10n.noWorkspacesFound,
           );
         }
         return DropdownButton<String>(
@@ -255,7 +259,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
         if (boardsVM.boards.isEmpty) {
           return _EmptySelectorHint(
             icon: Icons.dashboard_outlined,
-            text: 'Pano bulunamadı.',
+            text: l10n.noBoardsFound,
           );
         }
         return DropdownButton<String>(
@@ -278,7 +282,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
         if (cardsVM.cards.isEmpty) {
           return _EmptySelectorHint(
             icon: Icons.check_box_outlined,
-            text: 'Kart bulunamadı.',
+            text: l10n.noCardsFound,
           );
         }
         return DropdownButton<String>(
@@ -373,8 +377,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
 class _ActivityTile extends StatelessWidget {
   final ActivityLog log;
+  final AppLocalizations l10n;
 
-  const _ActivityTile({required this.log});
+  const _ActivityTile({required this.log, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -387,9 +392,9 @@ class _ActivityTile extends StatelessWidget {
           backgroundColor: colorScheme.primaryContainer,
           child: Icon(icon, color: colorScheme.onPrimaryContainer),
         ),
-        title: Text(_titleText(log), overflow: TextOverflow.ellipsis),
+        title: Text(_titleText(log, l10n), overflow: TextOverflow.ellipsis),
         subtitle: Text(
-          _subtitleText(log),
+          _subtitleText(log, l10n),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
@@ -402,18 +407,18 @@ class _ActivityTile extends StatelessWidget {
     );
   }
 
-  String _titleText(ActivityLog log) {
-    final actor = log.userFullName ?? log.userName ?? log.userEmail ?? 'Bilinmeyen kullanıcı';
+  String _titleText(ActivityLog log, AppLocalizations l10n) {
+    final actor = log.userFullName ?? log.userName ?? log.userEmail ?? l10n.unknownUser;
     return '$actor · ${log.action}';
   }
 
-  String _subtitleText(ActivityLog log) {
+  String _subtitleText(ActivityLog log, AppLocalizations l10n) {
     final entityName = log.entityName ?? log.entityType;
     final valueLine = [
       if (log.oldValue != null && log.oldValue!.isNotEmpty)
-        'Önce: ${log.oldValue}',
+        '${l10n.before}: ${log.oldValue}',
       if (log.newValue != null && log.newValue!.isNotEmpty)
-        'Sonra: ${log.newValue}',
+        '${l10n.after}: ${log.newValue}',
     ].join(' • ');
 
     if (valueLine.isEmpty) {
@@ -450,6 +455,7 @@ class _ActivityTile extends StatelessWidget {
   }
 }
 
+
 class _EmptySelectorHint extends StatelessWidget {
   final IconData icon;
   final String text;
@@ -475,3 +481,4 @@ class _EmptySelectorHint extends StatelessWidget {
     );
   }
 }
+

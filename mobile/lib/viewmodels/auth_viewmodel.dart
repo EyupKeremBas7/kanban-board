@@ -62,7 +62,7 @@ class AuthViewModel extends ChangeNotifier {
         return false;
       }
     } catch (e) {
-      _errorMessage = 'Bağlantı hatası: $e';
+      _errorMessage = 'Connection error: $e';
       _isLoading = false;
       notifyListeners();
       return false;
@@ -97,7 +97,7 @@ class AuthViewModel extends ChangeNotifier {
         return false;
       }
     } catch (e) {
-      _errorMessage = 'Bağlantı hatası: $e';
+      _errorMessage = 'Connection error: $e';
       _isLoading = false;
       notifyListeners();
       return false;
@@ -165,7 +165,7 @@ class AuthViewModel extends ChangeNotifier {
         return false;
       }
     } catch (e) {
-      _errorMessage = 'Bağlantı hatası: $e';
+      _errorMessage = 'Connection error: $e';
       _isLoading = false;
       notifyListeners();
       return false;
@@ -279,10 +279,7 @@ class AuthViewModel extends ChangeNotifier {
     _currentUser = null;
     _errorMessage = null;
     try {
-      final googleSignIn = GoogleSignIn();
-      if (await googleSignIn.isSignedIn()) {
-        await googleSignIn.signOut();
-      }
+      await GoogleSignIn.instance.signOut();
     } catch (_) {}
     notifyListeners();
   }
@@ -294,11 +291,13 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final googleSignIn = GoogleSignIn(
-        scopes: ['email', 'profile', 'openid'],
+      final googleSignIn = GoogleSignIn.instance;
+      // Initialize if needed
+      await googleSignIn.initialize(
+        serverClientId: '480173408364-o51tp09af5s6h34dqh8mpv9c3cvt1tm2.apps.googleusercontent.com',
       );
 
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      final googleUser = await GoogleSignIn.instance.authenticate();
       if (googleUser == null) {
         // User canceled the sign-in
         _isLoading = false;
@@ -306,7 +305,7 @@ class AuthViewModel extends ChangeNotifier {
         return false;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final googleAuth = googleUser.authentication;
       final idToken = googleAuth.idToken;
 
       if (idToken == null) {

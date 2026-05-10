@@ -6,6 +6,7 @@ import 'package:mobile/domain/models/notification.dart';
 import 'package:mobile/domain/models/invitation.dart';
 import 'package:mobile/utils/enums.dart';
 import 'package:mobile/viewmodels/workspaces_viewmodel.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 /// Gelen Kutusu (Bildirimler ve Davetler) ekranı
 /// Kullanıcının tüm bildirimlerini ve davetiyelerini yönettiği alan.
@@ -31,15 +32,16 @@ class _InboxScreenState extends State<InboxScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Gelen Kutusu'),
-          bottom: const TabBar(
+          title: Text(l10n.inbox),
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'Bildirimler'),
-              Tab(text: 'Davetler'),
+              Tab(text: l10n.notifications),
+              Tab(text: l10n.invitations),
             ],
           ),
           actions: [
@@ -56,8 +58,8 @@ class _InboxScreenState extends State<InboxScreen> {
                           final success = await vm.markAllAsRead();
                           if (context.mounted && success) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Tümü okundu olarak işaretlendi'),
+                              SnackBar(
+                                content: Text(l10n.markAllReadSuccess),
                               ),
                             );
                           }
@@ -88,6 +90,7 @@ class _NotificationsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Consumer<NotificationsViewModel>(
       builder: (context, vm, child) {
         if (vm.isLoading && vm.notifications.isEmpty) {
@@ -110,7 +113,7 @@ class _NotificationsTab extends StatelessWidget {
                 FilledButton.icon(
                   onPressed: () => vm.fetchNotifications(),
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Tekrar Dene'),
+                  label: Text(l10n.tryAgain),
                 ),
               ],
             ),
@@ -133,12 +136,12 @@ class _NotificationsTab extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Bildiriminiz yok',
+                    l10n.noNotifications,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Tüm gelişmelerden haberdar olduğunuzda burada görünecek.',
+                    l10n.noNotificationsSubtitle,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(
@@ -159,7 +162,7 @@ class _NotificationsTab extends StatelessWidget {
             separatorBuilder: (context, index) => const Divider(height: 1),
             itemBuilder: (context, index) {
               final notification = vm.notifications[index];
-              return _NotificationTile(notification: notification);
+              return _NotificationTile(notification: notification, l10n: l10n);
             },
           ),
         );
@@ -173,6 +176,7 @@ class _InvitationsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Consumer<InvitationsViewModel>(
       builder: (context, vm, child) {
         if (vm.isLoading &&
@@ -202,7 +206,7 @@ class _InvitationsTab extends StatelessWidget {
                     vm.fetchSentInvitations();
                   },
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Tekrar Dene'),
+                  label: Text(l10n.tryAgain),
                 ),
               ],
             ),
@@ -218,7 +222,7 @@ class _InvitationsTab extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             children: [
               Text(
-                'Gelen Davetler',
+                l10n.receivedInvitations,
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -229,7 +233,7 @@ class _InvitationsTab extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 32),
                   child: Center(
                     child: Text(
-                      'Bekleyen davetiniz bulunmuyor.',
+                      l10n.noReceivedInvitations,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(
                           context,
@@ -240,13 +244,13 @@ class _InvitationsTab extends StatelessWidget {
                 )
               else
                 ...vm.receivedInvitations.map(
-                  (inv) => _ReceivedInvitationCard(invitation: inv),
+                  (inv) => _ReceivedInvitationCard(invitation: inv, l10n: l10n),
                 ),
               const SizedBox(height: 32),
               const Divider(),
               const SizedBox(height: 16),
               Text(
-                'Gönderilen Davetler',
+                l10n.sentInvitations,
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -257,7 +261,7 @@ class _InvitationsTab extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 32),
                   child: Center(
                     child: Text(
-                      'Bekleyen gönderilmiş davetiniz bulunmuyor.',
+                      l10n.noSentInvitations,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(
                           context,
@@ -268,7 +272,7 @@ class _InvitationsTab extends StatelessWidget {
                 )
               else
                 ...vm.sentInvitations.map(
-                  (inv) => _SentInvitationCard(invitation: inv),
+                  (inv) => _SentInvitationCard(invitation: inv, l10n: l10n),
                 ),
             ],
           ),
@@ -280,8 +284,9 @@ class _InvitationsTab extends StatelessWidget {
 
 class _ReceivedInvitationCard extends StatelessWidget {
   final Invitation invitation;
+  final AppLocalizations l10n;
 
-  const _ReceivedInvitationCard({required this.invitation});
+  const _ReceivedInvitationCard({required this.invitation, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -308,12 +313,16 @@ class _ReceivedInvitationCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        invitation.workspaceName,
+                        invitation.workspaceName.isNotEmpty 
+                            ? invitation.workspaceName 
+                            : l10n.unknownWorkspace,
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        'Davet eden: ${invitation.inviterName}',
+                        l10n.invitedBy(invitation.inviterName.isNotEmpty 
+                            ? invitation.inviterName 
+                            : l10n.unknownUser),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -340,14 +349,14 @@ class _ReceivedInvitationCard extends StatelessWidget {
                               SnackBar(
                                 content: Text(
                                   success
-                                      ? 'Davet reddedildi'
-                                      : (vm.errorMessage ?? 'Hata'),
+                                      ? l10n.invitationRejected
+                                      : (vm.errorMessage ?? 'Error'),
                                 ),
                               ),
                             );
                           }
                         },
-                  child: const Text('Reddet'),
+                  child: Text(l10n.reject),
                 ),
                 const SizedBox(width: 8),
                 FilledButton(
@@ -368,14 +377,14 @@ class _ReceivedInvitationCard extends StatelessWidget {
                               SnackBar(
                                 content: Text(
                                   success
-                                      ? 'Davet kabul edildi'
-                                      : (vm.errorMessage ?? 'Hata'),
+                                      ? l10n.invitationAccepted
+                                      : (vm.errorMessage ?? 'Error'),
                                 ),
                               ),
                             );
                           }
                         },
-                  child: const Text('Kabul Et'),
+                  child: Text(l10n.accept),
                 ),
               ],
             ),
@@ -388,8 +397,9 @@ class _ReceivedInvitationCard extends StatelessWidget {
 
 class _SentInvitationCard extends StatelessWidget {
   final Invitation invitation;
+  final AppLocalizations l10n;
 
-  const _SentInvitationCard({required this.invitation});
+  const _SentInvitationCard({required this.invitation, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -403,7 +413,7 @@ class _SentInvitationCard extends StatelessWidget {
           child: const Icon(Icons.mail_outline),
         ),
         title: Text(invitation.inviteeEmail),
-        subtitle: Text('Çalışma Alanı: ${invitation.workspaceName}'),
+        subtitle: Text('${l10n.workspaceName}: ${invitation.workspaceName.isNotEmpty ? invitation.workspaceName : l10n.unknownWorkspace}'),
         trailing: IconButton(
           icon: const Icon(Icons.close, color: Colors.red),
           onPressed: vm.isLoading
@@ -412,14 +422,12 @@ class _SentInvitationCard extends StatelessWidget {
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: const Text('Daveti İptal Et'),
-                      content: const Text(
-                        'Bu daveti iptal etmek istediğinize emin misiniz?',
-                      ),
+                      title: Text(l10n.cancelInvitation),
+                      content: Text(l10n.cancelInvitationConfirm),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
-                          child: const Text('Hayır'),
+                          child: Text(l10n.cancel),
                         ),
                         FilledButton(
                           onPressed: () => Navigator.pop(context, true),
@@ -428,7 +436,7 @@ class _SentInvitationCard extends StatelessWidget {
                               context,
                             ).colorScheme.error,
                           ),
-                          child: const Text('Evet, İptal Et'),
+                          child: Text(l10n.yesCancel),
                         ),
                       ],
                     ),
@@ -441,8 +449,8 @@ class _SentInvitationCard extends StatelessWidget {
                         SnackBar(
                           content: Text(
                             success
-                                ? 'Davet iptal edildi'
-                                : (vm.errorMessage ?? 'Hata'),
+                                ? l10n.invitationCancelled
+                                : (vm.errorMessage ?? 'Error'),
                           ),
                         ),
                       );
@@ -457,8 +465,9 @@ class _SentInvitationCard extends StatelessWidget {
 
 class _NotificationTile extends StatelessWidget {
   final AppNotification notification;
+  final AppLocalizations l10n;
 
-  const _NotificationTile({required this.notification});
+  const _NotificationTile({required this.notification, required this.l10n});
 
   IconData _getIconForType(NotificationType type) {
     switch (type) {
@@ -574,7 +583,7 @@ class _NotificationTile extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        _formatDate(notification.createdAt),
+                        _formatDate(notification.createdAt, l10n),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(
                             context,
@@ -602,22 +611,23 @@ class _NotificationTile extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
+  String _formatDate(DateTime date, AppLocalizations l10n) {
     final now = DateTime.now();
     final difference = now.difference(date);
 
     if (difference.inDays == 0) {
       if (difference.inHours == 0) {
         if (difference.inMinutes == 0) {
-          return 'Az önce';
+          return l10n.justNow;
         }
-        return '${difference.inMinutes} dakika önce';
+        return l10n.minutesAgo(difference.inMinutes);
       }
-      return '${difference.inHours} saat önce';
+      return l10n.hoursAgo(difference.inHours);
     } else if (difference.inDays < 7) {
-      return '${difference.inDays} gün önce';
+      return l10n.daysAgo(difference.inDays);
     } else {
       return '${date.day}/${date.month}/${date.year}';
     }
   }
 }
+

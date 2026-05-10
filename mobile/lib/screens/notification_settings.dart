@@ -1,96 +1,80 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:mobile/viewmodels/settings_viewmodel.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 /// Bildirim Ayarları Ekranı
-class NotificationSettingsScreen extends StatefulWidget {
+class NotificationSettingsScreen extends StatelessWidget {
   const NotificationSettingsScreen({super.key});
 
   @override
-  State<NotificationSettingsScreen> createState() =>
-      _NotificationSettingsScreenState();
-}
-
-class _NotificationSettingsScreenState extends State<NotificationSettingsScreen> {
-  bool _enablePushNotifications = true;
-  bool _enableEmailNotifications = true;
-  bool _enableCardComments = true;
-  bool _enableCardAssignments = true;
-  bool _enableBoardUpdates = true;
-  bool _enableMentions = true;
-
-  @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Bildirim Ayarları')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Text(
-            'Bildirim Türleri',
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          SwitchListTile(
-            title: const Text('Push Bildirimleri'),
-            subtitle: const Text('Uygulama içi ve cihaz bildirimleri'),
-            value: _enablePushNotifications,
-            onChanged: (val) {
-              setState(() => _enablePushNotifications = val);
-            },
-          ),
-          SwitchListTile(
-            title: const Text('E-posta Bildirimleri'),
-            subtitle: const Text('Önemli güncellemelerin e-postası'),
-            value: _enableEmailNotifications,
-            onChanged: (val) {
-              setState(() => _enableEmailNotifications = val);
-            },
-          ),
-          const Divider(height: 24),
-          Text(
-            'Bildirim Kategor ileri',
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          SwitchListTile(
-            title: const Text('Kart Yorumları'),
-            subtitle: const Text('Kartlara yorum yapıldığında bilgilendir'),
-            value: _enableCardComments,
-            onChanged: (val) {
-              setState(() => _enableCardComments = val);
-            },
-          ),
-          SwitchListTile(
-            title: const Text('Kart Atanması'),
-            subtitle: const Text('Sana kart atandığında bilgilendir'),
-            value: _enableCardAssignments,
-            onChanged: (val) {
-              setState(() => _enableCardAssignments = val);
-            },
-          ),
-          SwitchListTile(
-            title: const Text('Pano Güncellemeleri'),
-            subtitle: const Text('Panonuzdaki önemli değişiklikler'),
-            value: _enableBoardUpdates,
-            onChanged: (val) {
-              setState(() => _enableBoardUpdates = val);
-            },
-          ),
-          SwitchListTile(
-            title: const Text('Anılan Bildirimler'),
-            subtitle: const Text('Sizi anılanlar için bildirim al'),
-            value: _enableMentions,
-            onChanged: (val) {
-              setState(() => _enableMentions = val);
-            },
-          ),
-        ],
+      appBar: AppBar(title: Text(l10n.notificationSettings)),
+      body: Consumer<SettingsViewModel>(
+        builder: (context, settingsVM, child) {
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Text(
+                l10n.notificationTypes,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              SwitchListTile(
+                title: Text(l10n.pushNotifications),
+                subtitle: Text(l10n.inAppAndDevice),
+                value: settingsVM.pushEnabled,
+                onChanged: settingsVM.setPushEnabled,
+              ),
+              SwitchListTile(
+                title: Text(l10n.emailNotifications),
+                subtitle: Text(l10n.importantUpdatesEmail),
+                value: settingsVM.emailEnabled,
+                onChanged: settingsVM.setEmailEnabled,
+              ),
+              const Divider(height: 24),
+              Text(
+                l10n.notificationCategories,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              SwitchListTile(
+                title: Text(l10n.cardComments),
+                subtitle: Text(l10n.notifyOnComments),
+                value: settingsVM.commentsEnabled,
+                onChanged: settingsVM.setCommentsEnabled,
+              ),
+              SwitchListTile(
+                title: Text(l10n.cardAssignments),
+                subtitle: Text(l10n.notifyOnAssignments),
+                value: settingsVM.assignmentsEnabled,
+                onChanged: settingsVM.setAssignmentsEnabled,
+              ),
+              SwitchListTile(
+                title: Text(l10n.boardUpdates),
+                subtitle: Text(l10n.importantBoardChanges),
+                value: settingsVM.boardUpdatesEnabled,
+                onChanged: settingsVM.setBoardUpdatesEnabled,
+              ),
+              SwitchListTile(
+                title: Text(l10n.mentions),
+                subtitle: Text(l10n.notifyOnMentions),
+                value: settingsVM.mentionsEnabled,
+                onChanged: settingsVM.setMentionsEnabled,
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 }
+

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/viewmodels/auth_viewmodel.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 /// Profil düzenleme ekranı — PATCH /users/me
 /// StatefulWidget (form — Kural 16), SingleChildScrollView (Kural 10).
@@ -31,7 +32,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     super.dispose();
   }
 
-  Future<void> _handleSave() async {
+  Future<void> _handleSave(AppLocalizations l10n) async {
     if (!_formKey.currentState!.validate()) return;
 
     final authVM = context.read<AuthViewModel>();
@@ -59,12 +60,12 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     if (success) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Profil güncellendi')));
+      ).showSnackBar(SnackBar(content: Text(l10n.profileUpdatedSuccessfully)));
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(authVM.errorMessage ?? 'Güncelleme başarısız'),
+          content: Text(authVM.errorMessage ?? l10n.save), // generic error
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -73,21 +74,22 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profil Düzenle'),
+        title: Text(l10n.editProfile),
         actions: [
           Consumer<AuthViewModel>(
             builder: (context, authVM, child) {
               return TextButton(
-                onPressed: authVM.isLoading ? null : _handleSave,
+                onPressed: authVM.isLoading ? null : () => _handleSave(l10n),
                 child: authVM.isLoading
                     ? const SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Kaydet'),
+                    : Text(l10n.save),
               );
             },
           ),
@@ -131,14 +133,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               TextFormField(
                 controller: _fullNameController,
                 textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
-                  labelText: 'Ad Soyad',
-                  prefixIcon: Icon(Icons.person_outlined),
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.fullName,
+                  prefixIcon: const Icon(Icons.person_outlined),
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Ad soyad gerekli';
+                    return l10n.fullNameRequired;
                   }
                   return null;
                 },
@@ -149,21 +151,21 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.done,
-                decoration: const InputDecoration(
-                  labelText: 'E-posta',
-                  prefixIcon: Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.email,
+                  prefixIcon: const Icon(Icons.email_outlined),
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'E-posta adresi gerekli';
+                    return l10n.emailRequired;
                   }
                   if (!value.contains('@')) {
-                    return 'Geçerli bir e-posta adresi girin';
+                    return l10n.invalidEmail;
                   }
                   return null;
                 },
-                onFieldSubmitted: (_) => _handleSave(),
+                onFieldSubmitted: (_) => _handleSave(l10n),
               ),
             ],
           ),
@@ -172,3 +174,4 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     );
   }
 }
+

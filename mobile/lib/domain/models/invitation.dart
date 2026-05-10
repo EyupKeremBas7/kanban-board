@@ -33,9 +33,9 @@ factory Invitation.fromJson(Map<String, dynamic> json) {
       // ?? '' koyarak null gelse bile boş string ile devam etmesini sağlıyoruz
       id: json['id'] as String? ?? '', 
       workspaceId: json['workspace_id'] as String? ?? '',
-      workspaceName: json['workspace_name'] as String? ?? 'Bilinmeyen Workspace',
+      workspaceName: json['workspace_name'] as String? ?? '',
       inviterId: json['inviter_id'] as String? ?? '',
-      inviterName: json['inviter_name'] as String? ?? 'Bilinmiyor',
+      inviterName: json['inviter_name'] as String? ?? '',
       inviteeId: json['invitee_id'] as String?, // Zaten nullable tanımlamışsın, sorun yok
       inviteeEmail: json['invitee_email'] as String? ?? '',
 

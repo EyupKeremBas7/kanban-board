@@ -10,6 +10,7 @@ import 'package:mobile/domain/models/board_card.dart';
 import 'package:mobile/domain/models/checklist_item.dart';
 import 'package:mobile/domain/models/card_comment.dart';
 import 'package:mobile/domain/models/activity_log.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 /// Kart detay ekranı — tam MVVM entegrasyonu
 /// Kural 18: Sadece cardId ve cardTitle taşınır, veri ViewModel'den okunur.
@@ -63,6 +64,7 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     // BoardCard nesnesini CardsViewModel state'inden çek (ID ile)
     final card = context.select<CardsViewModel, BoardCard?>(
       (vm) => vm.cards.where((c) => c.id == widget.cardId).firstOrNull,
@@ -74,7 +76,7 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_outlined),
-            onPressed: () => _showEditCardDialog(context, card),
+            onPressed: () => _showEditCardDialog(context, l10n, card),
           ),
         ],
       ),
@@ -84,7 +86,7 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── Kapak Resmi ───────────────────────────────────────────────
-            _CoverImageSection(card: card, cardId: widget.cardId),
+            _CoverImageSection(card: card, cardId: widget.cardId, l10n: l10n),
             if (card?.coverImage != null) const SizedBox(height: 16),
 
             // ── Açıklama ─────────────────────────────────────────────────
@@ -94,7 +96,7 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
               title: 'Açıklama',
             ),
             const SizedBox(height: 8),
-            _DescriptionTile(card: card, cardId: widget.cardId),
+            _DescriptionTile(card: card, cardId: widget.cardId, l10n: l10n),
             const Divider(height: 32),
 
             // ── Bitiş Tarihi ──────────────────────────────────────────────
@@ -104,7 +106,7 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
               title: 'Bitiş Tarihi',
             ),
             const SizedBox(height: 8),
-            _DueDateTile(card: card, cardId: widget.cardId),
+            _DueDateTile(card: card, cardId: widget.cardId, l10n: l10n),
             const Divider(height: 32),
 
             // ── Atanan Kişi ───────────────────────────────────────────────
@@ -114,7 +116,7 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
               title: 'Atanan Kişi',
             ),
             const SizedBox(height: 8),
-            _AssigneeTile(card: card, cardId: widget.cardId),
+            _AssigneeTile(card: card, cardId: widget.cardId, l10n: l10n),
             const Divider(height: 32),
 
             // ── Checklist ─────────────────────────────────────────────────
@@ -123,13 +125,13 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
               icon: Icons.check_box_outlined,
               title: 'Kontrol Listesi',
               trailing: TextButton.icon(
-                onPressed: () => _showAddChecklistItemDialog(context),
+                onPressed: () => _showAddChecklistItemDialog(context, l10n),
                 icon: const Icon(Icons.add, size: 16),
-                label: const Text('Ekle'),
+                label: Text(l10n.save), // Using save as generic 'Add' if no 'Add' key
               ),
             ),
             const SizedBox(height: 8),
-            _ChecklistSection(cardId: widget.cardId),
+            _ChecklistSection(cardId: widget.cardId, l10n: l10n),
             const Divider(height: 32),
 
             // ── Yorumlar ──────────────────────────────────────────────────
@@ -142,9 +144,10 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
             _CommentInput(
               controller: _commentController,
               cardId: widget.cardId,
+              l10n: l10n,
             ),
             const SizedBox(height: 12),
-            _CommentsSection(cardId: widget.cardId),
+            _CommentsSection(cardId: widget.cardId, l10n: l10n),
             const Divider(height: 32),
 
             // ── Aktivite ─────────────────────────────────────────────────
@@ -154,7 +157,7 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
               title: 'Aktivite',
             ),
             const SizedBox(height: 8),
-            _CardActivitySection(cardId: widget.cardId),
+            _CardActivitySection(cardId: widget.cardId, l10n: l10n),
           ],
         ),
       ),
@@ -187,7 +190,7 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
 
   // ── Diyaloglar ──────────────────────────────────────────────────────────
 
-  void _showAddChecklistItemDialog(BuildContext context) {
+  void _showAddChecklistItemDialog(BuildContext context, AppLocalizations l10n) {
     _checklistController.clear();
     showDialog(
       context: context,
@@ -205,7 +208,7 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('İptal'),
+            child: Text(l10n.cancel),
           ),
           Consumer<ChecklistsViewModel>(
             builder: (context, vm, child) => FilledButton(
@@ -248,7 +251,7 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
     }
   }
 
-  void _showEditCardDialog(BuildContext context, BoardCard? card) {
+  void _showEditCardDialog(BuildContext context, AppLocalizations l10n, BoardCard? card) {
     if (card == null) return;
     final titleCtrl = TextEditingController(text: card.title);
     final descCtrl = TextEditingController(text: card.description ?? '');
@@ -281,7 +284,7 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('İptal'),
+            child: Text(l10n.cancel),
           ),
           Consumer<CardsViewModel>(
             builder: (context, vm, child) => FilledButton(
@@ -310,7 +313,7 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
                         );
                       }
                     },
-              child: const Text('Kaydet'),
+              child: Text(l10n.save),
             ),
           ),
         ],
@@ -324,8 +327,9 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
 class _DescriptionTile extends StatelessWidget {
   final BoardCard? card;
   final String cardId;
+  final AppLocalizations l10n;
 
-  const _DescriptionTile({required this.card, required this.cardId});
+  const _DescriptionTile({required this.card, required this.cardId, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -345,8 +349,9 @@ class _DescriptionTile extends StatelessWidget {
 class _DueDateTile extends StatelessWidget {
   final BoardCard? card;
   final String cardId;
+  final AppLocalizations l10n;
 
-  const _DueDateTile({required this.card, required this.cardId});
+  const _DueDateTile({required this.card, required this.cardId, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -462,8 +467,9 @@ class _DueDateTile extends StatelessWidget {
 class _AssigneeTile extends StatelessWidget {
   final BoardCard? card;
   final String cardId;
+  final AppLocalizations l10n;
 
-  const _AssigneeTile({required this.card, required this.cardId});
+  const _AssigneeTile({required this.card, required this.cardId, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -483,7 +489,7 @@ class _AssigneeTile extends StatelessWidget {
         return InkWell(
           onTap: () {
             if (workspaceVM.isLoading) return;
-            _showAssigneePicker(context, workspaceVM);
+            _showAssigneePicker(context, workspaceVM, l10n);
           },
           borderRadius: BorderRadius.circular(8),
           child: Padding(
@@ -548,6 +554,7 @@ class _AssigneeTile extends StatelessWidget {
   void _showAssigneePicker(
     BuildContext context,
     WorkspacesViewModel workspaceVM,
+    AppLocalizations l10n,
   ) {
     showModalBottomSheet(
       context: context,
@@ -596,8 +603,9 @@ class _AssigneeTile extends StatelessWidget {
 class _CoverImageSection extends StatelessWidget {
   final BoardCard? card;
   final String cardId;
+  final AppLocalizations l10n;
 
-  const _CoverImageSection({required this.card, required this.cardId});
+  const _CoverImageSection({required this.card, required this.cardId, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -671,8 +679,9 @@ class _CoverImageSection extends StatelessWidget {
 /// Checklist bölümü — ChecklistsViewModel ile bağlı
 class _ChecklistSection extends StatelessWidget {
   final String cardId;
+  final AppLocalizations l10n;
 
-  const _ChecklistSection({required this.cardId});
+  const _ChecklistSection({required this.cardId, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -739,7 +748,7 @@ class _ChecklistSection extends StatelessWidget {
               itemCount: vm.items.length,
               itemBuilder: (context, index) {
                 final item = vm.items[index];
-                return _ChecklistItemTile(item: item);
+                return _ChecklistItemTile(item: item, l10n: l10n);
               },
             ),
           ],
@@ -752,8 +761,9 @@ class _ChecklistSection extends StatelessWidget {
 /// Tek bir checklist öğesi
 class _ChecklistItemTile extends StatelessWidget {
   final ChecklistItem item;
+  final AppLocalizations l10n;
 
-  const _ChecklistItemTile({required this.item});
+  const _ChecklistItemTile({required this.item, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -798,7 +808,7 @@ class _ChecklistItemTile extends StatelessWidget {
             size: 20,
             color: Theme.of(context).colorScheme.primary,
           ),
-          onPressed: () => _showEditChecklistItemDialog(context, item, vm),
+          onPressed: () => _showEditChecklistItemDialog(context, item, vm, l10n),
         ),
       ),
     );
@@ -808,6 +818,7 @@ class _ChecklistItemTile extends StatelessWidget {
     BuildContext context,
     ChecklistItem item,
     ChecklistsViewModel vm,
+    AppLocalizations l10n,
   ) {
     final controller = TextEditingController(text: item.title);
 
@@ -827,7 +838,7 @@ class _ChecklistItemTile extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('İptal'),
+              child: Text(l10n.cancel),
             ),
             Consumer<ChecklistsViewModel>(
               builder: (context, vmConsumer, child) {
@@ -866,7 +877,7 @@ class _ChecklistItemTile extends StatelessWidget {
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Kaydet'),
+                      : Text(l10n.save),
                 );
               },
             ),
@@ -881,8 +892,9 @@ class _ChecklistItemTile extends StatelessWidget {
 class _CommentInput extends StatelessWidget {
   final TextEditingController controller;
   final String cardId;
+  final AppLocalizations l10n;
 
-  const _CommentInput({required this.controller, required this.cardId});
+  const _CommentInput({required this.controller, required this.cardId, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -948,8 +960,9 @@ class _CommentInput extends StatelessWidget {
 /// Yorumlar listesi bölümü
 class _CommentsSection extends StatelessWidget {
   final String cardId;
+  final AppLocalizations l10n;
 
-  const _CommentsSection({required this.cardId});
+  const _CommentsSection({required this.cardId, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -990,7 +1003,7 @@ class _CommentsSection extends StatelessWidget {
           separatorBuilder: (context, index) => const Divider(height: 16),
           itemBuilder: (context, index) {
             final comment = vm.comments[index];
-            return _CommentTile(comment: comment);
+            return _CommentTile(comment: comment, l10n: l10n);
           },
         );
       },
@@ -1000,8 +1013,9 @@ class _CommentsSection extends StatelessWidget {
 
 class _CardActivitySection extends StatelessWidget {
   final String cardId;
+  final AppLocalizations l10n;
 
-  const _CardActivitySection({required this.cardId});
+  const _CardActivitySection({required this.cardId, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -1041,7 +1055,7 @@ class _CardActivitySection extends StatelessWidget {
           separatorBuilder: (context, index) => const Divider(height: 16),
           itemBuilder: (context, index) {
             final log = vm.logs[index];
-            return _ActivityLogTile(log: log);
+            return _ActivityLogTile(log: log, l10n: l10n);
           },
         );
       },
@@ -1051,8 +1065,9 @@ class _CardActivitySection extends StatelessWidget {
 
 class _ActivityLogTile extends StatelessWidget {
   final ActivityLog log;
+  final AppLocalizations l10n;
 
-  const _ActivityLogTile({required this.log});
+  const _ActivityLogTile({required this.log, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -1127,8 +1142,9 @@ class _ActivityLogTile extends StatelessWidget {
 /// Tek bir yorum kartı
 class _CommentTile extends StatelessWidget {
   final CardComment comment;
+  final AppLocalizations l10n;
 
-  const _CommentTile({required this.comment});
+  const _CommentTile({required this.comment, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -1188,7 +1204,7 @@ class _CommentTile extends StatelessWidget {
                     ),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
-                    onPressed: () => _showEditCommentDialog(context, comment, vm),
+                    onPressed: () => _showEditCommentDialog(context, comment, vm, l10n),
                   ),
                   const SizedBox(width: 8),
                   // Sil butonu
@@ -1239,6 +1255,7 @@ class _CommentTile extends StatelessWidget {
     BuildContext context,
     CardComment comment,
     CommentsViewModel vm,
+    AppLocalizations l10n,
   ) {
     final controller = TextEditingController(text: comment.content);
 
@@ -1258,7 +1275,7 @@ class _CommentTile extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('İptal'),
+              child: Text(l10n.cancel),
             ),
             Consumer<CommentsViewModel>(
               builder: (context, vmConsumer, child) {
@@ -1297,7 +1314,7 @@ class _CommentTile extends StatelessWidget {
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Kaydet'),
+                      : Text(l10n.save),
                 );
               },
             ),
@@ -1307,3 +1324,4 @@ class _CommentTile extends StatelessWidget {
     );
   }
 }
+

@@ -40,10 +40,10 @@ class BoardsViewModel extends ChangeNotifier {
             .toList();
       } else {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
-        _errorMessage = data['detail'] as String? ?? 'Board listesi alınamadı';
+        _errorMessage = data['detail'] as String? ?? 'Failed to fetch boards';
       }
     } catch (e) {
-      _errorMessage = 'Bağlantı hatası: $e';
+      _errorMessage = 'Connection error: $e';
     }
 
     _isLoading = false;
@@ -94,13 +94,13 @@ class BoardsViewModel extends ChangeNotifier {
         return true;
       } else {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
-        _errorMessage = data['detail'] as String? ?? 'Pano oluşturulamadı';
+        _errorMessage = data['detail'] as String? ?? 'Failed to create board';
         _isLoading = false;
         notifyListeners();
         return false;
       }
     } catch (e) {
-      _errorMessage = 'Bağlantı hatası: $e';
+      _errorMessage = 'Connection error: $e';
       _isLoading = false;
       notifyListeners();
       return false;
@@ -141,13 +141,13 @@ class BoardsViewModel extends ChangeNotifier {
         return true;
       } else {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
-        _errorMessage = data['detail'] as String? ?? 'Güncelleme başarısız';
+        _errorMessage = data['detail'] as String? ?? 'Update failed';
         _isLoading = false;
         notifyListeners();
         return false;
       }
     } catch (e) {
-      _errorMessage = 'Bağlantı hatası: $e';
+      _errorMessage = 'Connection error: $e';
       _isLoading = false;
       notifyListeners();
       return false;
@@ -172,7 +172,7 @@ class BoardsViewModel extends ChangeNotifier {
         return true;
       } else {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
-        _errorMessage = data['detail'] as String? ?? 'Silme başarısız';
+        _errorMessage = data['detail'] as String? ?? 'Delete failed';
         _isLoading = false;
         notifyListeners();
         return false;

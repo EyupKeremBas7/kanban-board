@@ -4,6 +4,7 @@ import 'package:mobile/viewmodels/workspaces_viewmodel.dart';
 import 'package:mobile/viewmodels/auth_viewmodel.dart';
 import 'package:mobile/domain/models/workspace.dart';
 import 'package:mobile/domain/models/workspace_member.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class WorkspaceMembersScreen extends StatefulWidget {
   final Workspace workspace;
@@ -29,8 +30,9 @@ class _WorkspaceMembersScreenState extends State<WorkspaceMembersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: Text('${widget.workspace.name} Üyeleri')),
+      appBar: AppBar(title: Text(l10n.membersOf(widget.workspace.name))),
       body: Consumer<WorkspacesViewModel>(
         builder: (context, vm, child) {
           if (vm.isLoading && vm.currentMembers.isEmpty) {
@@ -51,7 +53,7 @@ class _WorkspaceMembersScreenState extends State<WorkspaceMembersScreen> {
           }
 
           if (vm.currentMembers.isEmpty) {
-            return const Center(child: Text('Henüz üye bulunmuyor.'));
+            return Center(child: Text(l10n.noMembersFound));
           }
 
           return RefreshIndicator(
@@ -82,6 +84,7 @@ class _MemberTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final authVM = context.read<AuthViewModel>();
     final currentUserId = authVM.currentUser?.id;
     final isMe = detail.member.userId == currentUserId;
@@ -103,7 +106,7 @@ class _MemberTile extends StatelessWidget {
     final canEdit = isImAdmin && !isMe && detail.member.role != 'owner';
 
     String displayName =
-        detail.fullName ?? detail.email ?? 'Bilinmeyen Kullanıcı';
+        detail.fullName ?? detail.email ?? l10n.unknownUser;
     String initial = displayName.isNotEmpty
         ? displayName[0].toUpperCase()
         : '?';
@@ -126,7 +129,7 @@ class _MemberTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
-                'Ben',
+                l10n.me,
                 style: TextStyle(
                   fontSize: 10,
                   color: Theme.of(context).colorScheme.onPrimaryContainer,
@@ -141,24 +144,24 @@ class _MemberTile extends StatelessWidget {
           ? PopupMenuButton<String>(
               onSelected: (value) {
                 if (value == 'remove') {
-                  _showRemoveDialog(context);
+                  _showRemoveDialog(context, l10n);
                 } else {
-                  _updateRole(context, value);
+                  _updateRole(context, value, l10n);
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(value: 'admin', child: Text('Admin Yap')),
-                const PopupMenuItem(value: 'member', child: Text('Member Yap')),
-                const PopupMenuItem(
+                PopupMenuItem(value: 'admin', child: Text(l10n.makeAdmin)),
+                PopupMenuItem(value: 'member', child: Text(l10n.makeMember)),
+                PopupMenuItem(
                   value: 'observer',
-                  child: Text('Observer Yap'),
+                  child: Text(l10n.makeObserver),
                 ),
                 const PopupMenuDivider(),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'remove',
                   child: Text(
-                    'Üyeyi Çıkar',
-                    style: TextStyle(color: Colors.red),
+                    l10n.removeMember,
+                    style: const TextStyle(color: Colors.red),
                   ),
                 ),
               ],
@@ -167,7 +170,7 @@ class _MemberTile extends StatelessWidget {
     );
   }
 
-  Future<void> _updateRole(BuildContext context, String newRole) async {
+  Future<void> _updateRole(BuildContext context, String newRole, AppLocalizations l10n) async {
     final vm = context.read<WorkspacesViewModel>();
     final success = await vm.updateMemberRole(
       workspaceId,
@@ -178,25 +181,23 @@ class _MemberTile extends StatelessWidget {
     if (!success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(vm.errorMessage ?? 'Rol güncellenemedi'),
+          content: Text(vm.errorMessage ?? l10n.roleUpdateFailed),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
   }
 
-  void _showRemoveDialog(BuildContext context) {
+  void _showRemoveDialog(BuildContext context, AppLocalizations l10n) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Üyeyi Çıkar'),
-        content: Text(
-          'Bu üyeyi çalışma alanından çıkarmak istediğinize emin misiniz?',
-        ),
+        title: Text(l10n.removeMember),
+        content: Text(l10n.removeMemberConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('İptal'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -213,19 +214,20 @@ class _MemberTile extends StatelessWidget {
               if (!success) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(vm.errorMessage ?? 'Üye çıkarılamadı'),
+                    content: Text(vm.errorMessage ?? l10n.removeMemberFailed),
                     backgroundColor: Theme.of(context).colorScheme.error,
                   ),
                 );
               }
             },
-            child: const Text('Çıkar'),
+            child: Text(l10n.remove),
           ),
         ],
       ),
     );
   }
 }
+
 
 class _RoleBadge extends StatelessWidget {
   final String role;

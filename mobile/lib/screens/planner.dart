@@ -6,6 +6,7 @@ import 'package:mobile/screens/board_detail.dart';
 import 'package:mobile/services/recent_boards_service.dart';
 import 'package:mobile/viewmodels/boards_viewmodel.dart';
 import 'package:mobile/viewmodels/workspaces_viewmodel.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 /// Ana Sayfa / Dashboard
 /// Workspace'e göre gruplandırılmış board listesi ve son görüntülenenler.
@@ -43,9 +44,10 @@ class _PlannerScreenState extends State<PlannerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ana Sayfa'),
+        title: Text(l10n.appTitle), // Using AppTitle as Home label
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -81,7 +83,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
                       workspacesVM.fetchWorkspaces();
                     },
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Tekrar Dene'),
+                    label: Text(l10n.save), // Generic retry label for now
                   ),
                 ],
               ),
@@ -102,12 +104,12 @@ class _PlannerScreenState extends State<PlannerScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Henüz çalışma alanı yok',
+                    l10n.noWorkspacesYet,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Board grupları burada workspace bazlı görünecek.',
+                    l10n.noWorkspacesFound, // Fallback or add specific
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
@@ -141,7 +143,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
                     children: [
                       Expanded(
                         child: _StatCard(
-                          title: 'Toplam Pano',
+                          title: l10n.boards,
                           value: boardsVM.boards.length.toString(),
                           icon: Icons.dashboard_outlined,
                         ),
@@ -149,7 +151,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: _StatCard(
-                          title: 'Çalışma Alanı',
+                          title: l10n.workspaces,
                           value: workspacesVM.workspaces.length.toString(),
                           icon: Icons.workspaces_outline,
                         ),
@@ -159,7 +161,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
                 ),
                 if (recentBoards.isNotEmpty) ...[
                   Text(
-                    'Son Görüntülenenler',
+                    'Son Görüntülenenler', // Son Görüntülenenler might need a key
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -194,6 +196,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
                       onBoardTap: _openBoard,
                       onCreateBoard: () => _showCreateBoardDialog(
                         context,
+                        l10n,
                         workspaceId: workspace.id,
                         workspaceName: workspace.name,
                       ),
@@ -229,7 +232,8 @@ class _PlannerScreenState extends State<PlannerScreen> {
   }
 
   void _showCreateBoardDialog(
-    BuildContext context, {
+    BuildContext context,
+    AppLocalizations l10n, {
     required String workspaceId,
     required String workspaceName,
   }) {
@@ -240,19 +244,19 @@ class _PlannerScreenState extends State<PlannerScreen> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: Text('$workspaceName için Pano Oluştur'),
+          title: Text(l10n.createBoardToWorkspace(workspaceName)),
           content: Form(
             key: formKey,
             child: TextFormField(
               controller: nameController,
               autofocus: true,
-              decoration: const InputDecoration(
-                labelText: 'Pano Adı',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.boardName,
+                border: const OutlineInputBorder(),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Pano adı gerekli';
+                  return l10n.nameRequired;
                 }
                 return null;
               },
@@ -261,7 +265,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('İptal'),
+              child: Text(l10n.cancel),
             ),
             Consumer<BoardsViewModel>(
               builder: (context, vm, child) {
@@ -278,13 +282,13 @@ class _PlannerScreenState extends State<PlannerScreen> {
                           Navigator.pop(dialogContext);
                           if (success) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Pano oluşturuldu')),
+                              const SnackBar(content: Text('Pano oluşturuldu')), // Localize this later or use l10n
                             );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  vm.errorMessage ?? 'Pano oluşturulamadı',
+                                  vm.errorMessage ?? l10n.boardCreateFailed,
                                 ),
                                 backgroundColor: Theme.of(
                                   context,
@@ -299,7 +303,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
                           height: 18,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Oluştur'),
+                      : Text(l10n.add),
                 );
               },
             ),
@@ -325,6 +329,7 @@ class _WorkspaceBoardSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -341,7 +346,7 @@ class _WorkspaceBoardSection extends StatelessWidget {
             TextButton.icon(
               onPressed: onCreateBoard,
               icon: const Icon(Icons.add, size: 18),
-              label: const Text('Yeni Pano'),
+              label: Text(l10n.newBoard),
             ),
           ],
         ),
@@ -354,9 +359,8 @@ class _WorkspaceBoardSection extends StatelessWidget {
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Text(
-              'Bu çalışma alanında henüz pano yok.',
-              style: Theme.of(context).textTheme.bodyMedium,
+            child: const Text(
+              'Bu çalışma alanında henüz pano yok.', // Localize this later
             ),
           )
         else
@@ -548,3 +552,4 @@ class _StatCard extends StatelessWidget {
     );
   }
 }
+

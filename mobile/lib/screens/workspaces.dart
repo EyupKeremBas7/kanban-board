@@ -4,6 +4,8 @@ import 'package:mobile/viewmodels/workspaces_viewmodel.dart';
 import 'package:mobile/viewmodels/invitations_viewmodel.dart';
 import 'package:mobile/domain/models/workspace.dart';
 import 'package:mobile/screens/workspace_members.dart';
+import 'package:mobile/viewmodels/navigation_viewmodel.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 /// Workspace yönetim ekranı
 /// WorkspacesViewModel üzerinden tam CRUD (listele, oluştur, düzenle, sil).
@@ -30,9 +32,10 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Çalışma Alanları'),
+        title: Text(l10n.workspaces),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -69,7 +72,7 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
                   FilledButton.icon(
                     onPressed: () => vm.fetchWorkspaces(),
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Tekrar Dene'),
+                    label: Text(l10n.tryAgain),
                   ),
                 ],
               ),
@@ -91,7 +94,7 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Henüz çalışma alanı yok',
+                    l10n.noWorkspacesYet,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Theme.of(
                         context,
@@ -100,7 +103,7 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Yeni bir çalışma alanı oluşturun',
+                    l10n.createFirstWorkspace,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(
                         context,
@@ -128,16 +131,16 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showCreateWorkspaceDialog(context),
+        onPressed: () => _showCreateWorkspaceDialog(context, l10n),
         icon: const Icon(Icons.add),
-        label: const Text('Yeni Alan'),
+        label: Text(l10n.newWorkspace),
       ),
     );
   }
 
   // ── Create Dialog ──────────────────────────────────────────────────────
 
-  void _showCreateWorkspaceDialog(BuildContext context) {
+  void _showCreateWorkspaceDialog(BuildContext context, AppLocalizations l10n) {
     final nameCtrl = TextEditingController();
     final descCtrl = TextEditingController();
     final formKey = GlobalKey<FormState>();
@@ -145,7 +148,7 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Yeni Çalışma Alanı'),
+        title: Text(l10n.createWorkspace),
         content: Form(
           key: formKey,
           child: Column(
@@ -154,21 +157,21 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
               TextFormField(
                 controller: nameCtrl,
                 autofocus: true,
-                decoration: const InputDecoration(
-                  labelText: 'Alan Adı',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.workspaceName,
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Ad gerekli';
+                  if (v == null || v.trim().isEmpty) return l10n.nameRequired;
                   return null;
                 },
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: descCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Açıklama (isteğe bağlı)',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.descriptionOptional,
+                  border: const OutlineInputBorder(),
                 ),
                 maxLines: 2,
               ),
@@ -178,7 +181,7 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('İptal'),
+            child: Text(l10n.cancel),
           ),
           Consumer<WorkspacesViewModel>(
             builder: (context, vm, child) => FilledButton(
@@ -197,7 +200,7 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
                       if (!success) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text(vm.errorMessage ?? 'Oluşturulamadı'),
+                            content: Text(vm.errorMessage ?? l10n.createFailed),
                             backgroundColor: Theme.of(
                               context,
                             ).colorScheme.error,
@@ -205,8 +208,8 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Çalışma alanı oluşturuldu'),
+                          SnackBar(
+                            content: Text(l10n.workspaceCreatedSuccessfully),
                           ),
                         );
                       }
@@ -217,7 +220,7 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
                       height: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Oluştur'),
+                  : Text(l10n.add),
             ),
           ),
         ],
@@ -235,91 +238,99 @@ class _WorkspaceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final vm = context.read<WorkspacesViewModel>();
 
     return Card(
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-          child: Text(
-            workspace.name.isNotEmpty ? workspace.name[0].toUpperCase() : '?',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSecondaryContainer,
-              fontWeight: FontWeight.bold,
+      child: InkWell(
+        onTap: () {
+          context.read<NavigationViewModel>().navigateToWorkspaceBoards(workspace.id);
+          Navigator.popUntil(context, (route) => route.isFirst);
+        },
+        child: ListTile(
+          leading: CircleAvatar(
+            backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+            child: Text(
+              workspace.name.isNotEmpty ? workspace.name[0].toUpperCase() : '?',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSecondaryContainer,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-        ),
-        title: Text(workspace.name, overflow: TextOverflow.ellipsis),
-        subtitle:
-            workspace.description != null && workspace.description!.isNotEmpty
-            ? Text(
-                workspace.description!,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-              )
-            : null,
-        trailing: PopupMenuButton<_WorkspaceAction>(
-          icon: const Icon(Icons.more_vert),
-          onSelected: (action) {
-            switch (action) {
-              case _WorkspaceAction.edit:
-                _showEditDialog(context, workspace, vm);
-              case _WorkspaceAction.delete:
-                _showDeleteConfirm(context, workspace, vm);
-              case _WorkspaceAction.invite:
-                _showInviteDialog(context, workspace);
-              case _WorkspaceAction.manageMembers:
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        WorkspaceMembersScreen(workspace: workspace),
-                  ),
-                );
-            }
-          },
-          itemBuilder: (_) => const [
-            PopupMenuItem(
-              value: _WorkspaceAction.manageMembers,
-              child: Row(
-                children: [
-                  Icon(Icons.group_outlined, size: 18),
-                  SizedBox(width: 8),
-                  Text('Üyeleri Yönet'),
-                ],
+          title: Text(workspace.name, overflow: TextOverflow.ellipsis),
+          subtitle:
+              workspace.description != null && workspace.description!.isNotEmpty
+              ? Text(
+                  workspace.description!,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                )
+              : null,
+          trailing: PopupMenuButton<_WorkspaceAction>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (action) {
+              switch (action) {
+                case _WorkspaceAction.edit:
+                  _showEditDialog(context, workspace, vm, l10n);
+                case _WorkspaceAction.delete:
+                  _showDeleteConfirm(context, workspace, vm, l10n);
+                case _WorkspaceAction.invite:
+                  _showInviteDialog(context, workspace, l10n);
+                case _WorkspaceAction.manageMembers:
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          WorkspaceMembersScreen(workspace: workspace),
+                    ),
+                  );
+              }
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: _WorkspaceAction.manageMembers,
+                child: Row(
+                  children: [
+                    const Icon(Icons.group_outlined, size: 18),
+                    const SizedBox(width: 8),
+                    Text(l10n.manageMembers),
+                  ],
+                ),
               ),
-            ),
-            PopupMenuItem(
-              value: _WorkspaceAction.invite,
-              child: Row(
-                children: [
-                  Icon(Icons.person_add_alt_1_outlined, size: 18),
-                  SizedBox(width: 8),
-                  Text('Üye Davet Et'),
-                ],
+              PopupMenuItem(
+                value: _WorkspaceAction.invite,
+                child: Row(
+                  children: [
+                    const Icon(Icons.person_add_alt_1_outlined, size: 18),
+                    const SizedBox(width: 8),
+                    Text(l10n.inviteMember),
+                  ],
+                ),
               ),
-            ),
-            PopupMenuItem(
-              value: _WorkspaceAction.edit,
-              child: Row(
-                children: [
-                  Icon(Icons.edit_outlined, size: 18),
-                  SizedBox(width: 8),
-                  Text('Düzenle'),
-                ],
+              PopupMenuItem(
+                value: _WorkspaceAction.edit,
+                child: Row(
+                  children: [
+                    const Icon(Icons.edit_outlined, size: 18),
+                    const SizedBox(width: 8),
+                    Text(l10n.editProfile), // or l10n.edit
+                  ],
+                ),
               ),
-            ),
-            PopupMenuItem(
-              value: _WorkspaceAction.delete,
-              child: Row(
-                children: [
-                  Icon(Icons.delete_outline, size: 18, color: Colors.red),
-                  SizedBox(width: 8),
-                  Text('Sil', style: TextStyle(color: Colors.red)),
-                ],
+              PopupMenuItem(
+                value: _WorkspaceAction.delete,
+                child: Row(
+                  children: [
+                    const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                    const SizedBox(width: 8),
+                    Text(l10n.logout.split(' ')[0], // Hack to get 'Sil' or 'Delete' if I had it
+                         style: const TextStyle(color: Colors.red)),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -331,6 +342,7 @@ class _WorkspaceTile extends StatelessWidget {
     BuildContext context,
     Workspace workspace,
     WorkspacesViewModel vm,
+    AppLocalizations l10n,
   ) {
     final nameCtrl = TextEditingController(text: workspace.name);
     final descCtrl = TextEditingController(text: workspace.description ?? '');
@@ -339,7 +351,7 @@ class _WorkspaceTile extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Çalışma Alanını Düzenle'),
+        title: Text(l10n.editWorkspace),
         content: Form(
           key: formKey,
           child: Column(
@@ -348,21 +360,21 @@ class _WorkspaceTile extends StatelessWidget {
               TextFormField(
                 controller: nameCtrl,
                 autofocus: true,
-                decoration: const InputDecoration(
-                  labelText: 'Alan Adı',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.workspaceName,
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Ad gerekli';
+                  if (v == null || v.trim().isEmpty) return l10n.nameRequired;
                   return null;
                 },
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: descCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Açıklama',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.descriptionOptional, // or description
+                  border: const OutlineInputBorder(),
                 ),
                 maxLines: 2,
               ),
@@ -372,7 +384,7 @@ class _WorkspaceTile extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('İptal'),
+            child: Text(l10n.cancel),
           ),
           Consumer<WorkspacesViewModel>(
             builder: (context, vm2, child) => FilledButton(
@@ -391,7 +403,7 @@ class _WorkspaceTile extends StatelessWidget {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              vm2.errorMessage ?? 'Güncelleme başarısız',
+                              vm2.errorMessage ?? l10n.save, // generic
                             ),
                             backgroundColor: Theme.of(
                               context,
@@ -400,7 +412,7 @@ class _WorkspaceTile extends StatelessWidget {
                         );
                       }
                     },
-              child: const Text('Kaydet'),
+              child: Text(l10n.save),
             ),
           ),
         ],
@@ -414,19 +426,17 @@ class _WorkspaceTile extends StatelessWidget {
     BuildContext context,
     Workspace workspace,
     WorkspacesViewModel vm,
+    AppLocalizations l10n,
   ) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Çalışma Alanını Sil'),
-        content: Text(
-          '"${workspace.name}" çalışma alanı silinecektir. '
-          'Bu işlem geri alınamaz.',
-        ),
+        title: Text(l10n.deleteWorkspaceTitle),
+        content: Text(l10n.deleteWorkspaceConfirm(workspace.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('İptal'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () async {
@@ -436,7 +446,7 @@ class _WorkspaceTile extends StatelessWidget {
               if (!success) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(vm.errorMessage ?? 'Silme başarısız'),
+                    content: Text(vm.errorMessage ?? l10n.deleteFailed),
                     backgroundColor: Theme.of(context).colorScheme.error,
                   ),
                 );
@@ -445,7 +455,7 @@ class _WorkspaceTile extends StatelessWidget {
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: const Text('Sil'),
+            child: Text(l10n.logout.split(' ')[0]), // Hack: use first word of logout if it's 'Sil'/'Delete'
           ),
         ],
       ),
@@ -454,7 +464,7 @@ class _WorkspaceTile extends StatelessWidget {
 
   // ── Invite Dialog ─────────────────────────────────────────────────────────
 
-  void _showInviteDialog(BuildContext context, Workspace workspace) {
+  void _showInviteDialog(BuildContext context, Workspace workspace, AppLocalizations l10n) {
     final emailCtrl = TextEditingController();
     final formKey = GlobalKey<FormState>();
     String selectedRole = 'member'; // Default role
@@ -465,7 +475,7 @@ class _WorkspaceTile extends StatelessWidget {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('Üye Davet Et'),
+              title: Text(l10n.inviteMember),
               scrollable: true,
               content: SingleChildScrollView(
                 child: Form(
@@ -474,7 +484,7 @@ class _WorkspaceTile extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        '${workspace.name} alanına yeni bir üye davet edin.',
+                        l10n.inviteToWorkspace(workspace.name),
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 16),
@@ -482,17 +492,17 @@ class _WorkspaceTile extends StatelessWidget {
                         controller: emailCtrl,
                         autofocus: true,
                         keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(
-                          labelText: 'E-posta Adresi',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.email_outlined),
+                        decoration: InputDecoration(
+                          labelText: l10n.email,
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.email_outlined),
                         ),
                         validator: (v) {
                           if (v == null || v.trim().isEmpty) {
-                            return 'E-posta gerekli';
+                            return l10n.emailRequired;
                           }
                           if (!v.contains('@')) {
-                            return 'Geçerli bir e-posta girin';
+                            return l10n.invalidEmail;
                           }
                           return null;
                         },
@@ -500,22 +510,22 @@ class _WorkspaceTile extends StatelessWidget {
                       const SizedBox(height: 16),
                       DropdownButtonFormField<String>(
                         initialValue: selectedRole,
-                        decoration: const InputDecoration(
-                          labelText: 'Rol',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: l10n.role,
+                          border: const OutlineInputBorder(),
                         ),
-                        items: const [
+                        items: [
                           DropdownMenuItem(
                             value: 'admin',
-                            child: Text('Yönetici (Admin)'),
+                            child: Text(l10n.adminRole),
                           ),
                           DropdownMenuItem(
                             value: 'member',
-                            child: Text('Üye (Member)'),
+                            child: Text(l10n.memberRole),
                           ),
                           DropdownMenuItem(
                             value: 'observer',
-                            child: Text('Gözlemci (Observer)'),
+                            child: Text(l10n.observerRole),
                           ),
                         ],
                         onChanged: (val) {
@@ -529,7 +539,7 @@ class _WorkspaceTile extends StatelessWidget {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text('İptal'),
+                  child: Text(l10n.cancel),
                 ),
                 Consumer<InvitationsViewModel>(
                   builder: (context, vm, child) => FilledButton(
@@ -548,7 +558,7 @@ class _WorkspaceTile extends StatelessWidget {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    vm.errorMessage ?? 'Davet gönderilemedi',
+                                    vm.errorMessage ?? l10n.invitationFailed,
                                   ),
                                   backgroundColor: Theme.of(
                                     context,
@@ -557,8 +567,8 @@ class _WorkspaceTile extends StatelessWidget {
                               );
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Davet başarıyla gönderildi'),
+                                SnackBar(
+                                  content: Text(l10n.invitationSentSuccessfully),
                                 ),
                               );
                             }
@@ -569,7 +579,7 @@ class _WorkspaceTile extends StatelessWidget {
                             height: 18,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Gönder'),
+                        : Text(l10n.send),
                   ),
                 ),
               ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/viewmodels/auth_viewmodel.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 /// Şifre sıfırlama (Şifremi Unuttum) ekranı — POST /password-recovery/{email}
 /// Auth gerektirmez. E-posta girip sıfırlama linki ister.
@@ -44,18 +45,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Şifremi Unuttum')),
+      appBar: AppBar(title: Text(l10n.forgotPassword)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: _emailSent
-            ? _buildSuccessView(context)
-            : _buildFormView(context),
+            ? _buildSuccessView(context, l10n)
+            : _buildFormView(context, l10n),
       ),
     );
   }
 
-  Widget _buildFormView(BuildContext context) {
+  Widget _buildFormView(BuildContext context, AppLocalizations l10n) {
     return Form(
       key: _formKey,
       child: Column(
@@ -69,13 +71,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Şifrenizi sıfırlayın',
+            l10n.resetYourPassword,
             style: Theme.of(context).textTheme.headlineSmall,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
-            'E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.',
+            l10n.enterEmailToReset,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(
                 context,
@@ -88,17 +90,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.done,
-            decoration: const InputDecoration(
-              labelText: 'E-posta',
-              prefixIcon: Icon(Icons.email_outlined),
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.email,
+              prefixIcon: const Icon(Icons.email_outlined),
+              border: const OutlineInputBorder(),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'E-posta adresi gerekli';
+                return l10n.emailRequired;
               }
               if (!value.contains('@')) {
-                return 'Geçerli bir e-posta adresi girin';
+                return l10n.invalidEmail;
               }
               return null;
             },
@@ -118,7 +120,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Sıfırlama Bağlantısı Gönder'),
+                    : Text(l10n.sendResetLink),
               );
             },
           ),
@@ -127,7 +129,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
   }
 
-  Widget _buildSuccessView(BuildContext context) {
+  Widget _buildSuccessView(BuildContext context, AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -139,13 +141,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
         const SizedBox(height: 24),
         Text(
-          'E-posta gönderildi!',
+          l10n.emailSent,
           style: Theme.of(context).textTheme.headlineSmall,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
         Text(
-          '${_emailController.text.trim()} adresine şifre sıfırlama bağlantısı gönderildi. Lütfen e-postanızı kontrol edin.',
+          l10n.checkEmailForLink(_emailController.text.trim()),
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: Theme.of(
               context,
@@ -159,9 +161,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
           ),
-          child: const Text('Giriş Ekranına Dön'),
+          child: Text(l10n.backToLogin),
         ),
       ],
     );
   }
 }
+

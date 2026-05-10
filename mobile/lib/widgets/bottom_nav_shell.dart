@@ -6,10 +6,12 @@ import 'package:mobile/screens/planner.dart';
 import 'package:mobile/screens/activity.dart';
 import 'package:mobile/screens/account.dart';
 import 'package:mobile/viewmodels/notifications_viewmodel.dart';
+import 'package:mobile/viewmodels/navigation_viewmodel.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 /// 5-sekmeli BottomNavigationBar wrapper.
 /// Sekmeler: Panolar, Gelen Kutusu, Ana Sayfa, Etkinlik, Hesap
-/// IndexedStack ile sekme state korunumu sağlanır (Kural 21).
+/// IndexedStack ile sayfaların state'i korunur.
 class BottomNavShell extends StatefulWidget {
   const BottomNavShell({super.key});
 
@@ -18,9 +20,6 @@ class BottomNavShell extends StatefulWidget {
 }
 
 class _BottomNavShellState extends State<BottomNavShell> {
-  int _currentIndex = 0;
-
-  // IndexedStack ile sayfaların state'i korunur
   final List<Widget> _screens = const [
     BoardsScreen(),
     InboxScreen(),
@@ -33,7 +32,9 @@ class _BottomNavShellState extends State<BottomNavShell> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      context.read<NotificationsViewModel>().fetchUnreadCount();
+      if (mounted) {
+        context.read<NotificationsViewModel>().fetchUnreadCount();
+      }
     });
   }
 
@@ -48,7 +49,7 @@ class _BottomNavShellState extends State<BottomNavShell> {
             top: -6,
             child: Container(
               padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.red,
                 shape: BoxShape.circle,
               ),
@@ -71,46 +72,52 @@ class _BottomNavShellState extends State<BottomNavShell> {
 
   @override
   Widget build(BuildContext context) {
+    final navVM = context.watch<NavigationViewModel>();
+    final l10n = AppLocalizations.of(context)!;
+
     return Consumer<NotificationsViewModel>(
       builder: (context, notificationsVM, child) {
         return Scaffold(
-          body: IndexedStack(index: _currentIndex, children: _screens),
+          body: IndexedStack(index: navVM.currentIndex, children: _screens),
           bottomNavigationBar: NavigationBar(
-            selectedIndex: _currentIndex,
+            selectedIndex: navVM.currentIndex,
             onDestinationSelected: (index) {
-              setState(() => _currentIndex = index);
+              navVM.setIndex(index);
+              if (index != 0) {
+                navVM.clearWorkspaceFilter();
+              }
             },
             destinations: [
-              const NavigationDestination(
-                icon: Icon(Icons.dashboard_outlined),
-                selectedIcon: Icon(Icons.dashboard),
-                label: 'Panolar',
+              NavigationDestination(
+                icon: const Icon(Icons.dashboard_outlined),
+                selectedIcon: const Icon(Icons.dashboard),
+                label: l10n.boards,
               ),
               NavigationDestination(
                 icon: _buildInboxIcon(
                   notificationsVM.unreadCount,
-                  _currentIndex == 1,
+                  navVM.currentIndex == 1,
                 ),
                 selectedIcon: _buildInboxIcon(
                   notificationsVM.unreadCount,
                   true,
                 ),
-                label: 'Gelen Kutusu',
+                label: l10n.inbox,
               ),
-              const NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home),
-                label: 'Ana Sayfa',
+              NavigationDestination(
+                icon: const Icon(Icons.home_outlined),
+                selectedIcon: const Icon(Icons.home),
+                label: l10n.appTitle, // Using appTitle as "Ana Sayfa" placeholder
               ),
-              const NavigationDestination(
-                icon: Icon(Icons.notifications_outlined),
-                selectedIcon: Icon(Icons.notifications),
-                label: 'Etkinlik',
+              NavigationDestination(
+                icon: const Icon(Icons.notifications_outlined),
+                selectedIcon: const Icon(Icons.notifications),
+                label: l10n.activity,
               ),
-              const NavigationDestination(
-                icon: Icon(Icons.person_outlined),
-                selectedIcon: Icon(Icons.person),
-                label: 'Hesap',
+              NavigationDestination(
+                icon: const Icon(Icons.person_outlined),
+                selectedIcon: const Icon(Icons.person),
+                label: l10n.account,
               ),
             ],
           ),
@@ -119,3 +126,4 @@ class _BottomNavShellState extends State<BottomNavShell> {
     );
   }
 }
+

@@ -1,84 +1,100 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:mobile/viewmodels/settings_viewmodel.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
-/// Görünüm (Tema) Ayarları Ekranı
-class AppearanceSettingsScreen extends StatefulWidget {
+/// Görünüm (Tema ve Dil) Ayarları Ekranı
+class AppearanceSettingsScreen extends StatelessWidget {
   const AppearanceSettingsScreen({super.key});
 
   @override
-  State<AppearanceSettingsScreen> createState() =>
-      _AppearanceSettingsScreenState();
-}
-
-class _AppearanceSettingsScreenState extends State<AppearanceSettingsScreen> {
-  String _themeMode = 'system'; // 'system', 'light', 'dark'
-  bool _useHighContrast = false;
-  bool _useDynamicColors = true;
-
-  @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Görünüm')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Text(
-            'Tema',
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          // Yeni RadioGroup widget'ı ile sarmalıyoruz
-          RadioGroup<String>(
-            groupValue: _themeMode,
-            onChanged: (val) {
-              if (val != null) setState(() => _themeMode = val);
-            },
-            child: Column(
-              children: const [
-                RadioListTile<String>(
-                  title: Text('Sistem Varsayılanı'),
-                  subtitle: Text('Cihazınızın tercihine göre'),
-                  value: 'system',
+      appBar: AppBar(title: Text(l10n.appearanceAndLanguage)),
+      body: Consumer<SettingsViewModel>(
+        builder: (context, settingsVM, child) {
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Text(
+                l10n.theme,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              RadioGroup<ThemeMode>(
+                groupValue: settingsVM.themeMode,
+                onChanged: (val) {
+                  if (val != null) settingsVM.setThemeMode(val);
+                },
+                child: Column(
+                  children: [
+                    RadioListTile<ThemeMode>(
+                      title: Text(l10n.systemDefault),
+                      subtitle: Text(l10n.devicePreference),
+                      value: ThemeMode.system,
+                    ),
+                    RadioListTile<ThemeMode>(
+                      title: Text(l10n.lightTheme),
+                      value: ThemeMode.light,
+                    ),
+                    RadioListTile<ThemeMode>(
+                      title: Text(l10n.darkTheme),
+                      value: ThemeMode.dark,
+                    ),
+                  ],
                 ),
-                RadioListTile<String>(
-                  title: Text('Açık Tema'),
-                  value: 'light',
+              ),
+              const Divider(height: 32),
+              Text(
+                l10n.language,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              RadioGroup<Locale>(
+                groupValue: settingsVM.locale,
+                onChanged: (val) {
+                  if (val != null) settingsVM.setLocale(val);
+                },
+                child: Column(
+                  children: [
+                    RadioListTile<Locale>(
+                      title: Text(l10n.turkish),
+                      value: const Locale('tr'),
+                    ),
+                    RadioListTile<Locale>(
+                      title: Text(l10n.english),
+                      value: const Locale('en'),
+                    ),
+                  ],
                 ),
-                RadioListTile<String>(
-                  title: Text('Koyu Tema'),
-                  value: 'dark',
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 24),
-          Text(
-            'Erişilebilirlik',
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          SwitchListTile(
-            title: const Text('Yüksek Kontrastlı Renkler'),
-            subtitle: const Text('Okunabilirliği iyileştir'),
-            value: _useHighContrast,
-            onChanged: (val) {
-              setState(() => _useHighContrast = val);
-            },
-          ),
-          SwitchListTile(
-            title: const Text('Dinamik Renkler'),
-            subtitle: const Text('Cihaz teması renklerini kullan'),
-            value: _useDynamicColors,
-            onChanged: (val) {
-              setState(() => _useDynamicColors = val);
-            },
-          ),
-        ],
+              ),
+              const Divider(height: 32),
+              Text(
+                l10n.accessibility,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              SwitchListTile(
+                title: Text(l10n.highContrast),
+                subtitle: Text(l10n.improveReadability),
+                value: false, // Gelecekte eklenebilir
+                onChanged: (val) {
+                  // settingsVM.setHighContrast(val);
+                },
+              ),
+            ],
+          );
+        },
       ),
     );
   }

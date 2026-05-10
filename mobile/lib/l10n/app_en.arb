@@ -1,0 +1,310 @@
+{
+  "appTitle": "Kanban Board",
+  "login": "Login",
+  "signup": "Sign Up",
+  "email": "Email",
+  "password": "Password",
+  "fullName": "Full Name",
+  "forgotPassword": "Forgot Password",
+  "noAccount": "Don't have an account? Sign up",
+  "alreadyHaveAccount": "Already have an account? Login",
+  "boards": "Boards",
+  "workspaces": "Workspaces",
+  "activity": "Activity",
+  "account": "Account",
+  "settings": "Settings",
+  "logout": "Logout",
+  "deleteAccount": "Delete Account",
+  "editProfile": "Edit Profile",
+  "changePassword": "Change Password",
+  "notifications": "Notifications",
+  "theme": "Appearance",
+  "language": "Language",
+  "privacyPolicy": "Privacy Policy",
+  "termsOfService": "Terms of Service",
+  "appInfo": "App Information",
+  "save": "Save",
+  "cancel": "Cancel",
+  "add": "Add",
+  "appearanceAndLanguage": "Appearance and Language",
+  "systemDefault": "System Default",
+  "devicePreference": "Based on device preference",
+  "lightTheme": "Light Theme",
+  "darkTheme": "Dark Theme",
+  "turkish": "Turkish",
+  "english": "English",
+  "accessibility": "Accessibility",
+  "highContrast": "High Contrast Colors",
+  "improveReadability": "Improve readability",
+  "currentPassword": "Current Password",
+  "newPassword": "New Password",
+  "confirmPassword": "Confirm New Password",
+  "passwordChangedSuccessfully": "Password changed successfully",
+  "changePasswordFailed": "Failed to change password",
+  "passwordRequired": "Password is required",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "passwordTooShort": "Password must be at least 8 characters",
+  "passwordTooLong": "Password must be at most 40 characters",
+  "passwordSameAsCurrent": "New password cannot be the same as current password",
+  "resetYourPassword": "Reset your password",
+  "enterEmailToReset": "Enter your email address and we'll send you a password reset link.",
+  "sendResetLink": "Send Reset Link",
+  "emailSent": "Email Sent!",
+  "checkEmailForLink": "A password reset link has been sent to {email}. Please check your email.",
+  "@checkEmailForLink": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "backToLogin": "Back to Login",
+  "invalidEmail": "Please enter a valid email address",
+  "emailRequired": "Email is required",
+  "notificationSettings": "Notification Settings",
+  "notificationTypes": "Notification Types",
+  "pushNotifications": "Push Notifications",
+  "inAppAndDevice": "In-app and device notifications",
+  "emailNotifications": "Email Notifications",
+  "importantUpdatesEmail": "Email for important updates",
+  "notificationCategories": "Notification Categories",
+  "cardComments": "Card Comments",
+  "notifyOnComments": "Notify when someone comments on cards",
+  "cardAssignments": "Card Assignments",
+  "notifyOnAssignments": "Notify when a card is assigned to you",
+  "boardUpdates": "Board Updates",
+  "importantBoardChanges": "Important changes in your boards",
+  "mentions": "Mentions",
+  "notifyOnMentions": "Notify when someone mentions you",
+  "profileUpdatedSuccessfully": "Profile updated successfully",
+  "fullNameRequired": "Full name is required",
+  "membersOf": "{workspaceName} Members",
+  "@membersOf": {
+    "placeholders": {
+      "workspaceName": {
+        "type": "String"
+      }
+    }
+  },
+  "noMembersFound": "No members found.",
+  "unknownUser": "Unknown User",
+  "me": "Me",
+  "makeAdmin": "Make Admin",
+  "makeMember": "Make Member",
+  "makeObserver": "Make Observer",
+  "removeMember": "Remove Member",
+  "roleUpdateFailed": "Failed to update role",
+  "removeMemberConfirm": "Are you sure you want to remove this member from the workspace?",
+  "removeMemberFailed": "Failed to remove member",
+  "remove": "Remove",
+  "tryAgain": "Try Again",
+  "noWorkspacesYet": "No workspaces yet",
+  "createFirstWorkspace": "Create your first workspace",
+  "newWorkspace": "New Workspace",
+  "createWorkspace": "Create Workspace",
+  "workspaceName": "Workspace Name",
+  "descriptionOptional": "Description (optional)",
+  "nameRequired": "Name is required",
+  "createFailed": "Failed to create",
+  "workspaceCreatedSuccessfully": "Workspace created successfully",
+  "manageMembers": "Manage Members",
+  "inviteMember": "Invite Member",
+  "editWorkspace": "Edit Workspace",
+  "deleteWorkspaceTitle": "Delete Workspace",
+  "deleteWorkspaceConfirm": "{workspaceName} will be deleted. This action cannot be undone.",
+  "@deleteWorkspaceConfirm": {
+    "placeholders": {
+      "workspaceName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteFailed": "Failed to delete",
+  "inviteToWorkspace": "Invite a new member to {workspaceName}.",
+  "@inviteToWorkspace": {
+    "placeholders": {
+      "workspaceName": {
+        "type": "String"
+      }
+    }
+  },
+  "adminRole": "Administrator (Admin)",
+  "memberRole": "Member (Member)",
+  "observerRole": "Observer (Observer)",
+  "invitationFailed": "Failed to send invitation",
+  "invitationSentSuccessfully": "Invitation sent successfully",
+  "send": "Send",
+  "lastUpdated": "Last Updated: {date}",
+  "@lastUpdated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "profileInfo": "Profile Info",
+  "profileInfoSubtitle": "Name, email, profile photo",
+  "manageWorkspaces": "Manage Workspaces",
+  "manageWorkspacesSubtitle": "Create, edit, delete",
+  "light": "Light",
+  "dark": "Dark",
+  "system": "System",
+  "about": "About",
+  "version": "Version {version}",
+  "@version": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "appDescription": "Kanban Board application is designed for you to easily manage your projects and tasks. It was developed using MVVM architecture and Flutter.",
+  "developerLabel": "Developer: {name}",
+  "@developerLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "licenseLabel": "License: {license}",
+  "@licenseLabel": {
+    "placeholders": {
+      "license": {
+        "type": "String"
+      }
+    }
+  },
+  "termsContent1": "1. By using the application, you are deemed to have accepted these terms.",
+  "termsContent2": "2. The security of your data is important to us.",
+  "termsContent3": "3. Misuse of the application is prohibited.",
+  "termsContent4": "4. The service provider reserves the right to make changes to the service.",
+  "termsFooter": "These terms may be updated from time to time.",
+  "privacyContent": "Your privacy is important to us. Your data is not shared with third parties. Data collected within the application is only used to improve your experience and ensure your account security.",
+  "whatDataCollect": "What data do we collect?",
+  "dataEmail": "- Email address",
+  "dataFullName": "- Full Name",
+  "dataContent": "- Content you create",
+  "deleteAccountConfirm": "Your account will be permanently deleted. This action cannot be undone. Do you want to continue?",
+  "deleteAccountFailed": "Failed to delete account",
+  "card": "Card",
+  "noActivity": "No activity",
+  "noActivityFoundForSelection": "No activity records found for this selection.",
+  "noWorkspacesFound": "Workspaces not found.",
+  "noBoardsFound": "Boards not found.",
+  "noCardsFound": "Cards not found.",
+  "before": "Before",
+  "after": "After",
+  "inbox": "Inbox",
+  "invitations": "Invitations",
+  "markAllReadSuccess": "All marked as read",
+  "noNotifications": "No notifications",
+  "noNotificationsSubtitle": "You will see all updates here when you stay informed.",
+  "receivedInvitations": "Received Invitations",
+  "noReceivedInvitations": "You have no pending invitations.",
+  "sentInvitations": "Sent Invitations",
+  "noSentInvitations": "You have no pending sent invitations.",
+  "invitedBy": "Invited by: {name}",
+  "@invitedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reject": "Reject",
+  "accept": "Accept",
+  "invitationRejected": "Invitation rejected",
+  "invitationAccepted": "Invitation accepted",
+  "cancelInvitation": "Cancel Invitation",
+  "cancelInvitationConfirm": "Are you sure you want to cancel this invitation?",
+  "yesCancel": "Yes, Cancel",
+  "invitationCancelled": "Invitation cancelled",
+  "justNow": "Just now",
+  "minutesAgo": "{count} minutes ago",
+  "@minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{count} hours ago",
+  "@hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{count} days ago",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "username": "User",
+  "role": "Role",
+  "editList": "Edit List",
+  "cardMoveFailed": "Failed to move card",
+  "allNotifications": "All Notifications",
+  "notifyOnAllActivity": "Get notifications for all activity in this board",
+  "notifyOnPersonal": "Only for assignments and mentions",
+  "editBoard": "Edit Board",
+  "boardName": "Board Name",
+  "boardUpdated": "Board updated",
+  "deleteBoardConfirm": "Are you sure you want to delete this board? This action cannot be undone.",
+  "listName": "List Name",
+  "deleteListConfirm": "Are you sure you want to delete the list {listName}?",
+  "@deleteListConfirm": {
+    "placeholders": {
+      "listName": {
+        "type": "String"
+      }
+    }
+  },
+  "cardTitle": "Card Title",
+  "titleRequired": "Title is required",
+  "boardBackground": "Board Background",
+  "defaultOption": "Default",
+  "green": "Green",
+  "yellow": "Yellow",
+  "backgroundUpdateFailed": "Failed to update background",
+  "loginFailed": "Login failed",
+  "emailNotFoundSignup": "Email not found. Please sign up.",
+  "loginError": "Login Error",
+  "loginWithGoogle": "Login with Google",
+  "purple": "Purple",
+  "blue": "Blue",
+  "orange": "Orange",
+  "pink": "Pink",
+  "teal": "Teal",
+  "colors": "Colors",
+  "signupFailed": "Signup failed",
+  "bySigningUp": "By signing up, you accept our ",
+  "youAccept": ".",
+  "termsOfServiceContent": "Terms of Service content will be here...",
+  "privacyPolicyContent": "Privacy Policy content will be here...",
+  "ok": "OK",
+  "and": "and",
+  "error": "Error",
+  "cards": "Cards",
+  "createBoard": "Create Board",
+  "newBoard": "New Board",
+  "createBoardToWorkspace": "Create Board for {workspaceName}",
+  "@createBoardToWorkspace": {
+    "placeholders": {
+      "workspaceName": {
+        "type": "String"
+      }
+    }
+  },
+  "mustCreateWorkspaceFirst": "You must create a workspace first to create a board.",
+  "boardCreatedSuccessfully": "Board created",
+  "boardCreateFailed": "Failed to create board",
+  "unknownWorkspace": "Unknown Workspace",
+  "unknownUser": "Unknown User",
+  "createBoardTitle": "Create New Board"
+}

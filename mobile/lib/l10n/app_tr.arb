@@ -1,0 +1,313 @@
+{
+  "appTitle": "Kanban Board",
+  "login": "Giriş Yap",
+  "signup": "Üye Ol",
+  "email": "E-posta",
+  "password": "Şifre",
+  "fullName": "Ad Soyad",
+  "forgotPassword": "Şifremi Unuttum",
+  "noAccount": "Hesabın yok mu? Kayıt ol",
+  "alreadyHaveAccount": "Zaten hesabın var mı? Giriş yap",
+  "boards": "Panolar",
+  "workspaces": "Çalışma Alanları",
+  "activity": "Etkinlik",
+  "account": "Hesap",
+  "settings": "Ayarlar",
+  "logout": "Çıkış Yap",
+  "deleteAccount": "Hesabı Sil",
+  "editProfile": "Profili Düzenle",
+  "changePassword": "Şifre Değiştir",
+  "notifications": "Bildirimler",
+  "theme": "Görünüm",
+  "language": "Dil",
+  "privacyPolicy": "Gizlilik Politikası",
+  "termsOfService": "Kullanım Koşulları",
+  "appInfo": "Uygulama Bilgileri",
+  "save": "Kaydet",
+  "cancel": "İptal",
+  "add": "Ekle",
+  "appearanceAndLanguage": "Görünüm ve Dil",
+  "systemDefault": "Sistem Varsayılanı",
+  "devicePreference": "Cihazınızın tercihine göre",
+  "lightTheme": "Açık Tema",
+  "darkTheme": "Koyu Tema",
+  "turkish": "Türkçe",
+  "english": "İngilizce",
+  "accessibility": "Erişilebilirlik",
+  "highContrast": "Yüksek Kontrastlı Renkler",
+  "improveReadability": "Okunabilirliği iyileştir",
+  "currentPassword": "Mevcut Şifre",
+  "newPassword": "Yeni Şifre",
+  "confirmPassword": "Yeni Şifre (Tekrar)",
+  "passwordChangedSuccessfully": "Şifre başarıyla değiştirildi",
+  "changePasswordFailed": "Şifre değiştirme başarısız",
+  "passwordRequired": "Şifre gerekli",
+  "passwordsDoNotMatch": "Şifreler eşleşmiyor",
+  "passwordTooShort": "Şifre en az 8 karakter olmalı",
+  "passwordTooLong": "Şifre en fazla 40 karakter olabilir",
+  "passwordSameAsCurrent": "Yeni şifre mevcut şifreyle aynı olamaz",
+  "resetYourPassword": "Şifrenizi sıfırlayın",
+  "enterEmailToReset": "E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.",
+  "sendResetLink": "Sıfırlama Bağlantısı Gönder",
+  "emailSent": "E-posta gönderildi!",
+  "checkEmailForLink": "{email} adresine şifre sıfırlama bağlantısı gönderildi. Lütfen e-postanızı kontrol edin.",
+  "@checkEmailForLink": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "backToLogin": "Giriş Ekranına Dön",
+  "invalidEmail": "Geçerli bir e-posta adresi girin",
+  "emailRequired": "E-posta adresi gerekli",
+  "notificationSettings": "Bildirim Ayarları",
+  "notificationTypes": "Bildirim Türleri",
+  "pushNotifications": "Push Bildirimleri",
+  "inAppAndDevice": "Uygulama içi ve cihaz bildirimleri",
+  "emailNotifications": "E-posta Bildirimleri",
+  "importantUpdatesEmail": "Önemli güncellemelerin e-postası",
+  "notificationCategories": "Bildirim Kategorileri",
+  "cardComments": "Kart Yorumları",
+  "notifyOnComments": "Kartlara yorum yapıldığında bilgilendir",
+  "cardAssignments": "Kart Atanması",
+  "notifyOnAssignments": "Sana kart atandığında bilgilendir",
+  "boardUpdates": "Pano Güncellemeleri",
+  "importantBoardChanges": "Panonuzdaki önemli değişiklikler",
+  "mentions": "Anılan Bildirimler",
+  "notifyOnMentions": "Sizi anılanlar için bildirim al",
+  "profileUpdatedSuccessfully": "Profil güncellendi",
+  "fullNameRequired": "Ad soyad gerekli",
+  "membersOf": "{workspaceName} Üyeleri",
+  "@membersOf": {
+    "placeholders": {
+      "workspaceName": {
+        "type": "String"
+      }
+    }
+  },
+  "noMembersFound": "Henüz üye bulunmuyor.",
+  "unknownUser": "Bilinmeyen Kullanıcı",
+  "me": "Ben",
+  "makeAdmin": "Admin Yap",
+  "makeMember": "Member Yap",
+  "makeObserver": "Observer Yap",
+  "removeMember": "Üyeyi Çıkar",
+  "roleUpdateFailed": "Rol güncellenemedi",
+  "removeMemberConfirm": "Bu üyeyi çalışma alanından çıkarmak istediğinize emin misiniz?",
+  "removeMemberFailed": "Üye çıkarılamadı",
+  "remove": "Çıkar",
+  "tryAgain": "Tekrar Dene",
+  "noWorkspacesYet": "Henüz çalışma alanı yok",
+  "createFirstWorkspace": "Yeni bir çalışma alanı oluşturun",
+  "newWorkspace": "Yeni Alan",
+  "createWorkspace": "Yeni Çalışma Alanı",
+  "workspaceName": "Alan Adı",
+  "descriptionOptional": "Açıklama (isteğe bağlı)",
+  "nameRequired": "Ad gerekli",
+  "createFailed": "Oluşturulamadı",
+  "workspaceCreatedSuccessfully": "Çalışma alanı oluşturuldu",
+  "manageMembers": "Üyeleri Yönet",
+  "inviteMember": "Üye Davet Et",
+  "editWorkspace": "Çalışma Alanını Düzenle",
+  "deleteWorkspaceTitle": "Çalışma Alanını Sil",
+  "deleteWorkspaceConfirm": "\"{workspaceName}\" çalışma alanı silinecektir. Bu işlem geri alınamaz.",
+  "@deleteWorkspaceConfirm": {
+    "placeholders": {
+      "workspaceName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteFailed": "Silme başarısız",
+  "inviteToWorkspace": "{workspaceName} alanına yeni bir üye davet edin.",
+  "@inviteToWorkspace": {
+    "placeholders": {
+      "workspaceName": {
+        "type": "String"
+      }
+    }
+  },
+  "adminRole": "Yönetici (Admin)",
+  "memberRole": "Üye (Member)",
+  "observerRole": "Gözlemci (Observer)",
+  "invitationFailed": "Davet gönderilemedi",
+  "invitationSentSuccessfully": "Davet başarıyla gönderildi",
+  "send": "Gönder",
+  "lastUpdated": "Son Güncelleme: {date}",
+  "@lastUpdated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "profileInfo": "Profil Bilgileri",
+  "profileInfoSubtitle": "Ad, e-posta, profil fotoğrafı",
+  "manageWorkspaces": "Çalışma Alanlarını Yönet",
+  "manageWorkspacesSubtitle": "Oluştur, düzenle, sil",
+  "appearanceAndLanguage": "Görünüm ve Dil",
+  "light": "Açık",
+  "dark": "Koyu",
+  "system": "Sistem",
+  "turkish": "Türkçe",
+  "english": "English",
+  "about": "Hakkında",
+  "version": "Sürüm {version}",
+  "@version": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "appDescription": "Kanban Board uygulaması, projelerinizi ve görevlerinizi kolayca yönetmeniz için tasarlanmıştır. MVVM mimarisi ve Flutter kullanılarak geliştirilmiştir.",
+  "developerLabel": "Geliştirici: {name}",
+  "@developerLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "licenseLabel": "Lisans: {license}",
+  "@licenseLabel": {
+    "placeholders": {
+      "license": {
+        "type": "String"
+      }
+    }
+  },
+  "termsContent1": "1. Uygulamayı kullanarak bu koşulları kabul etmiş sayılırsınız.",
+  "termsContent2": "2. Verilerinizin güvenliği bizim için önemlidir.",
+  "termsContent3": "3. Uygulamayı kötüye kullanmak yasaktır.",
+  "termsContent4": "4. Servis sağlayıcı, hizmette değişiklik yapma hakkını saklı tutar.",
+  "termsFooter": "Bu koşullar zaman zaman güncellenebilir.",
+  "privacyContent": "Gizliliğiniz bizim için önemlidir. Verileriniz üçüncü taraflarla paylaşılmaz. Uygulama içerisinde toplanan veriler sadece deneyiminizi iyileştirmek ve hesap güvenliğinizi sağlamak amacıyla kullanılır.",
+  "whatDataCollect": "Hangi verileri topluyoruz?",
+  "dataEmail": "- E-posta adresi",
+  "dataFullName": "- Ad Soyad",
+  "dataContent": "- Oluşturduğunuz içerikler",
+  "deleteAccountConfirm": "Hesabınız kalıcı olarak silinecektir. Bu işlem geri alınamaz. Devam etmek istiyor musunuz?",
+  "deleteAccountFailed": "Hesap silme başarısız",
+  "card": "Kart",
+  "noActivity": "Aktivite yok",
+  "noActivityFoundForSelection": "Bu seçime ait aktivite kaydı bulunmuyor.",
+  "noWorkspacesFound": "Çalışma alanları bulunamadı.",
+  "noBoardsFound": "Panolar bulunamadı.",
+  "noCardsFound": "Kartlar bulunamadı.",
+  "before": "Önce",
+  "after": "Sonra",
+  "inbox": "Gelen Kutusu",
+  "invitations": "Davetler",
+  "markAllReadSuccess": "Tümü okundu olarak işaretlendi",
+  "noNotifications": "Bildiriminiz yok",
+  "noNotificationsSubtitle": "Tüm gelişmelerden haberdar olduğunuzda burada görünecek.",
+  "receivedInvitations": "Gelen Davetler",
+  "noReceivedInvitations": "Bekleyen davetiniz bulunmuyor.",
+  "sentInvitations": "Gönderilen Davetler",
+  "noSentInvitations": "Bekleyen gönderilmiş davetiniz bulunmuyor.",
+  "invitedBy": "Davet eden: {name}",
+  "@invitedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reject": "Reddet",
+  "accept": "Kabul Et",
+  "invitationRejected": "Davet reddedildi",
+  "invitationAccepted": "Davet kabul edildi",
+  "cancelInvitation": "Daveti İptal Et",
+  "cancelInvitationConfirm": "Bu daveti iptal etmek istediğinize emin misiniz?",
+  "yesCancel": "Evet, İptal Et",
+  "invitationCancelled": "Davet iptal edildi",
+  "justNow": "Az önce",
+  "minutesAgo": "{count} dakika önce",
+  "@minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{count} saat önce",
+  "@hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{count} gün önce",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "username": "Kullanıcı",
+  "role": "Rol",
+  "editList": "Listeyi Düzenle",
+  "cardMoveFailed": "Kart taşınamadı",
+  "allNotifications": "Tüm Bildirimler",
+  "notifyOnAllActivity": "Bu panodaki tüm etkinlikler için bildirim al",
+  "notifyOnPersonal": "Sadece bana atanan veya etiketlendiğim durumlarda",
+  "editBoard": "Panoyu Düzenle",
+  "boardName": "Pano Adı",
+  "boardUpdated": "Pano güncellendi",
+  "deleteBoardConfirm": "Bu panoyu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+  "listName": "Liste Adı",
+  "deleteListConfirm": "\"{listName}\" isimli listeyi silmek istediğinize emin misiniz?",
+  "@deleteListConfirm": {
+    "placeholders": {
+      "listName": {
+        "type": "String"
+      }
+    }
+  },
+  "cardTitle": "Kart Başlığı",
+  "titleRequired": "Başlık gerekli",
+  "boardBackground": "Pano Arka Planı",
+  "defaultOption": "Varsayılan",
+  "green": "Yeşil",
+  "yellow": "Sarı",
+  "backgroundUpdateFailed": "Arka plan güncellenemedi",
+  "loginFailed": "Giriş başarısız",
+  "emailNotFoundSignup": "E-posta bulunmadı. Lütfen kayıt olun.",
+  "loginError": "Giriş Hatası",
+  "loginWithGoogle": "Google ile Giriş Yap",
+  "purple": "Mor",
+  "blue": "Mavi",
+  "orange": "Turuncu",
+  "pink": "Pembe",
+  "teal": "Turkuaz",
+  "colors": "Renkler",
+  "signupFailed": "Kayıt başarısız",
+  "bySigningUp": "Kayıt olarak ",
+  "youAccept": "'nı kabul etmiş olursunuz.",
+  "termsOfServiceContent": "Kullanım koşulları metni buraya gelecek...",
+  "privacyPolicyContent": "Gizlilik politikası metni buraya gelecek...",
+  "ok": "Tamam",
+  "and": "ve",
+  "error": "Hata",
+  "cards": "Kartlar",
+  "createBoard": "Pano Oluştur",
+  "newBoard": "Yeni Pano",
+  "createBoardToWorkspace": "{workspaceName} için Pano Oluştur",
+  "@createBoardToWorkspace": {
+    "placeholders": {
+      "workspaceName": {
+        "type": "String"
+      }
+    }
+  },
+  "mustCreateWorkspaceFirst": "Pano oluşturmak için önce bir Çalışma Alanı oluşturmalısınız.",
+  "boardCreatedSuccessfully": "Pano oluşturuldu",
+  "boardCreateFailed": "Pano oluşturulamadı",
+  "unknownWorkspace": "Bilinmeyen Çalışma Alanı",
+  "unknownUser": "Bilinmeyen Kullanıcı",
+  "createBoardTitle": "Yeni Pano Oluştur"
+}

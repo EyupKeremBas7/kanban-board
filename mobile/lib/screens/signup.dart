@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/viewmodels/auth_viewmodel.dart';
 import 'package:mobile/screens/login.dart';
+import 'package:mobile/screens/contract_screen.dart';
 import 'package:mobile/widgets/bottom_nav_shell.dart';
+import 'package:flutter/gestures.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 /// Kayıt olma ekranı — referans: giris-signup.jpeg
 /// AuthViewModel üzerinden gerçek API çağrısı yapar.
@@ -50,9 +53,10 @@ class _SignupScreenState extends State<SignupScreen> {
       );
     } else {
       // Hata mesajını SnackBar ile göster (Kural 15)
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(authViewModel.errorMessage ?? 'Kayıt başarısız'),
+          content: Text(authViewModel.errorMessage ?? l10n.signupFailed),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -61,8 +65,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Kayıt Ol')),
+      appBar: AppBar(title: Text(l10n.signup)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -76,14 +81,14 @@ class _SignupScreenState extends State<SignupScreen> {
                 TextFormField(
                   controller: _fullNameController,
                   textInputAction: TextInputAction.next,
-                  decoration: const InputDecoration(
-                    labelText: 'Ad Soyad',
-                    prefixIcon: Icon(Icons.person_outlined),
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.fullName,
+                    prefixIcon: const Icon(Icons.person_outlined),
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Ad soyad gerekli';
+                      return l10n.nameRequired;
                     }
                     return null;
                   },
@@ -94,17 +99,17 @@ class _SignupScreenState extends State<SignupScreen> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
-                  decoration: const InputDecoration(
-                    labelText: 'E-posta',
-                    prefixIcon: Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.email,
+                    prefixIcon: const Icon(Icons.email_outlined),
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'E-posta adresi gerekli';
+                      return l10n.emailRequired;
                     }
                     if (!value.contains('@')) {
-                      return 'Geçerli bir e-posta adresi girin';
+                      return l10n.invalidEmail;
                     }
                     return null;
                   },
@@ -116,7 +121,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   obscureText: _obscurePassword,
                   textInputAction: TextInputAction.done,
                   decoration: InputDecoration(
-                    labelText: 'Şifre',
+                    labelText: l10n.password,
                     prefixIcon: const Icon(Icons.lock_outlined),
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
@@ -132,14 +137,65 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Şifre gerekli';
+                      return l10n.passwordRequired;
                     }
                     if (value.length < 8) {
-                      return 'Şifre en az 8 karakter olmalı';
+                      return l10n.passwordTooShort;
                     }
                     return null;
                   },
                   onFieldSubmitted: (_) => _handleSignup(),
+                ),
+                const SizedBox(height: 16),
+                // Gizlilik Politikası ve Kullanım Koşulları
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: Theme.of(context).textTheme.bodySmall,
+                    children: [
+                      TextSpan(text: l10n.bySigningUp),
+                      TextSpan(
+                        text: l10n.termsOfService,
+                        style: const TextStyle(
+                          decoration: TextDecoration.underline,
+                          color: Colors.blue,
+                        ),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ContractScreen(
+                                  title: l10n.termsOfService,
+                                  content: l10n.termsOfServiceContent,
+                                ),
+                              ),
+                            );
+                          },
+                      ),
+                      TextSpan(text: ' ${l10n.and} '),
+                      TextSpan(
+                        text: l10n.privacyPolicy,
+                        style: const TextStyle(
+                          decoration: TextDecoration.underline,
+                          color: Colors.blue,
+                        ),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ContractScreen(
+                                  title: l10n.privacyPolicy,
+                                  content: l10n.privacyPolicyContent,
+                                ),
+                              ),
+                            );
+                          },
+                      ),
+                      TextSpan(text: l10n.youAccept),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 24),
                 // Kayıt ol butonu — ViewModel loading state'ini dinle
@@ -156,7 +212,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Kayıt Ol'),
+                          : Text(l10n.signup),
                     );
                   },
                 ),
@@ -171,7 +227,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                     );
                   },
-                  child: const Text('Zaten hesabın var mı? Giriş yap'),
+                  child: Text(l10n.alreadyHaveAccount),
                 ),
               ],
             ),

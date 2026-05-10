@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart' as socket_io;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mobile/services/auth_service.dart';
 
 class SocketService extends ChangeNotifier {
-  IO.Socket? _socket;
+  socket_io.Socket? _socket;
   final AuthService _authService;
 
   bool _isConnected = false;
@@ -23,9 +23,9 @@ class SocketService extends ChangeNotifier {
     final token = await _authService.getToken();
     final baseUrl = dotenv.env['API_URL']?.replaceAll('/api/v1', '') ?? 'http://10.0.2.2:8000';
 
-    _socket = IO.io(
+    _socket = socket_io.io(
       baseUrl,
-      IO.OptionBuilder()
+      socket_io.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
           .setExtraHeaders(token != null ? {'Authorization': 'Bearer $token'} : {})

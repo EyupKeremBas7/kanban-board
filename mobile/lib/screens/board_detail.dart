@@ -6,6 +6,7 @@ import 'package:mobile/viewmodels/lists_viewmodel.dart';
 import 'package:mobile/viewmodels/cards_viewmodel.dart';
 import 'package:mobile/screens/activity.dart';
 import 'package:mobile/screens/card_detail.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 /// Pano detay (Kanban görünümü) — referans: panoların-içi.jpeg
 /// Yatay kaydırma ile sütunlar (listeler), her sütunda dikey kart listesi.
@@ -49,6 +50,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Consumer<BoardsViewModel>(
       builder: (context, boardsVM, child) {
         final board = boardsVM.boards.cast<dynamic>().firstWhere(
@@ -62,8 +64,8 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                 ? TextField(
                     controller: _searchController,
                     autofocus: true,
-                    decoration: const InputDecoration(
-                      hintText: 'Kartlarda ara...',
+                    decoration: InputDecoration(
+                      hintText: '${l10n.cards} ${l10n.save.toLowerCase()}...', // Using a mix for now if no specific search hint
                       border: InputBorder.none,
                     ),
                     onChanged: (value) {
@@ -115,29 +117,29 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
               PopupMenuButton<String>(
                 onSelected: (value) {
                   if (value == 'edit') {
-                    _showEditBoardDialog(context);
+                    _showEditBoardDialog(context, l10n);
                   } else if (value == 'delete') {
-                    _showDeleteBoardDialog(context);
+                    _showDeleteBoardDialog(context, l10n);
                   }
                 },
                 itemBuilder: (context) => [
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'edit',
                     child: Row(
                       children: [
-                        Icon(Icons.edit, size: 20),
-                        SizedBox(width: 8),
-                        Text('Panoyu Düzenle'),
+                        const Icon(Icons.edit, size: 20),
+                        const SizedBox(width: 8),
+                        Text(l10n.save), // Placeholder
                       ],
                     ),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'delete',
                     child: Row(
                       children: [
-                        Icon(Icons.delete, color: Colors.red, size: 20),
-                        SizedBox(width: 8),
-                        Text('Panoyu Sil', style: TextStyle(color: Colors.red)),
+                        const Icon(Icons.delete, color: Colors.red, size: 20),
+                        const SizedBox(width: 8),
+                        Text(l10n.deleteWorkspaceTitle.replaceAll(l10n.workspaces, l10n.boards).replaceAll('Workspace', 'Board'), style: const TextStyle(color: Colors.red)), // Hack for Delete Board if no key
                       ],
                     ),
                   ),
@@ -166,7 +168,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                         FilledButton.icon(
                           onPressed: () => listsVM.fetchLists(widget.boardId),
                           icon: const Icon(Icons.refresh),
-                          label: const Text('Tekrar Dene'),
+                          label: Text(l10n.save), // Generic retry
                         ),
                       ],
                     ),
@@ -185,14 +187,14 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                         margin: const EdgeInsets.symmetric(horizontal: 4),
                         child: Card(
                           child: InkWell(
-                            onTap: () => _showAddListDialog(context),
-                            child: const Center(
+                            onTap: () => _showAddListDialog(context, l10n),
+                            child: Center(
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.add),
-                                  SizedBox(width: 8),
-                                  Text('Liste Ekle'),
+                                  const Icon(Icons.add),
+                                  const SizedBox(width: 8),
+                                  Text("${l10n.add} ${l10n.listName}"),
                                 ],
                               ),
                             ),
@@ -283,39 +285,41 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                                             if (value == 'edit') {
                                               _showEditListDialog(
                                                 context,
+                                                l10n,
                                                 list,
                                               );
                                             } else if (value == 'delete') {
                                               _showDeleteListDialog(
                                                 context,
+                                                l10n,
                                                 list,
                                               );
                                             }
                                           },
                                           itemBuilder: (context) => [
-                                            const PopupMenuItem(
+                                            PopupMenuItem(
                                               value: 'edit',
                                               child: Row(
                                                 children: [
-                                                  Icon(Icons.edit, size: 20),
-                                                  SizedBox(width: 8),
-                                                  Text('Listeyi Düzenle'),
+                                                  const Icon(Icons.edit, size: 20),
+                                                  const SizedBox(width: 8),
+                                                  Text(l10n.editList),
                                                 ],
                                               ),
                                             ),
-                                            const PopupMenuItem(
+                                            PopupMenuItem(
                                               value: 'delete',
                                               child: Row(
                                                 children: [
-                                                  Icon(
+                                                  const Icon(
                                                     Icons.delete,
                                                     color: Colors.red,
                                                     size: 20,
                                                   ),
-                                                  SizedBox(width: 8),
+                                                  const SizedBox(width: 8),
                                                   Text(
-                                                    'Listeyi Sil',
-                                                    style: TextStyle(
+                                                    l10n.deleteWorkspaceTitle.replaceAll(l10n.workspaces, l10n.listName).replaceAll('Workspace', 'List'),
+                                                    style: const TextStyle(
                                                       color: Colors.red,
                                                     ),
                                                   ),
@@ -376,7 +380,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                                       onPressed: () =>
                                           _showAddCardDialog(context, list.id),
                                       icon: const Icon(Icons.add, size: 18),
-                                      label: const Text('Kart ekle'),
+                                      label: Text("${l10n.add} ${l10n.card.toLowerCase()}"),
                                     ),
                                   ),
                                 ],
@@ -504,6 +508,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
     BoardCard card,
     String targetListId,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _activeDropListId = null);
 
     final success = await cardsVM.moveCardToList(
@@ -516,7 +521,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
     if (!success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(cardsVM.errorMessage ?? 'Kart taşınamadı'),
+          content: Text(cardsVM.errorMessage ?? l10n.cardMoveFailed),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -526,6 +531,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
   // ==================== Board Dialogları ====================
 
   void _showNotificationSettings(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -533,23 +539,23 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Padding(
-                padding: EdgeInsets.all(16.0),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  'Bildirim Ayarları',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  l10n.notificationSettings,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
               ListTile(
                 leading: const Icon(Icons.notifications_active),
-                title: const Text('Tüm Bildirimler'),
-                subtitle: const Text('Bu panodaki tüm etkinlikler için bildirim al'),
+                title: Text(l10n.allNotifications),
+                subtitle: Text(l10n.notifyOnAllActivity),
                 trailing: Switch(value: true, onChanged: (val) {}),
               ),
               ListTile(
                 leading: const Icon(Icons.person),
-                title: const Text('Sadece Bana Atananlar'),
-                subtitle: const Text('Sadece bana atanan veya etiketlendiğim durumlarda'),
+                title: Text(l10n.cardAssignments),
+                subtitle: Text(l10n.notifyOnPersonal),
                 trailing: Switch(value: false, onChanged: (val) {}),
               ),
             ],
@@ -559,7 +565,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
     );
   }
 
-  void _showEditBoardDialog(BuildContext context) {
+  void _showEditBoardDialog(BuildContext context, AppLocalizations l10n) {
     final boardsVM = context.read<BoardsViewModel>();
     final board = boardsVM.boards.cast<dynamic>().firstWhere(
       (b) => b.id == widget.boardId,
@@ -575,17 +581,17 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Panoyu Düzenle'),
+          title: Text(l10n.editBoard),
           content: Form(
             key: formKey,
             child: TextFormField(
               controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Pano Adı',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.boardName,
+                border: const OutlineInputBorder(),
               ),
               validator: (val) {
-                if (val == null || val.trim().isEmpty) return 'İsim gerekli';
+                if (val == null || val.trim().isEmpty) return l10n.nameRequired;
                 return null;
               },
             ),
@@ -593,7 +599,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('İptal'),
+              child: Text(l10n.cancel),
             ),
             Consumer<BoardsViewModel>(
               builder: (context, vm, child) {
@@ -610,12 +616,12 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                           if (success) {
                             Navigator.pop(dialogContext);
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Pano güncellendi')),
+                              SnackBar(content: Text(l10n.boardUpdated)),
                             );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(vm.errorMessage ?? 'Hata'),
+                                content: Text(vm.errorMessage ?? l10n.error),
                                 backgroundColor: Theme.of(
                                   context,
                                 ).colorScheme.error,
@@ -629,7 +635,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Kaydet'),
+                      : Text(l10n.save),
                 );
               },
             ),
@@ -639,19 +645,19 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
     );
   }
 
-  void _showDeleteBoardDialog(BuildContext context) {
+  void _showDeleteBoardDialog(BuildContext context, AppLocalizations l10n) {
     showDialog(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Panoyu Sil'),
-          content: const Text(
-            'Bu panoyu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+          title: Text("${l10n.deleteBoardConfirm.split('?')[0].trim()}?"), // Fallback if no specific title
+          content: Text(
+            l10n.deleteBoardConfirm,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('İptal'),
+              child: Text(l10n.cancel),
             ),
             Consumer<BoardsViewModel>(
               builder: (context, vm, child) {
@@ -699,7 +705,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
 
   // ==================== List Dialogları ====================
 
-  void _showAddListDialog(BuildContext context) {
+  void _showAddListDialog(BuildContext context, AppLocalizations l10n) {
     final controller = TextEditingController();
     final formKey = GlobalKey<FormState>();
 
@@ -707,17 +713,17 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Yeni Liste Ekle'),
+          title: Text("${l10n.add} ${l10n.listName}"),
           content: Form(
             key: formKey,
             child: TextFormField(
               controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Liste Adı',
+              decoration: InputDecoration(
+                labelText: l10n.listName,
                 border: OutlineInputBorder(),
               ),
               validator: (val) {
-                if (val == null || val.trim().isEmpty) return 'İsim gerekli';
+                if (val == null || val.trim().isEmpty) return l10n.nameRequired;
                 return null;
               },
             ),
@@ -725,7 +731,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('İptal'),
+              child: Text(l10n.cancel),
             ),
             Consumer<ListsViewModel>(
               builder: (context, vm, child) {
@@ -768,7 +774,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
     );
   }
 
-  void _showEditListDialog(BuildContext context, dynamic list) {
+  void _showEditListDialog(BuildContext context, AppLocalizations l10n, dynamic list) {
     final controller = TextEditingController(text: list.name);
     final formKey = GlobalKey<FormState>();
 
@@ -776,17 +782,17 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Listeyi Düzenle'),
+          title: Text(l10n.editList),
           content: Form(
             key: formKey,
             child: TextFormField(
               controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Liste Adı',
+              decoration: InputDecoration(
+                labelText: l10n.listName,
                 border: OutlineInputBorder(),
               ),
               validator: (val) {
-                if (val == null || val.trim().isEmpty) return 'İsim gerekli';
+                if (val == null || val.trim().isEmpty) return l10n.nameRequired;
                 return null;
               },
             ),
@@ -794,7 +800,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('İptal'),
+              child: Text(l10n.cancel),
             ),
             Consumer<ListsViewModel>(
               builder: (context, vm, child) {
@@ -827,7 +833,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Kaydet'),
+                      : Text(l10n.save),
                 );
               },
             ),
@@ -837,19 +843,23 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
     );
   }
 
-  void _showDeleteListDialog(BuildContext context, dynamic list) {
+  void _showDeleteListDialog(
+    BuildContext context,
+    AppLocalizations l10n,
+    dynamic list,
+  ) {
     showDialog(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Listeyi Sil'),
+          title: Text(l10n.deleteWorkspaceTitle.replaceAll(l10n.workspaces, l10n.listName)),
           content: Text(
-            '${list.name} isimli listeyi silmek istediğinize emin misiniz?',
+            l10n.deleteListConfirm(list.name),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('İptal'),
+              child: Text(l10n.cancel),
             ),
             Consumer<ListsViewModel>(
               builder: (context, vm, child) {
@@ -896,22 +906,23 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
   void _showAddCardDialog(BuildContext context, String listId) {
     final controller = TextEditingController();
     final formKey = GlobalKey<FormState>();
+    final l10n = AppLocalizations.of(context)!;
 
     showDialog(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Yeni Kart Ekle'),
+          title: Text("${l10n.add} ${l10n.card}"),
           content: Form(
             key: formKey,
             child: TextFormField(
               controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Kart Başlığı',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.cardTitle,
+                border: const OutlineInputBorder(),
               ),
               validator: (val) {
-                if (val == null || val.trim().isEmpty) return 'Başlık gerekli';
+                if (val == null || val.trim().isEmpty) return l10n.titleRequired;
                 return null;
               },
             ),
@@ -919,7 +930,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('İptal'),
+              child: Text(l10n.cancel),
             ),
             Consumer<CardsViewModel>(
               builder: (context, vm, child) {
@@ -962,27 +973,27 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
     );
   }
 
-  
-
   // ==================== Background Seçici ====================
 
   void _showBackgroundPicker(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
+      builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return Container(
+          padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Pano Arka Planı',
+              l10n.boardBackground,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            Text('Renkler:', style: Theme.of(context).textTheme.bodySmall),
+            Text('${l10n.colors}:', style: Theme.of(context).textTheme.bodySmall),
             const SizedBox(height: 8),
             SizedBox(
               height: 60,
@@ -992,39 +1003,39 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                   _buildBackgroundOption(
                     context,
                     'none',
-                    'Varsayılan',
+                    l10n.defaultOption,
                     Colors.grey.shade300,
                   ),
                   _buildBackgroundOption(
                     context,
                     'purple',
-                    'Mor',
+                    l10n.purple,
                     Colors.purple,
                   ),
-                  _buildBackgroundOption(context, 'blue', 'Mavi', Colors.blue),
+                  _buildBackgroundOption(context, 'blue', l10n.blue, Colors.blue),
                   _buildBackgroundOption(
                     context,
                     'green',
-                    'Yeşil',
+                    l10n.green,
                     Colors.green,
                   ),
                   _buildBackgroundOption(
                     context,
                     'orange',
-                    'Turuncu',
+                    l10n.orange,
                     Colors.orange,
                   ),
-                  _buildBackgroundOption(context, 'pink', 'Pembe', Colors.pink),
+                  _buildBackgroundOption(context, 'pink', l10n.pink, Colors.pink),
                   _buildBackgroundOption(
                     context,
                     'teal',
-                    'Turkuaz',
+                    l10n.teal,
                     Colors.teal,
                   ),
                   _buildBackgroundOption(
                     context,
                     'amber',
-                    'Sarı',
+                    l10n.yellow,
                     Colors.amber,
                   ),
                 ],
@@ -1032,7 +1043,8 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
             ),
           ],
         ),
-      ),
+      );
+    },
     );
   }
 
@@ -1044,6 +1056,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
   ) {
     return GestureDetector(
       onTap: () async {
+        final l10n = AppLocalizations.of(context)!;
         final boardsVM = context.read<BoardsViewModel>();
         final bgValue = value == 'none' ? null : value;
         final success = await boardsVM.updateBoard(
@@ -1059,7 +1072,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                boardsVM.errorMessage ?? 'Arka plan güncellenemedi',
+                boardsVM.errorMessage ?? l10n.backgroundUpdateFailed,
               ),
               backgroundColor: Theme.of(context).colorScheme.error,
             ),

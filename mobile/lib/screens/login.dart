@@ -5,6 +5,7 @@ import 'package:mobile/screens/signup.dart';
 import 'package:mobile/screens/forgot_password.dart';
 import 'package:mobile/widgets/bottom_nav_shell.dart';
 import 'package:mobile/services/socket_service.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 /// Oturum açma ekranı — referans: giris-login.jpeg
 /// AuthViewModel üzerinden gerçek API çağrısı yapar.
@@ -31,6 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final l10n = AppLocalizations.of(context)!;
     final authViewModel = context.read<AuthViewModel>();
     final success = await authViewModel.login(
       _emailController.text.trim(),
@@ -47,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
         (route) => false,
       );
     } else {
-      final errorMsg = authViewModel.errorMessage ?? 'Giriş başarısız';
+      final errorMsg = authViewModel.errorMessage ?? l10n.loginFailed;
       
       // E-mail bulunamadı ise signup'a yönlendir
       if (errorMsg.toLowerCase().contains('user') || 
@@ -55,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
           errorMsg.toLowerCase().contains('bulunamadı')) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('E-posta bulunmadı. Lütfen kayıt olun.'),
+            content: Text(l10n.emailNotFoundSignup),
             backgroundColor: Theme.of(context).colorScheme.secondary,
             duration: const Duration(seconds: 2),
           ),
@@ -77,12 +79,12 @@ class _LoginScreenState extends State<LoginScreen> {
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text('Giriş Hatası'),
+            title: Text(l10n.loginError),
             content: Text(errorMsg),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('Tamam'),
+                child: Text(l10n.ok),
               ),
             ],
           ),
@@ -106,15 +108,16 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else {
       if (authViewModel.errorMessage != null) {
+        final l10n = AppLocalizations.of(context)!;
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text('Giriş Hatası'),
+            title: Text(l10n.loginError),
             content: Text(authViewModel.errorMessage!),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('Tamam'),
+                child: Text(l10n.ok),
               ),
             ],
           ),
@@ -125,8 +128,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Oturum Aç')),
+      appBar: AppBar(title: Text(l10n.login)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -141,17 +145,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
-                  decoration: const InputDecoration(
-                    labelText: 'E-posta',
-                    prefixIcon: Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.email,
+                    prefixIcon: const Icon(Icons.email_outlined),
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'E-posta adresi gerekli';
+                      return l10n.emailRequired;
                     }
                     if (!value.contains('@')) {
-                      return 'Geçerli bir e-posta adresi girin';
+                      return l10n.invalidEmail;
                     }
                     return null;
                   },
@@ -163,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   obscureText: _obscurePassword,
                   textInputAction: TextInputAction.done,
                   decoration: InputDecoration(
-                    labelText: 'Şifre',
+                    labelText: l10n.password,
                     prefixIcon: const Icon(Icons.lock_outlined),
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
@@ -179,10 +183,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Şifre gerekli';
+                      return l10n.passwordRequired;
                     }
                     if (value.length < 8) {
-                      return 'Şifre en az 8 karakter olmalı';
+                      return l10n.passwordTooShort;
                     }
                     return null;
                   },
@@ -203,7 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Giriş Yap'),
+                          : Text(l10n.login),
                     );
                   },
                 ),
@@ -214,7 +218,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     return OutlinedButton.icon(
                       onPressed: authVM.isLoading ? null : _handleGoogleLogin,
                       icon: const Icon(Icons.g_mobiledata, size: 28),
-                      label: const Text('Google ile Giriş Yap'),
+                      label: Text(l10n.loginWithGoogle),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
@@ -234,7 +238,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       );
                     },
-                    child: const Text('Şifremi Unuttum'),
+                    child: Text(l10n.forgotPassword),
                   ),
                 ),
                 // Kayıt ol yönlendirmesi
@@ -247,7 +251,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     );
                   },
-                  child: const Text('Hesabın yok mu? Kayıt ol'),
+                  child: Text(l10n.noAccount),
                 ),
               ],
             ),
