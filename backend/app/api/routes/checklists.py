@@ -15,6 +15,12 @@ from app.models.checklists import (
 )
 
 from app.repository import checklists as checklists_repo
+from app.events import (
+    ChecklistCreatedEvent,
+    ChecklistDeletedEvent,
+    ChecklistUpdatedEvent,
+    EventDispatcher,
+)
 
 router = APIRouter(prefix="/checklists", tags=["checklists"])
 
@@ -59,6 +65,9 @@ def create_checklist_item(
         raise HTTPException(status_code=404, detail="Card not found")
 
     item = checklists_repo.create_checklist_item(session=session, item_in=item_in)
+
+    EventDispatcher.dispatch(ChecklistCreatedEvent(card_id=item.card_id))
+
     return item
 
 
@@ -75,6 +84,9 @@ def update_checklist_item(
         raise HTTPException(status_code=404, detail="Checklist item not found")
 
     item = checklists_repo.update_checklist_item(session=session, item=item, item_in=item_in)
+
+    EventDispatcher.dispatch(ChecklistUpdatedEvent(card_id=item.card_id))
+
     return item
 
 
@@ -90,6 +102,9 @@ def delete_checklist_item(
         raise HTTPException(status_code=404, detail="Checklist item not found")
 
     checklists_repo.soft_delete_checklist_item(session=session, item=item, deleted_by=current_user.id)
+
+    EventDispatcher.dispatch(ChecklistDeletedEvent(card_id=item.card_id))
+
     return {"ok": True}
 
 
@@ -126,8 +141,9 @@ def toggle_checklist_item(
                 card_assignee = assignee.id
                 card_assignee_email = assignee.email
 
-        from app.events import ChecklistToggledEvent, EventDispatcher
+        from app.events import ChecklistToggledEvent
         EventDispatcher.dispatch(ChecklistToggledEvent(
+            item_id=item.id,
             card_id=card.id,
             card_title=card.title,
             item_title=item.title,

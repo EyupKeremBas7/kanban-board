@@ -26,6 +26,7 @@ class ListsViewModel extends ChangeNotifier {
            event == 'CardCreatedEvent' ||
            event == 'CardDeletedEvent' ||
            event == 'ListCreatedEvent' ||
+           event == 'ListUpdatedEvent' ||
            event == 'ListDeletedEvent')) {
         fetchLists(_currentBoardId!);
       }

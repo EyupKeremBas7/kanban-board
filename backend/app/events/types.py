@@ -40,6 +40,7 @@ class CommentAddedEvent(Event):
 @dataclass
 class ChecklistToggledEvent(Event):
     """Fired when a checklist item is toggled."""
+    item_id: UUID
     card_id: UUID
     card_title: str
     item_title: str
@@ -139,9 +140,23 @@ class ListDeletedEvent(Event):
 
 
 @dataclass
+class BoardCreatedEvent(Event):
+    """Fired when a board is created."""
+    board_id: UUID
+    workspace_id: UUID
+
+
+@dataclass
 class BoardUpdatedEvent(Event):
     """Fired when a board is updated."""
     board_id: UUID
+
+
+@dataclass
+class BoardDeletedEvent(Event):
+    """Fired when a board is deleted."""
+    board_id: UUID
+    workspace_id: UUID
 
 
 @dataclass
@@ -184,4 +199,3 @@ class WorkspaceMemberAddedEvent(Event):
 class WorkspaceMemberRemovedEvent(Event):
     """Fired when a member is removed from a workspace."""
     workspace_id: UUID
-

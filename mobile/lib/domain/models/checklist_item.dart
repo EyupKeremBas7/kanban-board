@@ -29,6 +29,26 @@ class ChecklistItem {
     );
   }
 
+  ChecklistItem copyWith({
+    String? id,
+    String? cardId,
+    String? title,
+    bool? isCompleted,
+    double? position,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return ChecklistItem(
+      id: id ?? this.id,
+      cardId: cardId ?? this.cardId,
+      title: title ?? this.title,
+      isCompleted: isCompleted ?? this.isCompleted,
+      position: position ?? this.position,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

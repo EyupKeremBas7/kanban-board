@@ -17,10 +17,24 @@ class CardsViewModel extends ChangeNotifier {
   void _listenToSockets() {
     _socketService?.eventStream.listen((eventData) {
       final String event = eventData['event'] ?? '';
-      // Refresh cards on major changes
-      if (event == 'CardMovedEvent' ||
-          event == 'CommentAddedEvent' ||
+      final data = eventData['data'];
+
+      if (event == 'ChecklistCreatedEvent' ||
           event == 'ChecklistToggledEvent' ||
+          event == 'ChecklistUpdatedEvent' ||
+          event == 'ChecklistDeletedEvent' ||
+          event == 'CommentAddedEvent' ||
+          event == 'CommentUpdatedEvent' ||
+          event == 'CommentDeletedEvent') {
+        final cardId = data is Map ? data['card_id'] as String? : null;
+        if (cardId != null) {
+          prefetchCardStats([cardId], forceRefresh: true);
+        }
+        return;
+      }
+
+      // Refresh cards on structural card changes.
+      if (event == 'CardMovedEvent' ||
           event == 'CardAssignedEvent' ||
           event == 'CardCreatedEvent' ||
           event == 'CardDeletedEvent' ||

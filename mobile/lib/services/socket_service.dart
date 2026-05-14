@@ -5,6 +5,31 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mobile/services/auth_service.dart';
 
 class SocketService extends ChangeNotifier {
+  static const List<String> _serverEvents = [
+    'BoardCreatedEvent',
+    'BoardUpdatedEvent',
+    'BoardDeletedEvent',
+    'CardMovedEvent',
+    'CardAssignedEvent',
+    'CardCreatedEvent',
+    'CardDeletedEvent',
+    'CardUpdatedEvent',
+    'ChecklistCreatedEvent',
+    'ChecklistUpdatedEvent',
+    'ChecklistDeletedEvent',
+    'ChecklistToggledEvent',
+    'CommentAddedEvent',
+    'CommentUpdatedEvent',
+    'CommentDeletedEvent',
+    'InvitationSentEvent',
+    'InvitationRespondedEvent',
+    'ListCreatedEvent',
+    'ListUpdatedEvent',
+    'ListDeletedEvent',
+    'WorkspaceMemberAddedEvent',
+    'WorkspaceMemberRemovedEvent',
+  ];
+
   socket_io.Socket? _socket;
   final AuthService _authService;
 
@@ -52,16 +77,25 @@ class SocketService extends ChangeNotifier {
       if (kDebugMode) print('Socket.IO: Error: $err');
     });
 
-    // Handle generic events
+    for (final eventName in _serverEvents) {
+      _socket!.on(eventName, (data) => _publishEvent(eventName, data));
+    }
+
+    // Useful while debugging newly added backend events.
     _socket!.onAny((event, data) {
-      if (kDebugMode) print('Socket.IO Event: $event -> $data');
-      _eventController.add({
-        'event': event,
-        'data': data,
-      });
+      if (kDebugMode) print('Socket.IO Any Event: $event -> $data');
     });
 
     _socket!.connect();
+  }
+
+  void _publishEvent(String event, dynamic data) {
+    final payload = data is List && data.isNotEmpty ? data.first : data;
+    if (kDebugMode) print('Socket.IO Event: $event -> $payload');
+    _eventController.add({
+      'event': event,
+      'data': payload,
+    });
   }
 
   void disconnect() {

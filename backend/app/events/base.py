@@ -73,12 +73,29 @@ class EventDispatcher:
         )
         from app.events.socket_handler import handle_socket
         from app.events.types import (
+            BoardCreatedEvent,
+            BoardDeletedEvent,
+            BoardUpdatedEvent,
+            CardAssignedEvent,
+            CardCreatedEvent,
+            CardDeletedEvent,
             CardMovedEvent,
+            CardUpdatedEvent,
+            ChecklistCreatedEvent,
+            ChecklistDeletedEvent,
             ChecklistToggledEvent,
+            ChecklistUpdatedEvent,
             CommentAddedEvent,
+            CommentDeletedEvent,
+            CommentUpdatedEvent,
             InvitationRespondedEvent,
             InvitationSentEvent,
+            ListCreatedEvent,
+            ListDeletedEvent,
+            ListUpdatedEvent,
             WelcomeEmailSentEvent,
+            WorkspaceMemberAddedEvent,
+            WorkspaceMemberRemovedEvent,
         )
 
         cls.register(CardMovedEvent, handle_notification)
@@ -94,10 +111,27 @@ class EventDispatcher:
 
         # Socket.IO Handlers
         cls.register(CardMovedEvent, handle_socket)
+        cls.register(CardAssignedEvent, handle_socket)
+        cls.register(CardCreatedEvent, handle_socket)
+        cls.register(CardDeletedEvent, handle_socket)
+        cls.register(CardUpdatedEvent, handle_socket)
         cls.register(CommentAddedEvent, handle_socket)
+        cls.register(CommentDeletedEvent, handle_socket)
+        cls.register(CommentUpdatedEvent, handle_socket)
+        cls.register(ChecklistCreatedEvent, handle_socket)
+        cls.register(ChecklistDeletedEvent, handle_socket)
         cls.register(ChecklistToggledEvent, handle_socket)
+        cls.register(ChecklistUpdatedEvent, handle_socket)
         cls.register(InvitationSentEvent, handle_socket)
         cls.register(InvitationRespondedEvent, handle_socket)
+        cls.register(ListCreatedEvent, handle_socket)
+        cls.register(ListDeletedEvent, handle_socket)
+        cls.register(ListUpdatedEvent, handle_socket)
+        cls.register(BoardCreatedEvent, handle_socket)
+        cls.register(BoardDeletedEvent, handle_socket)
+        cls.register(BoardUpdatedEvent, handle_socket)
+        cls.register(WorkspaceMemberAddedEvent, handle_socket)
+        cls.register(WorkspaceMemberRemovedEvent, handle_socket)
 
         cls._initialized = True
         logger.info("EventDispatcher initialized with handlers")

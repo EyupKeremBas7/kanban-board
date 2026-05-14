@@ -1,8 +1,14 @@
 from app.events.base import Event, EventDispatcher
 from app.events.types import (
     CardMovedEvent,
+    CardAssignedEvent,
+    ChecklistCreatedEvent,
+    ChecklistDeletedEvent,
     ChecklistToggledEvent,
+    ChecklistUpdatedEvent,
     CommentAddedEvent,
+    CommentDeletedEvent,
+    CommentUpdatedEvent,
     InvitationRespondedEvent,
     InvitationSentEvent,
     CardCreatedEvent,
@@ -11,15 +17,23 @@ from app.events.types import (
     ListCreatedEvent,
     ListUpdatedEvent,
     ListDeletedEvent,
+    BoardCreatedEvent,
     BoardUpdatedEvent,
+    BoardDeletedEvent,
 )
 
 __all__ = [
     "Event",
     "EventDispatcher",
     "CardMovedEvent",
+    "CardAssignedEvent",
     "CommentAddedEvent",
+    "CommentDeletedEvent",
+    "CommentUpdatedEvent",
+    "ChecklistCreatedEvent",
+    "ChecklistDeletedEvent",
     "ChecklistToggledEvent",
+    "ChecklistUpdatedEvent",
     "InvitationSentEvent",
     "InvitationRespondedEvent",
     "CardCreatedEvent",
@@ -28,5 +42,7 @@ __all__ = [
     "ListCreatedEvent",
     "ListUpdatedEvent",
     "ListDeletedEvent",
+    "BoardCreatedEvent",
     "BoardUpdatedEvent",
+    "BoardDeletedEvent",
 ]

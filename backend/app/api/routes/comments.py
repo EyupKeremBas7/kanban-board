@@ -13,6 +13,11 @@ from app.models.comments import (
     CardCommentWithUser,
 )
 from app.repository import comments as comments_repo
+from app.events import (
+    CommentDeletedEvent,
+    CommentUpdatedEvent,
+    EventDispatcher,
+)
 
 router = APIRouter(prefix="/comments", tags=["comments"])
 
@@ -83,7 +88,7 @@ def create_comment(
             card_assignee = assignee.id
             card_assignee_email = assignee.email
 
-    from app.events import CommentAddedEvent, EventDispatcher
+    from app.events import CommentAddedEvent
     EventDispatcher.dispatch(CommentAddedEvent(
         card_id=card.id,
         card_title=card.title,
@@ -115,6 +120,8 @@ def update_comment(
 
     comment = comments_repo.update_comment(session=session, comment=comment, comment_in=comment_in)
 
+    EventDispatcher.dispatch(CommentUpdatedEvent(card_id=comment.card_id))
+
     return comments_repo.enrich_comment_with_user(session, comment)
 
 
@@ -133,4 +140,7 @@ def delete_comment(
         raise HTTPException(status_code=403, detail="Not authorized to delete this comment")
 
     comments_repo.soft_delete_comment(session=session, comment=comment, deleted_by=current_user.id)
+
+    EventDispatcher.dispatch(CommentDeletedEvent(card_id=comment.card_id))
+
     return {"ok": True}

@@ -19,7 +19,10 @@ class CommentsViewModel extends ChangeNotifier {
   void _listenToSockets() {
     _socketService?.eventStream.listen((eventData) {
       final String event = eventData['event'] ?? '';
-      if (_currentCardId != null && event == 'CommentAddedEvent') {
+      if (_currentCardId != null &&
+          (event == 'CommentAddedEvent' ||
+              event == 'CommentUpdatedEvent' ||
+              event == 'CommentDeletedEvent')) {
         fetchComments(_currentCardId!);
       }
     });

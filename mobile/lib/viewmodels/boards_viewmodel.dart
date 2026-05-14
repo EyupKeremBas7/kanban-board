@@ -24,8 +24,11 @@ class BoardsViewModel extends ChangeNotifier {
       if (event == 'CardMovedEvent' ||
           event == 'InvitationRespondedEvent' ||
           event == 'InvitationSentEvent' ||
+          event == 'BoardCreatedEvent' ||
           event == 'BoardUpdatedEvent' ||
+          event == 'BoardDeletedEvent' ||
           event == 'ListCreatedEvent' ||
+          event == 'ListUpdatedEvent' ||
           event == 'ListDeletedEvent') {
         if (kDebugMode) print('Mobile Socket.IO: Refreshing boards due to event: $event');
         fetchBoards();

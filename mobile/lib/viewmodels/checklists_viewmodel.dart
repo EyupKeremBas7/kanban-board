@@ -19,7 +19,34 @@ class ChecklistsViewModel extends ChangeNotifier {
   void _listenToSockets() {
     _socketService?.eventStream.listen((eventData) {
       final String event = eventData['event'] ?? '';
-      if (_currentCardId != null && event == 'ChecklistToggledEvent') {
+      final data = eventData['data'];
+      final eventCardId = data is Map ? data['card_id'] as String? : null;
+
+      if (_currentCardId == null ||
+          (eventCardId != null && eventCardId != _currentCardId)) {
+        return;
+      }
+
+      if (event == 'ChecklistToggledEvent' && data is Map) {
+        final itemId = data['item_id'] as String?;
+        final isCompleted = data['is_completed'] as bool?;
+        if (itemId != null && isCompleted != null) {
+          final index = _items.indexWhere((item) => item.id == itemId);
+          if (index != -1) {
+            _items[index] = _items[index].copyWith(
+              isCompleted: isCompleted,
+              updatedAt: DateTime.now(),
+            );
+            notifyListeners();
+            return;
+          }
+        }
+      }
+
+      if (event == 'ChecklistCreatedEvent' ||
+          event == 'ChecklistUpdatedEvent' ||
+          event == 'ChecklistDeletedEvent' ||
+          event == 'ChecklistToggledEvent') {
         fetchItems(_currentCardId!);
       }
     });

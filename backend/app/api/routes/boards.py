@@ -12,6 +12,8 @@ from app.models.auth import Message
 from app.models.boards import BoardCreate, BoardPublic, BoardsPublic, BoardUpdate
 from app.repository import boards as boards_repo
 from app.events import (
+    BoardCreatedEvent,
+    BoardDeletedEvent,
     BoardUpdatedEvent,
     EventDispatcher,
 )
@@ -65,6 +67,12 @@ def create_board(
     board = boards_repo.create_board(
         session=session, board_in=board_in, owner_id=current_user.id
     )
+
+    EventDispatcher.dispatch(BoardCreatedEvent(
+        board_id=board.id,
+        workspace_id=board.workspace_id,
+    ))
+
     return board
 
 
@@ -110,4 +118,10 @@ def delete_board(
             raise HTTPException(status_code=403, detail="Only owner or admin can delete board")
 
     boards_repo.soft_delete_board(session=session, board=board, deleted_by=current_user.id)
+
+    EventDispatcher.dispatch(BoardDeletedEvent(
+        board_id=board.id,
+        workspace_id=board.workspace_id,
+    ))
+
     return Message(message="Board deleted successfully")
