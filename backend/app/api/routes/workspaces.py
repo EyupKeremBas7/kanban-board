@@ -21,6 +21,14 @@ from app.models.workspaces import (
     WorkspacesPublic,
     WorkspaceUpdate,
 )
+from app.events import (
+    EventDispatcher,
+    WorkspaceCreatedEvent,
+    WorkspaceDeletedEvent,
+    WorkspaceMemberAddedEvent,
+    WorkspaceMemberRemovedEvent,
+    WorkspaceUpdatedEvent,
+)
 from app.repository import workspaces as workspaces_repo
 
 router = APIRouter(prefix="/workspaces", tags=["workspaces"])
@@ -61,6 +69,14 @@ def create_workspace(
     workspace = workspaces_repo.create_workspace(
         session=session, workspace_in=workspace_in, owner_id=current_user.id
     )
+
+    EventDispatcher.dispatch(WorkspaceCreatedEvent(
+        workspace_id=workspace.id,
+        workspace_name=workspace.name,
+        created_by_id=current_user.id,
+        created_by_name=current_user.full_name or current_user.email,
+    ))
+
     return workspace
 
 
@@ -83,6 +99,14 @@ def update_workspace(
     workspace = workspaces_repo.update_workspace(
         session=session, workspace=workspace, workspace_in=workspace_in
     )
+
+    EventDispatcher.dispatch(WorkspaceUpdatedEvent(
+        workspace_id=workspace.id,
+        workspace_name=workspace.name,
+        updated_by_id=current_user.id,
+        updated_by_name=current_user.full_name or current_user.email,
+    ))
+
     return workspace
 
 
@@ -99,6 +123,14 @@ def delete_workspace(
     workspaces_repo.soft_delete_workspace(
         session=session, workspace=workspace, deleted_by=current_user.id
     )
+
+    EventDispatcher.dispatch(WorkspaceDeletedEvent(
+        workspace_id=workspace.id,
+        workspace_name=workspace.name,
+        deleted_by_id=current_user.id,
+        deleted_by_name=current_user.full_name or current_user.email,
+    ))
+
     return Message(message="Workspace deleted successfully")
 
 
@@ -147,6 +179,16 @@ def add_workspace_member(
     member = workspaces_repo.add_workspace_member(
         session=session, user_id=member_in.user_id, workspace_id=id, role=member_in.role
     )
+
+    EventDispatcher.dispatch(WorkspaceMemberAddedEvent(
+        workspace_id=id,
+        member_id=member.id,
+        member_user_id=member.user_id,
+        role=member.role.value,
+        added_by_id=current_user.id,
+        added_by_name=current_user.full_name or current_user.email,
+    ))
+
     return member
 
 
@@ -184,6 +226,16 @@ def invite_workspace_member(
     member = workspaces_repo.add_workspace_member(
         session=session, user_id=user.id, workspace_id=id, role=invite_in.role
     )
+
+    EventDispatcher.dispatch(WorkspaceMemberAddedEvent(
+        workspace_id=id,
+        member_id=member.id,
+        member_user_id=member.user_id,
+        role=member.role.value,
+        added_by_id=current_user.id,
+        added_by_name=current_user.full_name or current_user.email,
+    ))
+
     return member
 
 
@@ -231,4 +283,13 @@ def remove_workspace_member(
         raise HTTPException(status_code=404, detail="Member not found")
 
     workspaces_repo.remove_workspace_member(session=session, member=member)
+
+    EventDispatcher.dispatch(WorkspaceMemberRemovedEvent(
+        workspace_id=id,
+        member_id=member.id,
+        member_user_id=member.user_id,
+        removed_by_id=current_user.id,
+        removed_by_name=current_user.full_name or current_user.email,
+    ))
+
     return Message(message="Member removed successfully")

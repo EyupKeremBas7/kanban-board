@@ -77,8 +77,11 @@ def create_card(
 
     EventDispatcher.dispatch(CardCreatedEvent(
         card_id=card.id,
+        card_title=card.title,
         list_id=card.list_id,
-        board_id=board.id
+        board_id=board.id,
+        created_by_id=current_user.id,
+        created_by_name=current_user.full_name or current_user.email,
     ))
 
     return cards_repo.enrich_card_with_owner(session, card)
@@ -101,6 +104,7 @@ def update_card(
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
     old_list_id = card.list_id
+    old_assigned_to = card.assigned_to
     old_list = cards_repo.get_list_by_id(session=session, list_id=old_list_id)
     old_list_name = old_list.name if old_list else "Unknown"
 
@@ -150,9 +154,25 @@ def update_card(
         if board_list:
             EventDispatcher.dispatch(CardUpdatedEvent(
                 card_id=card.id,
+                card_title=card.title,
                 list_id=card.list_id,
-                board_id=board_list.board_id
+                board_id=board_list.board_id,
+                updated_by_id=current_user.id,
+                updated_by_name=current_user.full_name or current_user.email,
             ))
+
+        if card_in.assigned_to and card_in.assigned_to != old_assigned_to:
+            assignee = cards_repo.get_user_by_id(session=session, user_id=card_in.assigned_to)
+            if assignee and not assignee.is_deleted:
+                from app.events import CardAssignedEvent
+                EventDispatcher.dispatch(CardAssignedEvent(
+                    card_id=card.id,
+                    card_title=card.title,
+                    assigned_by_id=current_user.id,
+                    assigned_by_name=current_user.full_name or current_user.email,
+                    assignee_id=assignee.id,
+                    assignee_email=assignee.email,
+                ))
 
     return cards_repo.enrich_card_with_owner(session, card)
 
@@ -174,8 +194,11 @@ def delete_card(
     if board_list:
         EventDispatcher.dispatch(CardDeletedEvent(
             card_id=card.id,
+            card_title=card.title,
             list_id=card.list_id,
-            board_id=board_list.board_id
+            board_id=board_list.board_id,
+            deleted_by_id=current_user.id,
+            deleted_by_name=current_user.full_name or current_user.email,
         ))
 
     return Message(message="Card deleted successfully")

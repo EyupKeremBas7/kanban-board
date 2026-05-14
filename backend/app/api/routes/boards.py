@@ -70,7 +70,10 @@ def create_board(
 
     EventDispatcher.dispatch(BoardCreatedEvent(
         board_id=board.id,
+        board_name=board.name,
         workspace_id=board.workspace_id,
+        created_by_id=current_user.id,
+        created_by_name=current_user.full_name or current_user.email,
     ))
 
     return board
@@ -95,7 +98,11 @@ def update_board(
     board = boards_repo.update_board(session=session, board=board, board_in=board_in)
 
     EventDispatcher.dispatch(BoardUpdatedEvent(
-        board_id=board.id
+        board_id=board.id,
+        board_name=board.name,
+        workspace_id=board.workspace_id,
+        updated_by_id=current_user.id,
+        updated_by_name=current_user.full_name or current_user.email,
     ))
 
     return board
@@ -121,7 +128,10 @@ def delete_board(
 
     EventDispatcher.dispatch(BoardDeletedEvent(
         board_id=board.id,
+        board_name=board.name,
         workspace_id=board.workspace_id,
+        deleted_by_id=current_user.id,
+        deleted_by_name=current_user.full_name or current_user.email,
     ))
 
     return Message(message="Board deleted successfully")

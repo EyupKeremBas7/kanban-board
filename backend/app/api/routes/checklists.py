@@ -66,7 +66,13 @@ def create_checklist_item(
 
     item = checklists_repo.create_checklist_item(session=session, item_in=item_in)
 
-    EventDispatcher.dispatch(ChecklistCreatedEvent(card_id=item.card_id))
+    EventDispatcher.dispatch(ChecklistCreatedEvent(
+        item_id=item.id,
+        card_id=item.card_id,
+        item_title=item.title,
+        created_by_id=current_user.id,
+        created_by_name=current_user.full_name or current_user.email,
+    ))
 
     return item
 
@@ -85,7 +91,13 @@ def update_checklist_item(
 
     item = checklists_repo.update_checklist_item(session=session, item=item, item_in=item_in)
 
-    EventDispatcher.dispatch(ChecklistUpdatedEvent(card_id=item.card_id))
+    EventDispatcher.dispatch(ChecklistUpdatedEvent(
+        item_id=item.id,
+        card_id=item.card_id,
+        item_title=item.title,
+        updated_by_id=current_user.id,
+        updated_by_name=current_user.full_name or current_user.email,
+    ))
 
     return item
 
@@ -103,7 +115,13 @@ def delete_checklist_item(
 
     checklists_repo.soft_delete_checklist_item(session=session, item=item, deleted_by=current_user.id)
 
-    EventDispatcher.dispatch(ChecklistDeletedEvent(card_id=item.card_id))
+    EventDispatcher.dispatch(ChecklistDeletedEvent(
+        item_id=item.id,
+        card_id=item.card_id,
+        item_title=item.title,
+        deleted_by_id=current_user.id,
+        deleted_by_name=current_user.full_name or current_user.email,
+    ))
 
     return {"ok": True}
 

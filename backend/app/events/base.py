@@ -71,6 +71,7 @@ class EventDispatcher:
             handle_email,
             handle_notification,
         )
+        from app.events.activity_handler import handle_activity_log
         from app.events.socket_handler import handle_socket
         from app.events.types import (
             BoardCreatedEvent,
@@ -90,24 +91,56 @@ class EventDispatcher:
             CommentUpdatedEvent,
             InvitationRespondedEvent,
             InvitationSentEvent,
+            WorkspaceCreatedEvent,
+            WorkspaceDeletedEvent,
             ListCreatedEvent,
             ListDeletedEvent,
             ListUpdatedEvent,
+            WorkspaceUpdatedEvent,
             WelcomeEmailSentEvent,
             WorkspaceMemberAddedEvent,
             WorkspaceMemberRemovedEvent,
         )
 
         cls.register(CardMovedEvent, handle_notification)
+        cls.register(CardAssignedEvent, handle_notification)
         cls.register(CommentAddedEvent, handle_notification)
         cls.register(ChecklistToggledEvent, handle_notification)
         cls.register(InvitationSentEvent, handle_notification)
         cls.register(InvitationRespondedEvent, handle_notification)
 
         cls.register(CardMovedEvent, handle_email)
+        cls.register(CardAssignedEvent, handle_email)
         cls.register(CommentAddedEvent, handle_email)
         cls.register(ChecklistToggledEvent, handle_email)
         cls.register(WelcomeEmailSentEvent, handle_email)
+
+        # Activity Log Handlers
+        cls.register(CardMovedEvent, handle_activity_log)
+        cls.register(CardAssignedEvent, handle_activity_log)
+        cls.register(CardCreatedEvent, handle_activity_log)
+        cls.register(CardDeletedEvent, handle_activity_log)
+        cls.register(CardUpdatedEvent, handle_activity_log)
+        cls.register(CommentAddedEvent, handle_activity_log)
+        cls.register(CommentDeletedEvent, handle_activity_log)
+        cls.register(CommentUpdatedEvent, handle_activity_log)
+        cls.register(ChecklistCreatedEvent, handle_activity_log)
+        cls.register(ChecklistDeletedEvent, handle_activity_log)
+        cls.register(ChecklistToggledEvent, handle_activity_log)
+        cls.register(ChecklistUpdatedEvent, handle_activity_log)
+        cls.register(InvitationSentEvent, handle_activity_log)
+        cls.register(InvitationRespondedEvent, handle_activity_log)
+        cls.register(WorkspaceCreatedEvent, handle_activity_log)
+        cls.register(WorkspaceDeletedEvent, handle_activity_log)
+        cls.register(WorkspaceUpdatedEvent, handle_activity_log)
+        cls.register(WorkspaceMemberAddedEvent, handle_activity_log)
+        cls.register(WorkspaceMemberRemovedEvent, handle_activity_log)
+        cls.register(ListCreatedEvent, handle_activity_log)
+        cls.register(ListDeletedEvent, handle_activity_log)
+        cls.register(ListUpdatedEvent, handle_activity_log)
+        cls.register(BoardCreatedEvent, handle_activity_log)
+        cls.register(BoardDeletedEvent, handle_activity_log)
+        cls.register(BoardUpdatedEvent, handle_activity_log)
 
         # Socket.IO Handlers
         cls.register(CardMovedEvent, handle_socket)
@@ -124,6 +157,9 @@ class EventDispatcher:
         cls.register(ChecklistUpdatedEvent, handle_socket)
         cls.register(InvitationSentEvent, handle_socket)
         cls.register(InvitationRespondedEvent, handle_socket)
+        cls.register(WorkspaceCreatedEvent, handle_socket)
+        cls.register(WorkspaceDeletedEvent, handle_socket)
+        cls.register(WorkspaceUpdatedEvent, handle_socket)
         cls.register(ListCreatedEvent, handle_socket)
         cls.register(ListDeletedEvent, handle_socket)
         cls.register(ListUpdatedEvent, handle_socket)

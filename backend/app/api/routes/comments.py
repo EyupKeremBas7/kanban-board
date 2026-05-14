@@ -120,7 +120,12 @@ def update_comment(
 
     comment = comments_repo.update_comment(session=session, comment=comment, comment_in=comment_in)
 
-    EventDispatcher.dispatch(CommentUpdatedEvent(card_id=comment.card_id))
+    EventDispatcher.dispatch(CommentUpdatedEvent(
+        comment_id=comment.id,
+        card_id=comment.card_id,
+        updated_by_id=current_user.id,
+        updated_by_name=current_user.full_name or current_user.email,
+    ))
 
     return comments_repo.enrich_comment_with_user(session, comment)
 
@@ -141,6 +146,11 @@ def delete_comment(
 
     comments_repo.soft_delete_comment(session=session, comment=comment, deleted_by=current_user.id)
 
-    EventDispatcher.dispatch(CommentDeletedEvent(card_id=comment.card_id))
+    EventDispatcher.dispatch(CommentDeletedEvent(
+        comment_id=comment.id,
+        card_id=comment.card_id,
+        deleted_by_id=current_user.id,
+        deleted_by_name=current_user.full_name or current_user.email,
+    ))
 
     return {"ok": True}

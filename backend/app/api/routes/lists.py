@@ -82,7 +82,10 @@ def create_board_list(
 
     EventDispatcher.dispatch(ListCreatedEvent(
         list_id=board_list.id,
-        board_id=board_list.board_id
+        list_name=board_list.name,
+        board_id=board_list.board_id,
+        created_by_id=current_user.id,
+        created_by_name=current_user.full_name or current_user.email,
     ))
 
     return board_list
@@ -107,7 +110,10 @@ def update_board_list(
 
     EventDispatcher.dispatch(ListUpdatedEvent(
         list_id=board_list.id,
-        board_id=board_list.board_id
+        list_name=board_list.name,
+        board_id=board_list.board_id,
+        updated_by_id=current_user.id,
+        updated_by_name=current_user.full_name or current_user.email,
     ))
 
     return board_list
@@ -128,7 +134,10 @@ def delete_board_list(
 
     EventDispatcher.dispatch(ListDeletedEvent(
         list_id=board_list.id,
-        board_id=board_list.board_id
+        list_name=board_list.name,
+        board_id=board_list.board_id,
+        deleted_by_id=current_user.id,
+        deleted_by_name=current_user.full_name or current_user.email,
     ))
 
     return Message(message="List deleted successfully")
