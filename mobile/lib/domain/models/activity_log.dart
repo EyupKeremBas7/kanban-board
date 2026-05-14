@@ -28,6 +28,14 @@ class ActivityLog {
   });
 
   factory ActivityLog.fromJson(Map<String, dynamic> json) {
+    final rawCreatedAt = json['created_at'] as String? ?? '';
+    final normalizedCreatedAt = rawCreatedAt.isNotEmpty &&
+            !rawCreatedAt.endsWith('Z') &&
+            !rawCreatedAt.contains(RegExp(r'[+-]\d{2}:\d{2}$'))
+        ? '${rawCreatedAt}Z'
+        : rawCreatedAt;
+    final parsedCreatedAt = DateTime.tryParse(normalizedCreatedAt);
+
     return ActivityLog(
       id: json['id'] as String,
       userId: json['user_id'] as String?,
@@ -40,7 +48,8 @@ class ActivityLog {
       entityName: json['entity_name'] as String?,
       oldValue: json['old_value'] as String?,
       newValue: json['new_value'] as String?,
-      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
+      createdAt: parsedCreatedAt?.toUtc().add(const Duration(hours: 3)) ??
+          DateTime.now().toUtc().add(const Duration(hours: 3)),
     );
   }
 }

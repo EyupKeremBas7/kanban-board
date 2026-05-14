@@ -451,7 +451,21 @@ class _ActivityTile extends StatelessWidget {
   }
 
   String _formatDate(DateTime dt) {
-    return '${dt.day.toString().padLeft(2, '0')}.${dt.month.toString().padLeft(2, '0')}\n${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final date = DateTime(dt.year, dt.month, dt.day);
+    final time =
+        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+
+    if (date == today) {
+      return 'Bugun\n$time';
+    }
+
+    if (date == today.subtract(const Duration(days: 1))) {
+      return 'Dun\n$time';
+    }
+
+    return '${dt.day.toString().padLeft(2, '0')}.${dt.month.toString().padLeft(2, '0')}\n$time';
   }
 }
 
@@ -481,4 +495,3 @@ class _EmptySelectorHint extends StatelessWidget {
     );
   }
 }
-
