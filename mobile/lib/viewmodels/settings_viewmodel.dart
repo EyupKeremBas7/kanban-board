@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:mobile/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsViewModel extends ChangeNotifier {
+  final ApiService? _apiService;
+
   ThemeMode _themeMode = ThemeMode.system;
   Locale _locale = const Locale('tr');
 
@@ -12,6 +17,10 @@ class SettingsViewModel extends ChangeNotifier {
   bool _assignmentsEnabled = true;
   bool _boardUpdatesEnabled = true;
   bool _mentionsEnabled = true;
+  bool _isLoadingNotificationPreferences = false;
+  bool _isSavingNotificationPreferences = false;
+  bool _notificationPreferencesLoaded = false;
+  String? _notificationSettingsError;
 
   ThemeMode get themeMode => _themeMode;
   Locale get locale => _locale;
@@ -21,14 +30,18 @@ class SettingsViewModel extends ChangeNotifier {
   bool get assignmentsEnabled => _assignmentsEnabled;
   bool get boardUpdatesEnabled => _boardUpdatesEnabled;
   bool get mentionsEnabled => _mentionsEnabled;
+  bool get isLoadingNotificationPreferences =>
+      _isLoadingNotificationPreferences;
+  bool get isSavingNotificationPreferences => _isSavingNotificationPreferences;
+  String? get notificationSettingsError => _notificationSettingsError;
 
-  SettingsViewModel() {
+  SettingsViewModel({ApiService? apiService}) : _apiService = apiService {
     _loadSettings();
   }
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     // Theme
     final themeStr = prefs.getString('themeMode') ?? 'system';
     _themeMode = ThemeMode.values.firstWhere(
@@ -49,6 +62,87 @@ class SettingsViewModel extends ChangeNotifier {
     _mentionsEnabled = prefs.getBool('mentionsEnabled') ?? true;
 
     notifyListeners();
+  }
+
+  Future<void> fetchNotificationPreferences({bool force = false}) async {
+    if (_apiService == null) return;
+    if (_notificationPreferencesLoaded && !force) return;
+
+    _isLoadingNotificationPreferences = true;
+    _notificationSettingsError = null;
+    notifyListeners();
+
+    try {
+      final response = await _apiService.get('/notifications/preferences');
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        await _applyRemoteNotificationPreferences(data);
+        _notificationPreferencesLoaded = true;
+      } else {
+        _notificationSettingsError = 'Bildirim tercihleri alınamadı.';
+      }
+    } catch (_) {
+      _notificationSettingsError = 'Bildirim tercihleri alınamadı.';
+    } finally {
+      _isLoadingNotificationPreferences = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _applyRemoteNotificationPreferences(
+    Map<String, dynamic> data,
+  ) async {
+    _pushEnabled = data['in_app_enabled'] as bool? ?? _pushEnabled;
+    _emailEnabled = data['email_enabled'] as bool? ?? _emailEnabled;
+    _commentsEnabled = data['comments_enabled'] as bool? ?? _commentsEnabled;
+    _assignmentsEnabled =
+        data['assignments_enabled'] as bool? ?? _assignmentsEnabled;
+    final cardMovesEnabled =
+        data['card_moves_enabled'] as bool? ?? _boardUpdatesEnabled;
+    final checklistEnabled =
+        data['checklist_enabled'] as bool? ?? _boardUpdatesEnabled;
+    _boardUpdatesEnabled = cardMovesEnabled && checklistEnabled;
+    _mentionsEnabled = data['mentions_enabled'] as bool? ?? _mentionsEnabled;
+    await _persistNotificationSettings();
+  }
+
+  Future<void> _persistNotificationSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('pushEnabled', _pushEnabled);
+    await prefs.setBool('emailEnabled', _emailEnabled);
+    await prefs.setBool('commentsEnabled', _commentsEnabled);
+    await prefs.setBool('assignmentsEnabled', _assignmentsEnabled);
+    await prefs.setBool('boardUpdatesEnabled', _boardUpdatesEnabled);
+    await prefs.setBool('mentionsEnabled', _mentionsEnabled);
+  }
+
+  Future<void> _updateRemoteNotificationPreferences(
+    Map<String, dynamic> body,
+  ) async {
+    if (_apiService == null) return;
+
+    _isSavingNotificationPreferences = true;
+    _notificationSettingsError = null;
+    notifyListeners();
+
+    try {
+      final response = await _apiService.put(
+        '/notifications/preferences',
+        body: body,
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        await _applyRemoteNotificationPreferences(data);
+        _notificationPreferencesLoaded = true;
+      } else {
+        _notificationSettingsError = 'Bildirim tercihi kaydedilemedi.';
+      }
+    } catch (_) {
+      _notificationSettingsError = 'Bildirim tercihi kaydedilemedi.';
+    } finally {
+      _isSavingNotificationPreferences = false;
+      notifyListeners();
+    }
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
@@ -77,43 +171,46 @@ class SettingsViewModel extends ChangeNotifier {
 
   Future<void> setPushEnabled(bool value) async {
     _pushEnabled = value;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('pushEnabled', value);
+    await _persistNotificationSettings();
     notifyListeners();
+    await _updateRemoteNotificationPreferences({'in_app_enabled': value});
   }
 
   Future<void> setEmailEnabled(bool value) async {
     _emailEnabled = value;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('emailEnabled', value);
+    await _persistNotificationSettings();
     notifyListeners();
+    await _updateRemoteNotificationPreferences({'email_enabled': value});
   }
 
   Future<void> setCommentsEnabled(bool value) async {
     _commentsEnabled = value;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('commentsEnabled', value);
+    await _persistNotificationSettings();
     notifyListeners();
+    await _updateRemoteNotificationPreferences({'comments_enabled': value});
   }
 
   Future<void> setAssignmentsEnabled(bool value) async {
     _assignmentsEnabled = value;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('assignmentsEnabled', value);
+    await _persistNotificationSettings();
     notifyListeners();
+    await _updateRemoteNotificationPreferences({'assignments_enabled': value});
   }
 
   Future<void> setBoardUpdatesEnabled(bool value) async {
     _boardUpdatesEnabled = value;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('boardUpdatesEnabled', value);
+    await _persistNotificationSettings();
     notifyListeners();
+    await _updateRemoteNotificationPreferences({
+      'card_moves_enabled': value,
+      'checklist_enabled': value,
+    });
   }
 
   Future<void> setMentionsEnabled(bool value) async {
     _mentionsEnabled = value;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('mentionsEnabled', value);
+    await _persistNotificationSettings();
     notifyListeners();
+    await _updateRemoteNotificationPreferences({'mentions_enabled': value});
   }
 }

@@ -5,6 +5,7 @@ from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING
 
+from sqlalchemy import UniqueConstraint
 from sqlmodel import Field, SQLModel
 
 if TYPE_CHECKING:
@@ -59,3 +60,42 @@ class NotificationsPublic(SQLModel):
     data: list[NotificationPublic]
     count: int
     unread_count: int
+
+
+class NotificationPreferenceBase(SQLModel):
+    in_app_enabled: bool = True
+    email_enabled: bool = True
+    comments_enabled: bool = True
+    assignments_enabled: bool = True
+    card_moves_enabled: bool = True
+    checklist_enabled: bool = True
+    invitations_enabled: bool = True
+    mentions_enabled: bool = True
+
+
+class NotificationPreference(NotificationPreferenceBase, table=True):
+    __tablename__ = "notification_preference"
+    __table_args__ = (UniqueConstraint("user_id", name="uq_notification_preference_user"),)
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="user.id", ondelete="CASCADE", index=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class NotificationPreferencePublic(NotificationPreferenceBase):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    created_at: datetime
+    updated_at: datetime
+
+
+class NotificationPreferenceUpdate(SQLModel):
+    in_app_enabled: bool | None = None
+    email_enabled: bool | None = None
+    comments_enabled: bool | None = None
+    assignments_enabled: bool | None = None
+    card_moves_enabled: bool | None = None
+    checklist_enabled: bool | None = None
+    invitations_enabled: bool | None = None
+    mentions_enabled: bool | None = None

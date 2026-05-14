@@ -10,6 +10,8 @@ from app.api.deps import CurrentUser, SessionDep
 from app.models.auth import Message
 from app.models.notifications import (
     NotificationPublic,
+    NotificationPreferencePublic,
+    NotificationPreferenceUpdate,
     NotificationsPublic,
 )
 from app.repository import notifications as notifications_repo
@@ -42,6 +44,29 @@ def get_unread_count(session: SessionDep, current_user: CurrentUser) -> dict:
     """Get count of unread notifications."""
     count = notifications_repo.get_unread_count(session=session, user_id=current_user.id)
     return {"unread_count": count}
+
+
+@router.get("/preferences", response_model=NotificationPreferencePublic)
+def read_notification_preferences(
+    session: SessionDep,
+    current_user: CurrentUser,
+) -> Any:
+    """Get current user's notification preferences."""
+    return notifications_repo.get_or_create_preferences(session=session, user_id=current_user.id)
+
+
+@router.put("/preferences", response_model=NotificationPreferencePublic)
+def update_notification_preferences(
+    session: SessionDep,
+    current_user: CurrentUser,
+    preferences_in: NotificationPreferenceUpdate,
+) -> Any:
+    """Update current user's notification preferences."""
+    return notifications_repo.update_preferences(
+        session=session,
+        user_id=current_user.id,
+        preferences_in=preferences_in,
+    )
 
 
 @router.get("/{id}", response_model=NotificationPublic)

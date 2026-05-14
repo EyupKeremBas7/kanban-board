@@ -49,19 +49,34 @@ class KanbanBoardApp extends StatelessWidget {
           ),
         ),
         ChangeNotifierProvider(
-          create: (_) => BoardsViewModel(apiService: apiService, socketService: socketService),
+          create: (_) => BoardsViewModel(
+            apiService: apiService,
+            socketService: socketService,
+          ),
         ),
         ChangeNotifierProvider(
-          create: (_) => ListsViewModel(apiService: apiService, socketService: socketService),
+          create: (_) => ListsViewModel(
+            apiService: apiService,
+            socketService: socketService,
+          ),
         ),
         ChangeNotifierProvider(
-          create: (_) => CardsViewModel(apiService: apiService, socketService: socketService),
+          create: (_) => CardsViewModel(
+            apiService: apiService,
+            socketService: socketService,
+          ),
         ),
         ChangeNotifierProvider(
-          create: (_) => CommentsViewModel(apiService: apiService, socketService: socketService),
+          create: (_) => CommentsViewModel(
+            apiService: apiService,
+            socketService: socketService,
+          ),
         ),
         ChangeNotifierProvider(
-          create: (_) => ChecklistsViewModel(apiService: apiService, socketService: socketService),
+          create: (_) => ChecklistsViewModel(
+            apiService: apiService,
+            socketService: socketService,
+          ),
         ),
         ChangeNotifierProvider(
           create: (_) => ActivityViewModel(apiService: apiService),
@@ -75,7 +90,9 @@ class KanbanBoardApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => InvitationsViewModel(apiService: apiService),
         ),
-        ChangeNotifierProvider(create: (_) => SettingsViewModel()),
+        ChangeNotifierProvider(
+          create: (_) => SettingsViewModel(apiService: apiService),
+        ),
         ChangeNotifierProvider(create: (_) => NavigationViewModel()),
         ChangeNotifierProvider.value(value: socketService),
       ],
@@ -106,10 +123,7 @@ class KanbanBoardApp extends StatelessWidget {
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            supportedLocales: const [
-              Locale('tr', ''),
-              Locale('en', ''),
-            ],
+            supportedLocales: const [Locale('tr', ''), Locale('en', '')],
             home: const SplashScreen(),
           );
         },

@@ -54,7 +54,7 @@ def handle_notification(event: NotifiableEvent) -> None:
         if isinstance(event, CardMovedEvent):
             target_id, _ = _get_notification_target(event)
             if target_id and target_id != event.moved_by_id:
-                notifications_repo.create_notification(
+                notification = notifications_repo.create_notification(
                     session=session,
                     user_id=target_id,
                     notification_type=NotificationType.card_moved,
@@ -63,12 +63,13 @@ def handle_notification(event: NotifiableEvent) -> None:
                     reference_id=event.card_id,
                     reference_type="card",
                 )
-                logger.info(f"Notification created for card move: {event.card_id}")
+                if notification:
+                    logger.info(f"Notification created for card move: {event.card_id}")
 
         elif isinstance(event, CommentAddedEvent):
             target_id, _ = _get_notification_target(event)
             if target_id and target_id != event.commenter_id:
-                notifications_repo.create_notification(
+                notification = notifications_repo.create_notification(
                     session=session,
                     user_id=target_id,
                     notification_type=NotificationType.comment_added,
@@ -77,13 +78,14 @@ def handle_notification(event: NotifiableEvent) -> None:
                     reference_id=event.card_id,
                     reference_type="card",
                 )
-                logger.info(f"Notification created for comment: {event.card_id}")
+                if notification:
+                    logger.info(f"Notification created for comment: {event.card_id}")
 
         elif isinstance(event, ChecklistToggledEvent):
             target_id, _ = _get_notification_target(event)
             if target_id and target_id != event.toggled_by_id:
                 status = "completed" if event.is_completed else "uncompleted"
-                notifications_repo.create_notification(
+                notification = notifications_repo.create_notification(
                     session=session,
                     user_id=target_id,
                     notification_type=NotificationType.checklist_toggled,
@@ -92,10 +94,11 @@ def handle_notification(event: NotifiableEvent) -> None:
                     reference_id=event.card_id,
                     reference_type="card",
                 )
-                logger.info(f"Notification created for checklist toggle: {event.card_id}")
+                if notification:
+                    logger.info(f"Notification created for checklist toggle: {event.card_id}")
 
         elif isinstance(event, CardAssignedEvent):
-            notifications_repo.create_notification(
+            notification = notifications_repo.create_notification(
                 session=session,
                 user_id=event.assignee_id,
                 notification_type=NotificationType.card_assigned,
@@ -104,10 +107,11 @@ def handle_notification(event: NotifiableEvent) -> None:
                 reference_id=event.card_id,
                 reference_type="card",
             )
-            logger.info(f"Notification created for card assignment: {event.card_id}")
+            if notification:
+                logger.info(f"Notification created for card assignment: {event.card_id}")
 
         elif isinstance(event, InvitationSentEvent):
-            notifications_repo.create_notification(
+            notification = notifications_repo.create_notification(
                 session=session,
                 user_id=event.invitee_id,
                 notification_type=NotificationType.workspace_invitation,
@@ -116,7 +120,8 @@ def handle_notification(event: NotifiableEvent) -> None:
                 reference_id=event.invitation_id,
                 reference_type="invitation",
             )
-            logger.info(f"Notification created for invitation: {event.invitation_id}")
+            if notification:
+                logger.info(f"Notification created for invitation: {event.invitation_id}")
 
         elif isinstance(event, InvitationRespondedEvent):
             notification_type = (
@@ -124,7 +129,7 @@ def handle_notification(event: NotifiableEvent) -> None:
                 else NotificationType.invitation_rejected
             )
             status = "accepted" if event.accepted else "rejected"
-            notifications_repo.create_notification(
+            notification = notifications_repo.create_notification(
                 session=session,
                 user_id=event.inviter_id,
                 notification_type=notification_type,
@@ -133,16 +138,34 @@ def handle_notification(event: NotifiableEvent) -> None:
                 reference_id=event.workspace_id,
                 reference_type="workspace",
             )
-            logger.info(f"Notification created for invitation response: {event.invitation_id}")
+            if notification:
+                logger.info(f"Notification created for invitation response: {event.invitation_id}")
 
 
 def handle_email(event: NotifiableEvent) -> None:
+    from sqlmodel import Session
+
+    from app.core.db import engine
     from app.core.config import settings
+    from app.repository import notifications as notifications_repo
     from app.utils import render_email_template, send_email
 
+    def email_allowed(user_id, notification_type: NotificationType) -> bool:
+        with Session(engine) as session:
+            return notifications_repo.should_send_email(
+                session=session,
+                user_id=user_id,
+                notification_type=notification_type,
+            )
+
     if isinstance(event, CardMovedEvent):
-        _, target_email = _get_notification_target(event)
-        if target_email and _get_notification_target(event)[0] != event.moved_by_id:
+        target_id, target_email = _get_notification_target(event)
+        if (
+            target_id
+            and target_email
+            and target_id != event.moved_by_id
+            and email_allowed(target_id, NotificationType.card_moved)
+        ):
             html_content = render_email_template(
                 template_name="card_moved.html",
                 context={
@@ -162,8 +185,13 @@ def handle_email(event: NotifiableEvent) -> None:
             logger.info(f"Email queued for card move: {target_email}")
 
     elif isinstance(event, CommentAddedEvent):
-        _, target_email = _get_notification_target(event)
-        if target_email and _get_notification_target(event)[0] != event.commenter_id:
+        target_id, target_email = _get_notification_target(event)
+        if (
+            target_id
+            and target_email
+            and target_id != event.commenter_id
+            and email_allowed(target_id, NotificationType.comment_added)
+        ):
             content_preview = event.comment_content[:500]
             if len(event.comment_content) > 500:
                 content_preview += "..."
@@ -185,8 +213,13 @@ def handle_email(event: NotifiableEvent) -> None:
             logger.info(f"Email queued for comment: {target_email}")
 
     elif isinstance(event, ChecklistToggledEvent):
-        _, target_email = _get_notification_target(event)
-        if target_email and _get_notification_target(event)[0] != event.toggled_by_id:
+        target_id, target_email = _get_notification_target(event)
+        if (
+            target_id
+            and target_email
+            and target_id != event.toggled_by_id
+            and email_allowed(target_id, NotificationType.checklist_toggled)
+        ):
             status = "completed" if event.is_completed else "uncompleted"
             status_emoji = "✅" if event.is_completed else "⬜"
             html_content = render_email_template(
@@ -209,6 +242,9 @@ def handle_email(event: NotifiableEvent) -> None:
             logger.info(f"Email queued for checklist toggle: {target_email}")
 
     elif isinstance(event, CardAssignedEvent):
+        if not email_allowed(event.assignee_id, NotificationType.card_assigned):
+            return
+
         html_content = render_email_template(
             template_name="card_assigned.html",
             context={
@@ -240,4 +276,3 @@ def handle_email(event: NotifiableEvent) -> None:
             use_queue=True,
         )
         logger.info(f"Email queued for welcome: {event.user_email}")
-
