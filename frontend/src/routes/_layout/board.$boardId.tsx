@@ -34,9 +34,10 @@ import {
 import { CSS } from "@dnd-kit/utilities"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link as RouterLink } from "@tanstack/react-router"
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { FiArrowLeft, FiCheckSquare, FiImage, FiMessageSquare, FiMoreHorizontal, FiPlus, FiX } from "react-icons/fi"
 import { z } from "zod"
+import { useSocket } from "@/hooks/useSocket"
 
 import { BoardsService, CardsService, ChecklistsService, CommentsService, ListsService, type CardPublic, type ListPublic } from "@/client"
 import type { ApiError } from "@/client/core/ApiError"
@@ -423,6 +424,45 @@ function BoardDetail() {
   const [selectedCard, setSelectedCard] = useState<CardPublic | null>(null)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
+
+  const socket = useSocket()
+
+  useEffect(() => {
+    if (!socket) return
+
+    const handleUpdate = (data?: any) => {
+      console.log("Frontend Socket.IO: Board/Card update received", data)
+      queryClient.invalidateQueries({ queryKey: ["cards"] })
+      queryClient.invalidateQueries({ queryKey: ["lists"] })
+      queryClient.invalidateQueries({ queryKey: ["board", boardId] })
+      queryClient.invalidateQueries({ queryKey: ["checklists"] })
+      queryClient.invalidateQueries({ queryKey: ["comments"] })
+    }
+
+    socket.on("CardMovedEvent", handleUpdate)
+    socket.on("CardCreatedEvent", handleUpdate)
+    socket.on("CardDeletedEvent", handleUpdate)
+    socket.on("CardUpdatedEvent", handleUpdate)
+    socket.on("ListCreatedEvent", handleUpdate)
+    socket.on("ListUpdatedEvent", handleUpdate)
+    socket.on("ListDeletedEvent", handleUpdate)
+    socket.on("ChecklistToggledEvent", handleUpdate)
+    socket.on("CommentAddedEvent", handleUpdate)
+    socket.on("CardAssignedEvent", handleUpdate)
+
+    return () => {
+      socket.off("CardMovedEvent", handleUpdate)
+      socket.off("CardCreatedEvent", handleUpdate)
+      socket.off("CardDeletedEvent", handleUpdate)
+      socket.off("CardUpdatedEvent", handleUpdate)
+      socket.off("ListCreatedEvent", handleUpdate)
+      socket.off("ListUpdatedEvent", handleUpdate)
+      socket.off("ListDeletedEvent", handleUpdate)
+      socket.off("ChecklistToggledEvent", handleUpdate)
+      socket.off("CommentAddedEvent", handleUpdate)
+      socket.off("CardAssignedEvent", handleUpdate)
+    }
+  }, [socket, queryClient, boardId])
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

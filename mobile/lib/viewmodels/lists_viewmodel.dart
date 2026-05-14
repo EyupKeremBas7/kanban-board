@@ -2,12 +2,35 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:mobile/domain/models/board_list.dart';
 import 'package:mobile/services/api_service.dart';
+import 'package:mobile/services/socket_service.dart';
 
 /// BoardList ViewModel — Pano içi liste yönetimi (Sütunlar).
 class ListsViewModel extends ChangeNotifier {
   final ApiService _apiService;
+  final SocketService? _socketService;
+  String? _currentBoardId;
 
-  ListsViewModel({required ApiService apiService}) : _apiService = apiService;
+  ListsViewModel({required ApiService apiService, SocketService? socketService})
+      : _apiService = apiService,
+        _socketService = socketService {
+    _listenToSockets();
+  }
+
+  void _listenToSockets() {
+    _socketService?.eventStream.listen((eventData) {
+      final String event = eventData['event'] ?? '';
+      // Refresh list if current board is affected
+      if (_currentBoardId != null &&
+          (event == 'CardMovedEvent' ||
+           event == 'CardAssignedEvent' ||
+           event == 'CardCreatedEvent' ||
+           event == 'CardDeletedEvent' ||
+           event == 'ListCreatedEvent' ||
+           event == 'ListDeletedEvent')) {
+        fetchLists(_currentBoardId!);
+      }
+    });
+  }
 
   List<BoardList> _lists = [];
   bool _isLoading = false;
@@ -19,6 +42,7 @@ class ListsViewModel extends ChangeNotifier {
 
   /// Bir panoya ait listeleri getir — GET /lists/board/{boardId}
   Future<void> fetchLists(String boardId) async {
+    _currentBoardId = boardId;
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();

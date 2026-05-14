@@ -28,7 +28,7 @@ class SocketService extends ChangeNotifier {
       socket_io.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
-          .setExtraHeaders(token != null ? {'Authorization': 'Bearer $token'} : {})
+          .setAuth({'token': token})
           .build(),
     );
 

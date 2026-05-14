@@ -92,3 +92,96 @@ class WelcomeEmailSentEvent(Event):
     user_id: UUID
     user_email: str
 
+
+@dataclass
+class CardCreatedEvent(Event):
+    """Fired when a new card is created."""
+    card_id: UUID
+    list_id: UUID
+    board_id: UUID
+
+
+@dataclass
+class CardDeletedEvent(Event):
+    """Fired when a card is deleted."""
+    card_id: UUID
+    list_id: UUID
+    board_id: UUID
+
+
+@dataclass
+class CardUpdatedEvent(Event):
+    """Fired when a card is updated (title, description, etc.)."""
+    card_id: UUID
+    list_id: UUID
+    board_id: UUID
+
+
+@dataclass
+class ListCreatedEvent(Event):
+    """Fired when a new list is created."""
+    list_id: UUID
+    board_id: UUID
+
+
+@dataclass
+class ListUpdatedEvent(Event):
+    """Fired when a list is updated."""
+    list_id: UUID
+    board_id: UUID
+
+
+@dataclass
+class ListDeletedEvent(Event):
+    """Fired when a list is deleted."""
+    list_id: UUID
+    board_id: UUID
+
+
+@dataclass
+class BoardUpdatedEvent(Event):
+    """Fired when a board is updated."""
+    board_id: UUID
+
+
+@dataclass
+class ChecklistCreatedEvent(Event):
+    """Fired when a checklist item is created."""
+    card_id: UUID
+
+
+@dataclass
+class ChecklistDeletedEvent(Event):
+    """Fired when a checklist item is deleted."""
+    card_id: UUID
+
+
+@dataclass
+class ChecklistUpdatedEvent(Event):
+    """Fired when a checklist item is updated."""
+    card_id: UUID
+
+
+@dataclass
+class CommentDeletedEvent(Event):
+    """Fired when a comment is deleted."""
+    card_id: UUID
+
+
+@dataclass
+class CommentUpdatedEvent(Event):
+    """Fired when a comment is updated."""
+    card_id: UUID
+
+
+@dataclass
+class WorkspaceMemberAddedEvent(Event):
+    """Fired when a member is added to a workspace."""
+    workspace_id: UUID
+
+
+@dataclass
+class WorkspaceMemberRemovedEvent(Event):
+    """Fired when a member is removed from a workspace."""
+    workspace_id: UUID
+

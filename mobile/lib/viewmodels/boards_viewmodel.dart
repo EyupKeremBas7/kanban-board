@@ -3,13 +3,35 @@ import 'package:flutter/foundation.dart';
 import 'package:mobile/domain/models/board.dart';
 import 'package:mobile/domain/models/workspace.dart';
 import 'package:mobile/services/api_service.dart';
+import 'package:mobile/services/socket_service.dart';
 
 /// Boards ViewModel — Pano listesi yönetimi.
 /// Provider (ChangeNotifier) ile state yönetimi (MVVM — Kural 5).
 class BoardsViewModel extends ChangeNotifier {
   final ApiService _apiService;
+  final SocketService? _socketService;
 
-  BoardsViewModel({required ApiService apiService}) : _apiService = apiService;
+  BoardsViewModel({required ApiService apiService, SocketService? socketService})
+      : _apiService = apiService,
+        _socketService = socketService {
+    _listenToSockets();
+  }
+
+  void _listenToSockets() {
+    _socketService?.eventStream.listen((eventData) {
+      final String event = eventData['event'] ?? '';
+      // Refresh boards list on major changes
+      if (event == 'CardMovedEvent' ||
+          event == 'InvitationRespondedEvent' ||
+          event == 'InvitationSentEvent' ||
+          event == 'BoardUpdatedEvent' ||
+          event == 'ListCreatedEvent' ||
+          event == 'ListDeletedEvent') {
+        if (kDebugMode) print('Mobile Socket.IO: Refreshing boards due to event: $event');
+        fetchBoards();
+      }
+    });
+  }
 
   // State
   List<Board> _boards = [];

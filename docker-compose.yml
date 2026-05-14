@@ -46,7 +46,7 @@ services:
     image: postgres:17
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 10s
       retries: 5
       start_period: 30s
@@ -66,7 +66,7 @@ services:
     image: redis:7-alpine
     restart: always
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -127,17 +127,15 @@ services:
       - REDIS_PORT=6379
       - SENTRY_DSN=${SENTRY_DSN}
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/utils/health-check/').read()\"",
-        ]
+      test: [ "CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/utils/health-check/').read()\"" ]
       interval: 10s
       timeout: 5s
       retries: 5
     build:
       context: ./backend
-    command: ["bash", "-c", "./prestart.sh && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"]
+    ports:
+      - "8000:8000"
+    command: [ "bash", "-c", "./prestart.sh && python run.py" ]
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefik-public

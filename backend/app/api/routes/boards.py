@@ -11,6 +11,10 @@ from app.core.permissions import Action, has_permission
 from app.models.auth import Message
 from app.models.boards import BoardCreate, BoardPublic, BoardsPublic, BoardUpdate
 from app.repository import boards as boards_repo
+from app.events import (
+    BoardUpdatedEvent,
+    EventDispatcher,
+)
 
 router = APIRouter(prefix="/boards", tags=["boards"])
 
@@ -81,6 +85,11 @@ def update_board(
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
     board = boards_repo.update_board(session=session, board=board, board_in=board_in)
+
+    EventDispatcher.dispatch(BoardUpdatedEvent(
+        board_id=board.id
+    ))
+
     return board
 
 

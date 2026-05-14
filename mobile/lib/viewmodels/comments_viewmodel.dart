@@ -2,12 +2,28 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mobile/domain/models/card_comment.dart';
 import 'package:mobile/services/api_service.dart';
+import 'package:mobile/services/socket_service.dart';
 
 class CommentsViewModel extends ChangeNotifier {
   final ApiService _apiService;
 
-  CommentsViewModel({required ApiService apiService})
-    : _apiService = apiService;
+  final SocketService? _socketService;
+  String? _currentCardId;
+
+  CommentsViewModel({required ApiService apiService, SocketService? socketService})
+    : _apiService = apiService,
+      _socketService = socketService {
+    _listenToSockets();
+  }
+
+  void _listenToSockets() {
+    _socketService?.eventStream.listen((eventData) {
+      final String event = eventData['event'] ?? '';
+      if (_currentCardId != null && event == 'CommentAddedEvent') {
+        fetchComments(_currentCardId!);
+      }
+    });
+  }
 
   List<CardComment> _comments = [];
   bool _isLoading = false;
@@ -19,6 +35,7 @@ class CommentsViewModel extends ChangeNotifier {
 
   /// Karta ait yorumları çek — GET /comments/?card_id={id}
   Future<void> fetchComments(String cardId) async {
+    _currentCardId = cardId;
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();

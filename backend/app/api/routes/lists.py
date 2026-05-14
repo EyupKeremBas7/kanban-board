@@ -10,6 +10,12 @@ from app.api.deps import CurrentUser, SessionDep
 from app.models.auth import Message
 from app.models.lists import ListCreate, ListPublic, ListsPublic, ListUpdate
 from app.repository import lists as lists_repo
+from app.events import (
+    ListCreatedEvent,
+    ListDeletedEvent,
+    ListUpdatedEvent,
+    EventDispatcher,
+)
 
 router = APIRouter(prefix="/lists", tags=["lists"])
 
@@ -73,6 +79,12 @@ def create_board_list(
         raise HTTPException(status_code=404, detail="Board not found")
 
     board_list = lists_repo.create_list(session=session, list_in=list_in)
+
+    EventDispatcher.dispatch(ListCreatedEvent(
+        list_id=board_list.id,
+        board_id=board_list.board_id
+    ))
+
     return board_list
 
 
@@ -92,6 +104,12 @@ def update_board_list(
         raise HTTPException(status_code=404, detail="List not found")
 
     board_list = lists_repo.update_list(session=session, board_list=board_list, list_in=list_in)
+
+    EventDispatcher.dispatch(ListUpdatedEvent(
+        list_id=board_list.id,
+        board_id=board_list.board_id
+    ))
+
     return board_list
 
 
@@ -107,4 +125,10 @@ def delete_board_list(
         raise HTTPException(status_code=404, detail="List not found")
 
     lists_repo.soft_delete_list(session=session, board_list=board_list, deleted_by=current_user.id)
+
+    EventDispatcher.dispatch(ListDeletedEvent(
+        list_id=board_list.id,
+        board_id=board_list.board_id
+    ))
+
     return Message(message="List deleted successfully")

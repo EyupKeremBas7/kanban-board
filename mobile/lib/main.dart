@@ -42,23 +42,26 @@ class KanbanBoardApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) =>
-              AuthViewModel(apiService: apiService, authService: authService),
+          create: (_) => AuthViewModel(
+            apiService: apiService,
+            authService: authService,
+            socketService: socketService,
+          ),
         ),
         ChangeNotifierProvider(
-          create: (_) => BoardsViewModel(apiService: apiService),
+          create: (_) => BoardsViewModel(apiService: apiService, socketService: socketService),
         ),
         ChangeNotifierProvider(
-          create: (_) => ListsViewModel(apiService: apiService),
+          create: (_) => ListsViewModel(apiService: apiService, socketService: socketService),
         ),
         ChangeNotifierProvider(
-          create: (_) => CardsViewModel(apiService: apiService),
+          create: (_) => CardsViewModel(apiService: apiService, socketService: socketService),
         ),
         ChangeNotifierProvider(
-          create: (_) => CommentsViewModel(apiService: apiService),
+          create: (_) => CommentsViewModel(apiService: apiService, socketService: socketService),
         ),
         ChangeNotifierProvider(
-          create: (_) => ChecklistsViewModel(apiService: apiService),
+          create: (_) => ChecklistsViewModel(apiService: apiService, socketService: socketService),
         ),
         ChangeNotifierProvider(
           create: (_) => ActivityViewModel(apiService: apiService),

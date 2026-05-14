@@ -2,12 +2,28 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mobile/domain/models/checklist_item.dart';
 import 'package:mobile/services/api_service.dart';
+import 'package:mobile/services/socket_service.dart';
 
 class ChecklistsViewModel extends ChangeNotifier {
   final ApiService _apiService;
 
-  ChecklistsViewModel({required ApiService apiService})
-    : _apiService = apiService;
+  final SocketService? _socketService;
+  String? _currentCardId;
+
+  ChecklistsViewModel({required ApiService apiService, SocketService? socketService})
+    : _apiService = apiService,
+      _socketService = socketService {
+    _listenToSockets();
+  }
+
+  void _listenToSockets() {
+    _socketService?.eventStream.listen((eventData) {
+      final String event = eventData['event'] ?? '';
+      if (_currentCardId != null && event == 'ChecklistToggledEvent') {
+        fetchItems(_currentCardId!);
+      }
+    });
+  }
 
   List<ChecklistItem> _items = [];
   bool _isLoading = false;
@@ -19,6 +35,7 @@ class ChecklistsViewModel extends ChangeNotifier {
 
   /// Karta ait checklist öğelerini çek — GET /checklists/?card_id={id}
   Future<void> fetchItems(String cardId) async {
+    _currentCardId = cardId;
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();

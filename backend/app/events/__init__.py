@@ -5,6 +5,13 @@ from app.events.types import (
     CommentAddedEvent,
     InvitationRespondedEvent,
     InvitationSentEvent,
+    CardCreatedEvent,
+    CardDeletedEvent,
+    CardUpdatedEvent,
+    ListCreatedEvent,
+    ListUpdatedEvent,
+    ListDeletedEvent,
+    BoardUpdatedEvent,
 )
 
 __all__ = [
@@ -15,4 +22,11 @@ __all__ = [
     "ChecklistToggledEvent",
     "InvitationSentEvent",
     "InvitationRespondedEvent",
+    "CardCreatedEvent",
+    "CardDeletedEvent",
+    "CardUpdatedEvent",
+    "ListCreatedEvent",
+    "ListUpdatedEvent",
+    "ListDeletedEvent",
+    "BoardUpdatedEvent",
 ]

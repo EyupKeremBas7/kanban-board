@@ -1,345 +1,345 @@
-# 📋 Kanban Board Mobile — Eksik Feature Planı
+# Kanban Board Mobile - Guncel Eksik Feature ve Sunum Notlari
 
-> **⚠️ KURAL: Web/frontend kodu (`frontend/`) ve backend kodu (`backend/`) KESİNLİKLE değiştirilemez.**
-> Bu belge yalnızca web uygulamasındaki mevcut özellikleri tespit edip, bunları mobil Flutter uygulamasına **taşıma** planını içerir.
-
----
-
-## 🔍 Metodoloji
-
-Aşağıdaki kaynaklar incelendi:
-- `backend/app/api/routes/` — mevcut tüm API endpointleri
-- `frontend/src/routes/` — web'deki tüm sayfalar ve bileşenler
-- `mobile/` git geçmişi (tüm `feat(mobile):` commitleri)
+> Guncelleme tarihi: 13 Mayis 2026
+>
+> Bu belge artik sadece "mobilde eksik ne var?" listesi degil; web, backend, mobil ve git gecmisi incelendikten sonra 18 Mayis sunumu oncesi durum fotografi, riskler ve son dokunus fikirlerini de icerir.
 
 ---
 
-1-Kart aktiviteleri düzgün çalışmıyor yani karta yorum geldiğinde veya kart farklı listelere taşındığında bu aktivitelere yazılmıyor daha eklenmemiş  olabilir.
-2-Hafif bir takılma var sebebini araştırabilirsin
-3-Silinmiş bir calisma alanına sahip panolar ve cardlar silinmiyor kişi manuel silmesi gerekiyor veri tabanı sağlığı için bu normal ama bir şey yapabilir miyiz bakıcaz
-4-Üye davet et kısmında klavye acılınca çözünürlük overflow hatası oluyor
-5-Hatalı şifre giridliğinde söylemiyor
-6-Giriş yapmaya çalışanmail yoksa kaydol kısmına iletmesi lazım yapmıyor
-7-Çalışma alanlarıan davet edilen kişilere mail veya bildiirm gitmiyor
-8-Davetlerin bildirimi gözüküyor ama bağlantı hatası list<dynamics> is not a subtype of type Map<String,dynmacis> diyor
-9-Bildirim ayarları kısmı çalışmıyor
-10-Görünüm kısmı çalışmıyor
-11- Dil eklenicek 
-12- Kullanım koşulları ve gizlilik politakası kısmına bazı mock yazılar vs eklenicek 
-13-Cache first yapıya geçmek için sqllite entegre edilecek
-14-Gerekli sayfalarda sayfa yenileme kısmı olucak veya Stream yapısı getirelecek
-15-screensin altında activity de 
-```dart
-enum ActivityScope { workspace, board, card }
+## Kisa Sonuc
 
-class ActivityScreen extends StatefulWidget {
-  final String? boardId;
-  final String? boardName;
-  final String? workspaceId;
-  final String? workspaceName;
-  final String? cardId;
-  final String? cardName;
-  final ActivityScope initialScope;
+Mobil taraf web'e ciddi sekilde yaklasmis durumda. Ilk plandaki temel eksiklerin cogu kapatilmis: bildirimler, davetler, workspace uye yonetimi, activity, dashboard, due date, assignee, kapak resmi, kart rozetleri ve ayni liste icinde siralama artik kodda var.
 
-  const ActivityScreen({
-    super.key,
-    this.boardId,
-    this.boardName,
-    this.workspaceId,
-    this.workspaceName,
-    this.cardId,
-    this.cardName,
-    this.initialScope = ActivityScope.workspace,
-  });
-  ```
-  şeklinde kod var bunun olmaması lazım bence
+18 Mayis'a kadar ana hedef yeni buyuk feature acmak degil; demo akisini bozabilecek pürüzleri temizlemek olmali:
 
-## ✅ Mobilde Mevcut Olan Özellikler (Git Geçmişinden)
-
-| # | Commit | Özellik |
-|---|--------|---------|
-| 1 | `e90c66c` | JWT login, signup, auto-login (ApiService + AuthViewModel) |
-| 2 | `adcbe32` | Auth ekranları (splash, login, signup) |
-| 3 | `56369f8` | Account ekranı — gerçek profil ve logout |
-| 4 | `0fc7a06` | Profil düzenleme — `PATCH /users/me` |
-| 5 | `65f7a13` | Şifre değiştirme — `PATCH /users/me/password` |
-| 6 | `b1f1fa5` | Şifre sıfırlama — `POST /password-recovery/{email}` |
-| 7 | `e5bb526` | Hesap silme — `DELETE /users/me` |
-| 8 | `750b809` | Board listesi — `GET /boards` + pull-to-refresh |
-| 9 | `b891c65` | Board oluşturma — `POST /boards` + workspace seçimi |
-| 10 | `eab70ae` | Board güncelleme ve silme |
-| 11 | `5409ffa` | Liste yönetimi — `GET/POST /lists` |
-| 12 | `212d83a` | Kart CRUD — tam UI entegrasyonu |
-| 13 | 5895d04 | Sürükle-bırak kart taşıma (sadece listeler arası çalışıyor) |
-| 14 | d538964 | Card detail ekranında checklist + yorum entegrasyonu |
-| 15 | `d538964` | Workspace yönetim ekranı (CRUD) |
+- UI metinleri ve localization hack'leri
+- Realtime/socket akisini canli senaryoda dogrulama
+- Activity log yazma akisini backend eventlerine baglama
+- Mobilde performans/takilma hissini azaltma
+- Backend test ortamini temizleme
+- README/handoff belgelerini guncel durumla uyumlu hale getirme
 
 ---
 
-## ❌ Mobilde Eksik Olan Özellikler
+## Son Inceleme Kaynaklari
+
+Bakilan kaynaklar:
+
+- `README.md`, `frontend/README.md`, `backend/README.md`
+- `mobile/EKSIK_FEATURELAR.md`, `mobile/SON_DEGISIKLIKLER.md`
+- `git log --oneline -n 25`
+- `git status --short`
+- Web board detayi: `frontend/src/routes/_layout/board.$boardId.tsx`
+- Mobil ana ekranlar: `board_detail.dart`, `card_detail.dart`, `inbox.dart`, `activity.dart`, `workspaces.dart`, `planner.dart`
+- Socket/realtime dosyalari: `backend/app/core/sockets.py`, `backend/app/events/socket_handler.py`, `frontend/src/hooks/useSocket.ts`, `mobile/lib/services/socket_service.dart`
+
+Dogrulama:
+
+- `frontend`: `npm run build` basarili.
+- `mobile`: `flutter analyze` basarili, "No issues found".
+- `backend`: `uv run pytest tests/unit_test -q` baslamadi; sebep kod hatasi degil, `.venv` permission sorunu:
+  - `failed to remove file backend/.venv/.gitignore: Permission denied`
 
 ---
 
-### 1. 🔔 Bildirimler (Notifications) — `YÜKSEK ÖNCELİK`
+## 18 Mayis Oncesi En Kritik Son Dokunuslar
 
-**Web'deki durum:** Backend tam API'ye sahip. `inbox.dart` ekranı mevcut ama tamamen stub (placeholder).
+### 1. UI metinleri ve localization temizligi - yuksek oncelik
 
-**Backend API:** `GET /api/v1/notifications/`
-```
-GET  /notifications/              → Bildirim listesi (skip, limit, unread_only)
-GET  /notifications/unread-count  → Okunmamış sayısı
-GET  /notifications/{id}          → Tek bildirim
-PUT  /notifications/{id}/read     → Okundu işaretle
-PUT  /notifications/read-all      → Tümünü okundu işaretle
-DELETE /notifications/{id}        → Bildirim sil
-```
+Mobilde bazi yerlerde dogru kelime yerine eldeki baska localization key'i kullanilmis. Bu analiz/testten gecse bile sunumda "yarim kalmis" hissi verir.
 
-**Yapılacaklar:**
-- [x] `AppNotification` domain modeli (`lib/domain/models/notification.dart` içinde zaten mevcut)
-- [x] `NotificationsViewModel` oluştur (tüm CRUD)
-- [x] `inbox.dart` ekranını gerçek veriyle doldur
-  - Okunmamış badge sayısı (bottom nav'a ekle)
-  - Liste: avatar + mesaj + zaman + okundu/okunmadı ikonu
-  - Swipe to delete
-  - "Tümünü okundu işaretle" butonu
-- [x] `main.dart`'a `NotificationsViewModel` Provider kaydı
+Ornekler:
 
----
+- `board_detail.dart`: arama hint'i `cards + save` ile olusturulmus.
+- `board_detail.dart`: board edit menu label'i `l10n.save` ile gosteriliyor.
+- `planner.dart`: tekrar dene butonunda `l10n.save` kullaniliyor.
+- `workspaces.dart`: silme aksiyonunda `l10n.logout.split(' ')[0]` gibi hack var.
 
-### 2. 📨 Davetiyeler (Invitations) — `YÜKSEK ÖNCELİK`
+Yapilacak:
 
-**Web'deki durum:** Backend tam. Frontend workspace içinde üye davet edebiliyor. Mobilde hiç yok.
+- [ ] `app_tr.arb` ve `app_en.arb` icine net key'ler ekle:
+  - `searchCards`
+  - `edit`
+  - `delete`
+  - `retry`
+  - `add`
+  - `addItem`
+  - `editBoard`
+  - `deleteBoard`
+  - `deleteList`
+  - `updateFailed`
+- [ ] `l10n.save` fallback olarak kullanilan yerleri temizle.
+- [ ] `replaceAll(...)` ile metin uretme hack'lerini kaldir.
+- [ ] Turkce/Ingizlice karisik kalan hard-coded metinleri azalt.
 
-**Backend API:** `GET /api/v1/invitations/`
-```
-GET  /invitations/              → Bana gelen davetler (status filtresi)
-GET  /invitations/sent          → Benim gönderdiğim davetler
-POST /invitations/              → Davet gönder (invitee_email veya invitee_id)
-POST /invitations/{id}/respond  → Kabul et / Reddet
-DELETE /invitations/{id}        → Daveti iptal et
-```
-
-**Yapılacaklar:**
-- [x] `Invitation` domain modeli ve `InvitationStatus` enum'ı (`enums.dart`'a eklenecek)
-- [x] `InvitationsViewModel` oluştur
-- [x] `inbox.dart` ekranına tab sistemi: "Bildirimler" | "Davetler"
-  - Gelen davetler: workspace adı, davet eden kişi, rol, kabul/reddet butonları
-  - Gönderilen davetler: bekleyen davetleri iptal etme
-- [x] `workspaces.dart` ekranına davet gönderme özelliği
-  - "Üye Davet Et" butonu → e-posta gir + rol seç dialog
-- [x] `main.dart`'a `InvitationsViewModel` Provider kaydı
+Benim fikrim: Sunum oncesi en cok degecek is bu. Cunku teknik olarak kucuk, etkisi buyuk.
 
 ---
 
-### 3. 👥 Workspace Üye Yönetimi — `YÜKSEK ÖNCELİK` ✅ **TAMAMLANDI**
+### 2. Realtime/socket akisini dogrulama - yuksek oncelik
 
-**Web'deki durum:** `workspaces.tsx` genişletildiğinde üyeleri gösterir, ekler, rolünü değiştirir, çıkarır.
+Calisma agacinda socket/realtime icin yeni degisiklikler var. Bu guzel bir sunum kozu olabilir: webde kart tasininca mobilde guncellenmesi, yorum eklenince diger client'a dusmesi gibi.
 
-**Backend API:**
-```
-GET    /workspaces/{id}/members              → Üye listesi
-POST   /workspaces/{id}/members             → Üye ekle (user_id + role)
-POST   /workspaces/{id}/invite              → E-posta ile davet et
-PUT    /workspaces/{id}/members/{member_id} → Rol güncelle
-DELETE /workspaces/{id}/members/{member_id} → Üyeyi çıkar
-```
+Yapilacak smoke test:
 
-**Tamamlanan İşler:**
-- [x] `WorkspaceMember` domain modeli (`lib/domain/models/workspace_member.dart`)
-- [x] `WorkspacesViewModel`'e üye metodları:
-  - `fetchWorkspaceMembers(workspaceId)` ✅
-  - `updateMemberRole(workspaceId, memberId, role)` ✅
-  - `removeMember(workspaceId, memberId)` ✅
-- [x] `workspace_members.dart` ekranı (full CRUD UI):
-  - Üye avatarları + isim + rol badge ✅
-  - Rol değiştirme (Admin/Member/Observer) ✅
-  - Üyeyi çıkar (confirmation dialog ile) ✅
-  - "Ben" göstergesi ✅
-- [x] `workspaces.dart`'ta "Üyeleri Yönet" ve "Üye Davet Et" menüleri ✅
+- [ ] Iki web client ac: kart olustur, tasi, guncelle, sil.
+- [ ] Web + mobil ac: kart/list/yorum/checklist degisiklikleri karsi tarafa dusuyor mu bak.
+- [ ] Mobil + mobil ac: ayni testleri tekrar et.
+- [ ] Socket baglanti kopunca uygulama bozulmadan normal API refresh ile devam ediyor mu bak.
+- [ ] Browser console ve backend loglarinda socket hata/uyari var mi kontrol et.
+
+Kod notu:
+
+- `backend/app/events/socket_handler.py` icinde `InvitationSentEvent` iki kez import edilmis. Zararsiz ama temizlenmeli.
+- Socket event payload'lari UUID/string donusumu acisindan pratikte denenmeli.
+
+Benim fikrim: Eger realtime stabilse sunumda mutlaka goster. Stabil degilse sunumda iddia etme; normal refresh akisi zaten yeterli.
 
 ---
 
-### 4. 📊 Activity Log (Aktivite Akışı) — `ORTA ÖNCELİK`
+### 3. Activity log yazma akisini tamamlama - yuksek oncelik
 
-**Web'deki durum:** `activity.dart` stub ekran mevcut. Backend tam API var.
+Activity ekrani ve API endpointleri var; fakat son incelemede kritik bir eksik gorundu: backend tarafinda `activity_repo.create_activity_log(...)` fonksiyonu tanimli olmasina ragmen uygulama akisinda hic cagrilmiyor.
 
-**Backend API:**
-```
-GET /activity/board/{board_id}        → Board aktiviteleri
-GET /activity/workspace/{workspace_id} → Workspace aktiviteleri
-GET /activity/card/{card_id}          → Kart aktiviteleri
-```
+Bu nedenle mobilde activity ekraninin bos veya eksik calismasi normal. Su an durum kabaca soyle:
 
-**Yapılacaklar:**
-- [ ] `ActivityLog` domain modeli
-- [ ] `ActivityViewModel` oluştur
-- [ ] `activity.dart` ekranını gerçek veriyle doldur
-  - Tab: "Tüm Aktiviteler" / "Boards" / "Workspace"
-  - Timeline stili liste: ikon + kullanıcı + eylem + zaman
-  - Pull-to-refresh
-  - Pagination (infinite scroll)
-- [ ] `board_detail.dart`'ta board başlığına yanına aktivite ikonuna tıklanınca board aktiviteleri
-- [ ] `card_detail.dart`'ta "Aktivite" bölümü ekle (card activity log)
-- [ ] `main.dart`'a `ActivityViewModel` Provider kaydı
+- `GET /activity/board/{board_id}` var.
+- `GET /activity/workspace/{workspace_id}` var.
+- `GET /activity/card/{card_id}` var.
+- `ActivityViewModel` bu endpointleri okuyabiliyor.
+- `ActivityLog` modeli ve repository hazir.
+- Ama card move, comment add, checklist toggle, card create/update/delete gibi olaylar activity tablosuna yazilmiyor.
 
----
+Yapilacak:
 
-### 5. 🎨 Board Arka Plan Seçici — `ORTA ÖNCELİK` ✅ **TAMAMLANDI**
+- [ ] `handle_activity_log` benzeri bir event handler ekle.
+- [ ] `EventDispatcher.initialize()` icinde activity handler'i ilgili eventlere register et.
+- [ ] En azindan sunum icin su eventler log'a yazilsin:
+  - Kart olusturuldu
+  - Kart guncellendi
+  - Kart tasindi
+  - Kart silindi
+  - Yorum eklendi
+  - Checklist item tamamlandi/geri alindi
+  - Karta kisi atandi
+- [ ] Activity kaydinda `user_id`, `entity_type`, `entity_id`, `entity_name`, `board_id`, `workspace_id`, `details` alanlari dolsun.
+- [ ] Card activity endpointi sadece `entity_type == card` ve `entity_id == card_id` kayitlarini degil, karta ait yorum/checklist hareketlerini de gosterecek sekilde dusunulsun.
 
-**Tamamlanan İşler:**
-- [x] `board_detail.dart` AppBar'a "Arka Plan" aksiyonu ✅
-- [x] `_showBackgroundPicker()` BottomSheet — 8 renk seçeneği ✅
-- [x] `BoardsViewModel.updateBoard(backgroundImage: ...)` PUT /boards/{id} ✅
+Benim fikrim: Activity UI'ini yeniden yazmaya gerek yok. Asil eksik backend event -> activity_log baglantisi. Bu tamamlanirsa mobildeki activity ekrani cok daha anlamli hale gelir ve sunumda guzel gorunur.
 
 ---
 
-### 6. 🏠 Dashboard / Ana Ekran — `ORTA ÖNCELİK` ✅ **TAMAMLANDI**
+### 4. Demo senaryosunu kilitleme - yuksek oncelik
 
-**Web'deki durum:** `index.tsx` — Workspace'e göre gruplandırılmış board listesi, "Son Görüntülenenler" paneli.
+Projede cok fazla ozellik var. Sunumda dagilmamak icin tek bir temiz hikaye lazim.
 
-**Tamamlanan İşler:**
-- [x] `planner.dart` gerçek Dashboard ekranına dönüştürüldü ✅
-  - Workspace'e göre gruplandırılmış board grid'i ✅
-  - Her workspace için "+" ile hızlı board oluşturma ✅
-  - Son gezilen boardlar (SharedPreferences ile kalıcı) ✅
-- [x] Bottom nav'daki "Planner" sekmesi "Ana Sayfa" olarak adlandırıldı ✅
+Onerilen demo akisi:
 
----
+1. Login veya Google login.
+2. Workspace olustur veya hazir workspace sec.
+3. Board olustur.
+4. Liste ve kart olustur.
+5. Kartlari drag-drop ile tasi.
+6. Card detail ac:
+   - Aciklama
+   - Due date
+   - Assignee
+   - Checklist
+   - Yorum
+   - Kapak resmi
+7. Activity ekraninda yapilan islemleri goster.
+8. Bildirim/davet ekranina gec.
+9. Ayni datayi web ve mobilde goster.
 
-### 7. 📋 Liste Güncelleme ve Silme — `ORTA ÖNCELİK` ✅ **TAMAMLANDI**
+Yapilacak:
 
-**Web'deki durum:** `lists.tsx` sayfasında liste CRUD tam. Board detay ekranında listenin `⋯` butonu var ama sadece UI'da.
+- [ ] Demo icin temiz test kullanicilari hazirla.
+- [ ] Demo datasini onceden olustur.
+- [ ] Sunumda gosterilecek board/list/card isimlerini profesyonel sec.
+- [ ] Calismayan veya yarim calisan butonlari demo sirasinda kullanma.
 
-**Backend API:**
-```
-PUT    /lists/{id} → Liste adı / sırası güncelle
-DELETE /lists/{id} → Liste sil
-```
-
-**Tamamlanan İşler:**
-- [x] `board_detail.dart`'ta her listenin üstündeki `⋯` butonuna PopupMenu eklendi ✅
-  - "Listeyi Düzenle" → ad değiştirme dialogu ✅
-  - "Listeyi Sil" → onay dialogu ✅
-
----
-
-### 8. 🖼️ Profil Fotoğrafı / Resim Yükleme — `DÜŞÜK ÖNCELİK`
-
-**Web'deki durum:** `POST /uploads/image` endpoint var. Profil fotoğrafı yükleme destekleniyor.
-
-**Backend API:**
-```
-POST /uploads/image        → Resim yükle (multipart/form-data)
-GET  /uploads/files/{filename} → Resmi al
-```
-
-**Not:** Mobilde profil güncelleme uç noktası `PATCH /users/me` mevcut ancak backend `UserPublic` modelinde profile/avatar alanı görünmüyor. Bu nedenle fotoğraf URL'sinin kullanıcı profiline kaydedilmesi şu an backend desteği gerektiriyor.
-
-**Yapılacaklar:**
-- [ ] `pubspec.yaml`'a `image_picker` paketi ekle (kullanıcı onayı gerekli!)
-- [ ] `profile_edit.dart`'ta avatar'a tıklanınca fotoğraf seçici
-- [ ] Upload işlemi → dönen URL'yi `PATCH /users/me` ile kaydet (backend alanı hazır olmalı)
+Benim fikrim: "Her seyi gosterelim" yerine "tek akisi kusursuz gosterelim" daha guclu durur.
 
 ---
 
-### 9. 🔗 Card — Atama (Assign to Member) — `DÜŞÜK ÖNCELİK`
+### 5. Mobil takilma/performance hissi - orta/yuksek oncelik
 
-**Web'deki durum:** Kart detay modalında `assigned_to` alanı düzenlenebiliyor.
+Eski notlarda "hafif takilma var" denmis. Kodda kart uzerindeki yorum/checklist rozetleri icin cache/prefetch eklenmis; bu iyi. Yine de board ekraninda cok kart varsa performans bakilmali.
 
-**Backend API:**
-```
-PUT /cards/{id} → { assigned_to: "user_id" }
-```
+Bakilacak yerler:
 
-**Mevcut mobil:** `BoardCard` modelinde `assignedTo` alanı var ama UI'da düzenlenemiyor.
+- `board_detail.dart`: yatay listeler + dikey kartlar + drag-drop
+- `cards_viewmodel.dart`: yorum sayisi ve checklist ilerleme cache'i
+- `card_detail.dart`: detaydan geri donunce rozet refresh
 
-**Yapılacaklar:**
-- [ ] `card_detail.dart`'ta "Atanan Kişi" bölümü ekle
-  - Workspace üyelerini listele
-  - Seçilen üyeyi karta ata / atamayı kaldır
+Yapilacak:
 
----
+- [ ] 5 liste, 30-50 kart ile mobil board ekranini dene.
+- [ ] Kart tasirken frame drop belirgin mi bak.
+- [ ] Board acilisinda gereksiz tum kartlari tekrar tekrar cekiyor mu kontrol et.
+- [ ] Gerekirse demo board'unu makul sayida kartla tut.
 
-### 10. 📅 Bitiş Tarihi (Due Date) Düzenleme — `DÜŞÜK ÖNCELİK` ✅ **TAMAMLANDI**
-
-**Web'deki durum:** Kart detayda due date seçici mevcut.
-
-**Backend API:**
-```
-PUT /cards/{id} → { due_date: "ISO 8601 string" }
-```
-
-**Tamamlanan İşler:**
-- [x] `card_detail.dart`'ta `_DueDateTile` tıklanabilir hale getirildi ✅
-  - `showDatePicker` ile tarih seçimi ✅
-  - Seçilen tarih `CardsViewModel.updateCard(dueDate: ...)` ile kaydediliyor ✅
-  - Geçmiş tarih için kırmızı uyarı (`Gecikti`) gösteriliyor ✅
-  - Mevcut tarihi temizleme (clear due date) desteği ✅
+Benim fikrim: Performans problemi kokten cozulmese bile demo datasini iyi ayarlamak sunum icin yeterli olabilir.
 
 ---
 
-### 11. 🔄 Aynı Liste İçinde Kart Sıralama (Drag & Drop) — `YÜKSEK ÖNCELİK` ✅ **TAMAMLANDI**
+### 6. Backend test ortamini duzeltme - orta oncelik
 
-**Tamamlanan İşler:**
-- [x] DragTarget `onWillAcceptWithDetails` aynı liste engeli kaldırıldı ✅
-- [x] `CardsViewModel.moveCardToList()` aynı liste position hesaplama ✅
-- [x] Kartlar aynı liste içinde sürüklenebiliyor ✅
+Backend unit testleri calismadi; sebep `.venv` izin problemi. Bu sunumdan once cozulmeli.
 
----
+Yapilacak:
 
-### 12. 📊 Kart Üzerinde Özet Bilgiler (Checklist & Yorum Sayısı) — `ORTA ÖNCELİK` ✅ **TAMAMLANDI**
+- [ ] `backend/.venv` sahiplik/izin sorununu duzelt.
+- [ ] Backend icin dogru Python surumunu sabitle.
+- [ ] `UV_CACHE_DIR=/tmp/uv-cache uv run pytest tests/unit_test -q` veya proje standardi neyse onunla testleri calistir.
+- [ ] Test sonucu README veya sunum notlarina eklenebilir.
 
-**Tamamlanan İşler:**
-- [x] `CardsViewModel` içine kart bazlı istatistik cache yapısı eklendi ✅
-  - Yorum sayısı (`/comments/?card_id=...`) ✅
-  - Checklist ilerlemesi (`/checklists/?card_id=...` → `tamamlanan/toplam`) ✅
-  - Kart açıp kapandıktan sonra tek kart için force refresh ✅
-- [x] `board_detail.dart` kart tile UI rozetleri eklendi ✅
-  - Checklist ilerleme rozeti (örn: `2/5`) ✅
-  - Yorum sayısı rozeti ✅
+Benim fikrim: Juri/test sorarsa "frontend build ve flutter analyze temiz, backend unit testleri de geciyor" demek guven verir.
 
 ---
 
-## 📊 Öncelik Özeti
+## Eski Eksik Maddelerin Guncel Durumu
 
-| Özellik | Öncelik | API Hazır | ViewModel Hazır |
-|---------|---------|-----------|-----------------|
-| Bildirimler | 🔴 Yüksek | ✅ | ✅ |
-| Davetiyeler | 🔴 Yüksek | ✅ | ✅ |
-| Workspace Üye Yönetimi | 🔴 Yüksek | ✅ | ⚠️ Kısmi |
-| Aynı Liste İçi Kart Sıralama | 🔴 Yüksek | ✅ | ✅ |
-| Activity Log | 🟡 Orta | ✅ | ✅ |
-| Board Arka Plan Seçici | 🟡 Orta | ✅ | ✅ |
-| Dashboard / Ana Ekran | 🟡 Orta | ✅ | ✅ |
-| Liste Güncelle/Sil UI | 🟡 Orta | ✅ | ✅ |
-| Kart Üzerinde Özet Bilgiler | 🟡 Orta | ✅ | ✅ |
-| Profil Fotoğrafı Upload | 🟢 Düşük | ✅ | ❌ |
-| Kart Atama | 🟢 Düşük | ✅ | ✅ |
-| Bitiş Tarihi Düzenleme | 🟢 Düşük | ✅ | ✅ |
-
----
-
-## 🏁 Önerilen Geliştirme Sırası
-
-```
-Sprint 1 (Yüksek Öncelik):
-  1. NotificationsViewModel + inbox.dart
-  2. InvitationsViewModel + inbox.dart'a tab
-  3. Workspace üye yönetimi (workspaces.dart genişletme)
-
-Sprint 2 (Orta Öncelik):
-  4. Activity Log — activity.dart + card_detail bölümü
-  5. Board arka plan seçici — board_detail.dart
-  6. Liste güncelle/sil — board_detail.dart ⋯ menüsü
-  7. Dashboard — planner.dart dönüşümü
-
-Sprint 3 (Düşük Öncelik):
-  8. Due date düzenleme — card_detail.dart
-  9. Kart atama — card_detail.dart
-  10. Profil fotoğrafı upload (pubspec değişikliği gerektirir)
-```
+| # | Eski not | Guncel durum | Not |
+|---|---------|--------------|-----|
+| 1 | Kart aktiviteleri duzgun calismiyor | Dogru, hala eksik | Activity ekranlari ve endpointler var; fakat backend'de `create_activity_log(...)` hic cagrilmiyor. Event -> activity_log yazma handler'i eklenmeli. |
+| 2 | Hafif takilma var | Devam eden risk | Buyuk board ile test edilmeli. Demo datasini makul tutmak mantikli. |
+| 3 | Silinen workspace'e ait board/card kalmasi | Backend/veri modeli karari | Cascade delete isteniyorsa backend/migration konusu. Sunum oncesi buyuk riskli. |
+| 4 | Davet dialog keyboard overflow | Muhtemelen fixlendi | Git gecmisinde keyboard overflow fix commit'i var. Mobil cihazda tekrar test edilmeli. |
+| 5 | Hatali sifre mesaj vermiyor | Muhtemelen fixlendi | Login error handling fix commit'i var. Tekrar test edilmeli. |
+| 6 | Mail yoksa signup'a yonlendirme | Muhtemelen fixlendi | Signup redirect fix commit'i var. Tekrar test edilmeli. |
+| 7 | Davet mail/bildirim gitmiyor | Kontrol gerekli | Notification/invitation ve socket birlikte denenmeli. |
+| 8 | Davetlerde List<dynamic> type hatasi | Muhtemelen fixlendi | Invitation type casting fix commit'i var. Tekrar test edilmeli. |
+| 9 | Bildirim ayarlari calismiyor | Kontrol gerekli | Board detail'da notification settings aksiyonu var. Gercek etkisi test edilmeli. |
+| 10 | Gorunum ayarlari calismiyor | Kontrol gerekli | Appearance screen var; tema/dil kaliciligi test edilmeli. |
+| 11 | Dil eklenecek | Tamamlandi | Son commit: `feat(mobile): english translation was added`. |
+| 12 | Kullanim kosullari/gizlilik mock metin | Dusuk oncelik | Sunumda account ekranindan acilacaksa doldurulmali. |
+| 13 | Cache-first icin SQLite | Ertele | Sunum oncesi riskli. SharedPreferences recent boards icin yeterli. |
+| 14 | Refresh/Stream yapisi | Kismen tamam | Pull-to-refresh ve socket/realtime calismalari var. |
+| 15 | Activity constructor yapisi garip | Refactor opsiyonel | Calisiyorsa sunum oncesi buyuk refactor yapma. Sonra route argument modeli sadeleştirilebilir. |
 
 ---
 
-> *Son güncelleme: Nisan 2026*
-> *Kaynak: `git log --oneline` + `backend/app/api/routes/` + `frontend/src/routes/` analizi*
+## Mobilde Tamamlanan Ana Ozellikler
+
+### Auth ve hesap
+
+- [x] JWT login
+- [x] Signup
+- [x] Auto-login
+- [x] Google auth
+- [x] Profil goruntuleme
+- [x] Profil duzenleme
+- [x] Sifre degistirme
+- [x] Sifre sifirlama
+- [x] Hesap silme
+- [x] Login hata yonetimi
+
+### Board/list/card
+
+- [x] Board listesi
+- [x] Board olusturma
+- [x] Board guncelleme/silme
+- [x] Board arka plan secici
+- [x] Board icinde kart arama/filtreleme
+- [x] Liste olusturma
+- [x] Liste guncelleme/silme
+- [x] Kart CRUD
+- [x] Listeler arasi drag-drop
+- [x] Ayni liste icinde kart siralama
+- [x] Kart detay ekrani
+- [x] Due date secme/temizleme
+- [x] Geciken kart uyarisi
+- [x] Assignee secme/kaldirma
+- [x] Kapak resmi yukleme
+- [x] Checklist
+- [x] Yorumlar
+- [x] Kart ustunde checklist ve yorum rozetleri
+
+### Workspace, davet, bildirim
+
+- [x] Workspace CRUD
+- [x] Workspace uye listesi
+- [x] Uye rol guncelleme
+- [x] Uye cikarma
+- [x] Workspace'e davet gonderme
+- [x] Gelen/giden davetler
+- [x] Daveti kabul/reddet/iptal et
+- [x] Bildirim listesi
+- [x] Okunmamis bildirim sayisi
+- [x] Tumunu okundu isaretleme
+- [x] Bildirim silme
+
+### Dashboard ve activity
+
+- [x] Ana sayfa/dashboard
+- [x] Workspace'e gore board gruplama
+- [x] Hizli board olusturma
+- [x] Son goruntulenen boardlar
+- [x] Activity domain modeli
+- [x] ActivityViewModel
+- [x] Workspace/board/card activity ekrani
+- [x] Card detail icinde activity bolumu
+
+---
+
+## Web ve Mobil Karsilastirmasi
+
+| Alan | Web | Mobil | Sunum notu |
+|------|-----|-------|------------|
+| Auth | Var | Var | Mobilde Google auth yeni eklendi, demo oncesi OAuth config test edilmeli. |
+| Board/list/card CRUD | Var | Var | Iki tarafta da ana akis gosterilebilir. |
+| Drag-drop | Var | Var | Mobil drag-drop demo oncesi cihazda denenmeli. |
+| Card detail | Var | Var | Mobilde due date, assignee, cover, checklist, yorum var. |
+| Bildirim/davet | Var/API var | Var | Canli davet/bildirim akisi test edilmeli. |
+| Activity | API/model var | UI/ViewModel var | Yazma tarafi eksik: eventler activity_log tablosuna baglanmali. |
+| Realtime | Yeni ekleniyor | Yeni ekleniyor | Stabilse sunumda cok iyi etki yaratir. |
+| Localization | Web daha stabil | Mobil yeni eklendi | Mobil metin polish'i gerekli. |
+| Test/build | Web build geciyor | Analyze geciyor | Backend test ortami duzeltilmeli. |
+
+---
+
+## Ertelenmesi Daha Mantikli Isler
+
+Sunum oncesi bu islere girilmesini onermiyorum:
+
+- SQLite cache-first mimarisi
+- Workspace silinince cascade delete davranisini degistirme
+- Activity route/constructor mimarisini buyuk refactor etmek
+- Profil avatar alanini backend modeliyle genisletmek
+- Buyuk UI redesign
+- Tum uygulama icin offline-first davranis
+
+Bu isler degerli ama 18 Mayis oncesi risk/fayda dengesi zayif.
+
+---
+
+## Sunum Icin Kapanis Checklist'i
+
+- [ ] `frontend` icin `npm run build` tekrar calistir.
+- [ ] `mobile` icin `flutter analyze` tekrar calistir.
+- [ ] Backend test ortamini duzeltip unit testleri calistir.
+- [ ] Demo cihazinda mobil login, board, card detail, drag-drop test et.
+- [ ] Web ve mobil ayni backend'e bagli mi kontrol et.
+- [ ] Realtime calisiyorsa iki client ile canli dene.
+- [ ] Activity icin card move/comment/checklist eventlerinin log'a dustugunu dogrula.
+- [ ] Calismayan/yarim calisan butonlari demo sirasinda kullanma.
+- [ ] Demo kullanicilari ve board datasi onceden hazir olsun.
+- [ ] README ve handoff belgelerinde "tamamlandi" durumlarini guncelle.
+
+---
+
+## Codex Notu
+
+Bence proje feature sayisi olarak sunuma yeterli. Bundan sonraki en akilli hamle "bir feature daha ekleyelim" degil, mevcut deneyimi daha guvenli ve temiz gostermek.
+
+En yuksek etkiyi su sirayla alirsiniz:
+
+1. Mobil localization/metin temizligi.
+2. Activity log yazma handler'ini tamamlamak.
+3. Realtime/socket smoke test.
+4. Demo verisi ve demo akisini sabitleme.
+5. Backend test ortamini duzeltme.
+6. Kucuk UI polish.
+
+Sunumda asil satilacak sey su olabilir: "Trello benzeri bir kanban sistemi; backend, web ve mobil ayni domain modeli uzerinden calisiyor; bildirim, davet, activity ve realtime senaryolariyla tam urun gibi davranıyor."

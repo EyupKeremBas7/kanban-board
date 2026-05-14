@@ -29,6 +29,7 @@ COPY ./pyproject.toml ./uv.lock ./alembic.ini /app/
 
 COPY ./app /app/app
 COPY ./tests /app/tests
+COPY ./run.py /app/run.py
 
 # Copy prestart script
 COPY ./scripts/prestart.sh /app/prestart.sh
@@ -39,4 +40,4 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen
 
 # Run prestart (migrations + init) then start uvicorn
-CMD ["bash", "-c", "./prestart.sh && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+CMD ["bash", "-c", "./prestart.sh && python run.py"]

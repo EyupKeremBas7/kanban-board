@@ -17,7 +17,7 @@ services:
     build:
       context: ./backend
     # command: sleep infinity  # Infinite loop to keep container alive doing nothing
-    command: ["bash", "-c", "./prestart.sh && fastapi run --reload app/main.py"]
+    command: ["bash", "-c", "./prestart.sh && python run.py"]
     develop:
       watch:
         - path: ./backend

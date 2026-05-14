@@ -14,6 +14,12 @@ from app.core.permissions import Action, has_permission
 from app.models.auth import Message
 from app.models.cards import CardCreate, CardPublic, CardsPublic, CardUpdate
 from app.repository import cards as cards_repo
+from app.events import (
+    CardCreatedEvent,
+    CardDeletedEvent,
+    CardUpdatedEvent,
+    EventDispatcher,
+)
 
 router = APIRouter(prefix="/cards", tags=["cards"])
 
@@ -68,6 +74,13 @@ def create_card(
     card = cards_repo.create_card(
         session=session, card_in=card_in, created_by=current_user.id
     )
+
+    EventDispatcher.dispatch(CardCreatedEvent(
+        card_id=card.id,
+        list_id=card.list_id,
+        board_id=board.id
+    ))
+
     return cards_repo.enrich_card_with_owner(session, card)
 
 
@@ -118,7 +131,7 @@ def update_card(
                 card_assignee = assignee.id
                 card_assignee_email = assignee.email
 
-        from app.events import CardMovedEvent, EventDispatcher
+        from app.events import CardMovedEvent
         EventDispatcher.dispatch(CardMovedEvent(
             card_id=card.id,
             card_title=card.title,
@@ -131,6 +144,15 @@ def update_card(
             card_assignee_id=card_assignee,
             card_assignee_email=card_assignee_email,
         ))
+    else:
+        # Dispatch generic CardUpdatedEvent if not moved
+        board_list = cards_repo.get_list_by_id(session=session, list_id=card.list_id)
+        if board_list:
+            EventDispatcher.dispatch(CardUpdatedEvent(
+                card_id=card.id,
+                list_id=card.list_id,
+                board_id=board_list.board_id
+            ))
 
     return cards_repo.enrich_card_with_owner(session, card)
 
@@ -146,5 +168,14 @@ def delete_card(
     ):
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
+    board_list = cards_repo.get_list_by_id(session=session, list_id=card.list_id)
     cards_repo.soft_delete_card(session=session, card=card, deleted_by=current_user.id)
+
+    if board_list:
+        EventDispatcher.dispatch(CardDeletedEvent(
+            card_id=card.id,
+            list_id=card.list_id,
+            board_id=board_list.board_id
+        ))
+
     return Message(message="Card deleted successfully")

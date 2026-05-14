@@ -2,11 +2,33 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mobile/domain/models/board_card.dart';
 import 'package:mobile/services/api_service.dart';
+import 'package:mobile/services/socket_service.dart';
 
 class CardsViewModel extends ChangeNotifier {
   final ApiService _apiService;
+  final SocketService? _socketService;
 
-  CardsViewModel({required ApiService apiService}) : _apiService = apiService;
+  CardsViewModel({required ApiService apiService, SocketService? socketService})
+      : _apiService = apiService,
+        _socketService = socketService {
+    _listenToSockets();
+  }
+
+  void _listenToSockets() {
+    _socketService?.eventStream.listen((eventData) {
+      final String event = eventData['event'] ?? '';
+      // Refresh cards on major changes
+      if (event == 'CardMovedEvent' ||
+          event == 'CommentAddedEvent' ||
+          event == 'ChecklistToggledEvent' ||
+          event == 'CardAssignedEvent' ||
+          event == 'CardCreatedEvent' ||
+          event == 'CardDeletedEvent' ||
+          event == 'CardUpdatedEvent') {
+        fetchCards();
+      }
+    });
+  }
 
   List<BoardCard> _cards = [];
   final Map<String, int> _commentCounts = {};
@@ -122,7 +144,7 @@ class CardsViewModel extends ChangeNotifier {
         notifyListeners();
 
         final cardIds = _cards.map((c) => c.id).toList();
-        Future.microtask(() => prefetchCardStats(cardIds));
+        Future.microtask(() => prefetchCardStats(cardIds, forceRefresh: true));
       } else {
         _errorMessage = 'Kartlar yüklenemedi: ${response.statusCode}';
         _isLoading = false;

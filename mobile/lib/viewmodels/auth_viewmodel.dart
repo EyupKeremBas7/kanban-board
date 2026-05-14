@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:mobile/domain/models/user.dart';
 import 'package:mobile/services/api_service.dart';
 import 'package:mobile/services/auth_service.dart';
+import 'package:mobile/services/socket_service.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 /// Auth ViewModel — Giriş, kayıt ve oturum yönetimi.
@@ -10,12 +11,15 @@ import 'package:google_sign_in/google_sign_in.dart';
 class AuthViewModel extends ChangeNotifier {
   final ApiService _apiService;
   final AuthService _authService;
+  final SocketService? _socketService;
 
   AuthViewModel({
     required ApiService apiService,
     required AuthService authService,
+    SocketService? socketService,
   }) : _apiService = apiService,
-       _authService = authService;
+       _authService = authService,
+       _socketService = socketService;
 
   // State
   bool _isLoading = false;
@@ -50,6 +54,9 @@ class AuthViewModel extends ChangeNotifier {
 
         // Token kaydedildikten sonra kullanıcı bilgisini çek
         await fetchCurrentUser();
+
+        // Socket bağlantısını başlat
+        _socketService?.connect();
 
         _isLoading = false;
         notifyListeners();
@@ -123,7 +130,10 @@ class AuthViewModel extends ChangeNotifier {
     final isLoggedIn = await _authService.isLoggedIn();
     if (isLoggedIn) {
       await fetchCurrentUser();
-      return _currentUser != null;
+      if (_currentUser != null) {
+        _socketService?.connect();
+        return true;
+      }
     }
     return false;
   }
@@ -275,6 +285,7 @@ class AuthViewModel extends ChangeNotifier {
 
   /// Çıkış yap
   Future<void> logout() async {
+    _socketService?.disconnect();
     await _authService.clearToken();
     _currentUser = null;
     _errorMessage = null;
@@ -298,12 +309,6 @@ class AuthViewModel extends ChangeNotifier {
       );
 
       final googleUser = await GoogleSignIn.instance.authenticate();
-      if (googleUser == null) {
-        // User canceled the sign-in
-        _isLoading = false;
-        notifyListeners();
-        return false;
-      }
 
       final googleAuth = googleUser.authentication;
       final idToken = googleAuth.idToken;
@@ -327,6 +332,7 @@ class AuthViewModel extends ChangeNotifier {
         final token = data['access_token'] as String;
         await _authService.saveToken(token);
         await fetchCurrentUser();
+        _socketService?.connect();
         _isLoading = false;
         notifyListeners();
         return true;

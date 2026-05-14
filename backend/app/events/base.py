@@ -71,6 +71,7 @@ class EventDispatcher:
             handle_email,
             handle_notification,
         )
+        from app.events.socket_handler import handle_socket
         from app.events.types import (
             CardMovedEvent,
             ChecklistToggledEvent,
@@ -90,6 +91,13 @@ class EventDispatcher:
         cls.register(CommentAddedEvent, handle_email)
         cls.register(ChecklistToggledEvent, handle_email)
         cls.register(WelcomeEmailSentEvent, handle_email)
+
+        # Socket.IO Handlers
+        cls.register(CardMovedEvent, handle_socket)
+        cls.register(CommentAddedEvent, handle_socket)
+        cls.register(ChecklistToggledEvent, handle_socket)
+        cls.register(InvitationSentEvent, handle_socket)
+        cls.register(InvitationRespondedEvent, handle_socket)
 
         cls._initialized = True
         logger.info("EventDispatcher initialized with handlers")
