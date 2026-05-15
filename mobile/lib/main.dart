@@ -130,7 +130,10 @@ class KanbanBoardApp extends StatelessWidget {
           ),
         ),
         ChangeNotifierProvider(
-          create: (_) => ActivityViewModel(apiService: apiService),
+          create: (_) => ActivityViewModel(
+            apiService: apiService,
+            socketService: socketService,
+          ),
         ),
         ChangeNotifierProvider(
           create: (_) => WorkspacesViewModel(apiService: apiService),
