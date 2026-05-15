@@ -20,6 +20,17 @@ class AccountScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final settingsVM = context.watch<SettingsViewModel>();
+    final themeLabel = switch (settingsVM.themeMode) {
+      ThemeMode.light => l10n.light,
+      ThemeMode.dark => l10n.dark,
+      ThemeMode.system => l10n.system,
+    };
+    final languageLabel =
+        settingsVM.locale.languageCode == 'tr' ? l10n.turkish : l10n.english;
+    final appearanceSubtitle = settingsVM.highContrastEnabled
+        ? '$themeLabel · $languageLabel · ${l10n.highContrast}'
+        : '$themeLabel · $languageLabel';
     final settingsSections = [
       _SettingsSection(
         title: l10n.editProfile,
@@ -87,7 +98,7 @@ class AccountScreen extends StatelessWidget {
           _SettingsItem(
             icon: Icons.palette_outlined,
             title: l10n.appearanceAndLanguage,
-            subtitle: '${context.read<SettingsViewModel>().themeMode == ThemeMode.light ? l10n.light : context.read<SettingsViewModel>().themeMode == ThemeMode.dark ? l10n.dark : l10n.system} · ${context.read<SettingsViewModel>().locale.languageCode == 'tr' ? l10n.turkish : l10n.english}',
+            subtitle: appearanceSubtitle,
             onTap: (ctx) {
               Navigator.push(
                 ctx,
@@ -112,7 +123,8 @@ class AccountScreen extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => ContractScreen(
                     title: l10n.appInfo,
-                    content: '${l10n.appDescription}\n\n${l10n.developerLabel('Eyüp Kerem Baş')}\n${l10n.version('1.0.0')}\n${l10n.licenseLabel('MIT')}',
+                    content:
+                        '${l10n.appDescription}\n\n${l10n.developerLabel('Eyüp Kerem Baş')}\n${l10n.version('1.0.0')}\n${l10n.licenseLabel('MIT')}',
                   ),
                 ),
               );
@@ -127,7 +139,8 @@ class AccountScreen extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => ContractScreen(
                     title: l10n.termsOfService,
-                    content: '${l10n.termsContent1}\n${l10n.termsContent2}\n${l10n.termsContent3}\n${l10n.termsContent4}\n\n${l10n.termsFooter}',
+                    content:
+                        '${l10n.termsContent1}\n${l10n.termsContent2}\n${l10n.termsContent3}\n${l10n.termsContent4}\n\n${l10n.termsFooter}',
                   ),
                 ),
               );
@@ -142,7 +155,8 @@ class AccountScreen extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => ContractScreen(
                     title: l10n.privacyPolicy,
-                    content: '${l10n.privacyContent}\n\n${l10n.whatDataCollect}\n${l10n.dataEmail}\n${l10n.dataFullName}\n${l10n.dataContent}',
+                    content:
+                        '${l10n.privacyContent}\n\n${l10n.whatDataCollect}\n${l10n.dataEmail}\n${l10n.dataFullName}\n${l10n.dataContent}',
                   ),
                 ),
               );
@@ -375,8 +389,6 @@ class AccountScreen extends StatelessWidget {
       ),
     );
   }
-
-
 }
 
 // Yardımcı veri sınıfları (settings pattern)

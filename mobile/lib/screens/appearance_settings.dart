@@ -19,10 +19,9 @@ class AppearanceSettingsScreen extends StatelessWidget {
             children: [
               Text(
                 l10n.theme,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               RadioGroup<ThemeMode>(
@@ -51,10 +50,9 @@ class AppearanceSettingsScreen extends StatelessWidget {
               const Divider(height: 32),
               Text(
                 l10n.language,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               RadioGroup<Locale>(
@@ -78,19 +76,16 @@ class AppearanceSettingsScreen extends StatelessWidget {
               const Divider(height: 32),
               Text(
                 l10n.accessibility,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               SwitchListTile(
                 title: Text(l10n.highContrast),
                 subtitle: Text(l10n.improveReadability),
-                value: false, // Gelecekte eklenebilir
-                onChanged: (val) {
-                  // settingsVM.setHighContrast(val);
-                },
+                value: settingsVM.highContrastEnabled,
+                onChanged: settingsVM.setHighContrastEnabled,
               ),
             ],
           );

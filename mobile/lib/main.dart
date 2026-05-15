@@ -32,6 +32,57 @@ Future<void> main() async {
 class KanbanBoardApp extends StatelessWidget {
   const KanbanBoardApp({super.key});
 
+  ThemeData _buildTheme({
+    required Brightness brightness,
+    required bool highContrast,
+  }) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: Colors.blue,
+      brightness: brightness,
+      contrastLevel: highContrast ? 1.0 : 0.0,
+    );
+    final isDark = brightness == Brightness.dark;
+    final background = highContrast
+        ? (isDark ? Colors.black : Colors.white)
+        : colorScheme.surface;
+    final foreground = highContrast
+        ? (isDark ? Colors.white : Colors.black)
+        : colorScheme.onSurface;
+
+    return ThemeData(
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: background,
+      useMaterial3: true,
+      dividerTheme: DividerThemeData(
+        color: highContrast ? foreground.withValues(alpha: 0.42) : null,
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: background,
+        foregroundColor: foreground,
+        surfaceTintColor: Colors.transparent,
+      ),
+      textTheme: ThemeData(
+        brightness: brightness,
+        useMaterial3: true,
+      ).textTheme.apply(bodyColor: foreground, displayColor: foreground),
+      listTileTheme: ListTileThemeData(
+        iconColor: highContrast ? foreground : null,
+        textColor: highContrast ? foreground : null,
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (!highContrast) return null;
+          return states.contains(WidgetState.selected)
+              ? colorScheme.primary
+              : foreground;
+        }),
+        trackOutlineColor: WidgetStatePropertyAll(
+          highContrast ? foreground : null,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Service'leri oluştur
@@ -101,19 +152,13 @@ class KanbanBoardApp extends StatelessWidget {
           return MaterialApp(
             title: 'Kanban Board',
             debugShowCheckedModeBanner: false,
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.blue,
-                brightness: Brightness.light,
-              ),
-              useMaterial3: true,
+            theme: _buildTheme(
+              brightness: Brightness.light,
+              highContrast: settingsVM.highContrastEnabled,
             ),
-            darkTheme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.blue,
-                brightness: Brightness.dark,
-              ),
-              useMaterial3: true,
+            darkTheme: _buildTheme(
+              brightness: Brightness.dark,
+              highContrast: settingsVM.highContrastEnabled,
             ),
             themeMode: settingsVM.themeMode,
             locale: settingsVM.locale,

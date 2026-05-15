@@ -9,6 +9,7 @@ class SettingsViewModel extends ChangeNotifier {
 
   ThemeMode _themeMode = ThemeMode.system;
   Locale _locale = const Locale('tr');
+  bool _highContrastEnabled = false;
 
   // Notification Preferences
   bool _pushEnabled = true;
@@ -24,6 +25,7 @@ class SettingsViewModel extends ChangeNotifier {
 
   ThemeMode get themeMode => _themeMode;
   Locale get locale => _locale;
+  bool get highContrastEnabled => _highContrastEnabled;
   bool get pushEnabled => _pushEnabled;
   bool get emailEnabled => _emailEnabled;
   bool get commentsEnabled => _commentsEnabled;
@@ -51,7 +53,10 @@ class SettingsViewModel extends ChangeNotifier {
 
     // Locale
     final langCode = prefs.getString('languageCode') ?? 'tr';
-    _locale = Locale(langCode);
+    _locale = langCode == 'en' ? const Locale('en') : const Locale('tr');
+
+    // Accessibility
+    _highContrastEnabled = prefs.getBool('highContrastEnabled') ?? false;
 
     // Notifications
     _pushEnabled = prefs.getBool('pushEnabled') ?? true;
@@ -155,9 +160,19 @@ class SettingsViewModel extends ChangeNotifier {
 
   Future<void> setLocale(Locale locale) async {
     if (_locale == locale) return;
-    _locale = locale;
+    _locale = locale.languageCode == 'en'
+        ? const Locale('en')
+        : const Locale('tr');
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('languageCode', locale.languageCode);
+    await prefs.setString('languageCode', _locale.languageCode);
+    notifyListeners();
+  }
+
+  Future<void> setHighContrastEnabled(bool value) async {
+    if (_highContrastEnabled == value) return;
+    _highContrastEnabled = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('highContrastEnabled', value);
     notifyListeners();
   }
 
