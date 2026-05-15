@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:socket_io_client/socket_io_client.dart' as socket_io;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:mobile/config/app_config.dart';
 import 'package:mobile/services/auth_service.dart';
 
 class SocketService extends ChangeNotifier {
@@ -49,7 +49,7 @@ class SocketService extends ChangeNotifier {
     if (_socket != null && _socket!.connected) return;
 
     final token = await _authService.getToken();
-    final baseUrl = dotenv.env['API_URL']?.replaceAll('/api/v1', '') ?? 'http://10.0.2.2:8000';
+    final baseUrl = AppConfig.socketUrl;
 
     _socket = socket_io.io(
       baseUrl,
@@ -95,10 +95,7 @@ class SocketService extends ChangeNotifier {
   void _publishEvent(String event, dynamic data) {
     final payload = data is List && data.isNotEmpty ? data.first : data;
     if (kDebugMode) print('Socket.IO Event: $event -> $payload');
-    _eventController.add({
-      'event': event,
-      'data': payload,
-    });
+    _eventController.add({'event': event, 'data': payload});
   }
 
   void disconnect() {

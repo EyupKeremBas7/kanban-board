@@ -194,6 +194,7 @@ class TestEventTypes:
         from app.events.types import ChecklistToggledEvent
 
         event = ChecklistToggledEvent(
+            item_id=uuid4(),
             card_id=uuid4(),
             card_title="Test Card",
             item_title="Task 1",
@@ -205,6 +206,7 @@ class TestEventTypes:
         )
 
         assert event.is_completed is True
+        assert event.item_id is not None
 
     def test_invitation_sent_event(self):
         """Test InvitationSentEvent creation."""

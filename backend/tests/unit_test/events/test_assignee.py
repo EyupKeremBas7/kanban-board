@@ -193,6 +193,7 @@ class TestChecklistToggledWithAssignee:
         toggler_id = uuid.uuid4()
 
         event = ChecklistToggledEvent(
+            item_id=uuid.uuid4(),
             card_id=uuid.uuid4(),
             card_title="Test Card",
             item_title="Task 1",
