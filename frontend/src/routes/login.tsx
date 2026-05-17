@@ -10,6 +10,7 @@ import { FcGoogle } from "react-icons/fc"
 
 import type { Body_login_login_access_token as AccessToken } from "@/client"
 import { Button } from "@/components/ui/button"
+import { getApiBaseUrl } from "@/config/api"
 import { Field } from "@/components/ui/field"
 import { InputGroup } from "@/components/ui/input-group"
 import { PasswordInput } from "@/components/ui/password-input"
@@ -55,7 +56,7 @@ function Login() {
   }
 
   const handleGoogleLogin = () => {
-    window.location.href = `${import.meta.env.VITE_API_URL || ""}/api/v1/oauth/google/login`
+    window.location.href = `${getApiBaseUrl()}/api/v1/oauth/google/login`
   }
 
   return (

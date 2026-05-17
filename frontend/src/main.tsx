@@ -9,9 +9,10 @@ import { StrictMode } from "react"
 import ReactDOM from "react-dom/client"
 import { ApiError, OpenAPI } from "./client"
 import { CustomProvider } from "./components/ui/provider"
+import { getApiBaseUrl } from "./config/api"
 import { routeTree } from "./routeTree.gen"
 
-OpenAPI.BASE = import.meta.env.VITE_API_URL
+OpenAPI.BASE = getApiBaseUrl()
 OpenAPI.TOKEN = async () => {
   return localStorage.getItem("access_token") || ""
 }
